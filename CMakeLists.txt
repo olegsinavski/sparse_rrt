@@ -11,9 +11,10 @@ IF(APPLE)
 
    # message( FATAL_ERROR "APPLE" )
    # Mac OS X bundle specific settings
-   set(MACOSX_BUNDLE true)
+   # set(MACOSX_BUNDLE true)
    # set(MACOSX_BUNDLE_BUNDLE_NAME ${MY_APP_NAME})
 
+   # set(CMAKE_MACOSX_RPATH 1)
 
 ENDIF(APPLE)
 

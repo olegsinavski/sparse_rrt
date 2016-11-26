@@ -1,9 +1,11 @@
 
 
+#include <numpy/arrayobject.h>
+
 #include <boost/python.hpp>
 #include <boost/format.hpp>
 #include <iostream>
-#include "utilities/numpy_boost_python.hpp"
+//#include "utilities/numpy_boost_python.hpp"
 
 namespace py = boost::python;
 
