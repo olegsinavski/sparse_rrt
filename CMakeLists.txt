@@ -14,14 +14,12 @@ IF(APPLE)
    # set(MACOSX_BUNDLE true)
    # set(MACOSX_BUNDLE_BUNDLE_NAME ${MY_APP_NAME})
 
-   # set(CMAKE_MACOSX_RPATH 1)
+   set(CMAKE_MACOSX_RPATH 1)
 
 ENDIF(APPLE)
 
 
 find_package(PythonLibs REQUIRED)
-include_directories(${PYTHON_INCLUDE_DIRS})
-
 find_package(Boost COMPONENTS program_options python REQUIRED)
 
 # Find actual numpy in use (as opposed to system numpy)
@@ -38,11 +36,13 @@ COMMAND "python2.7" -c
         "from __future__ import print_function\ntry: import numpy; print(numpy.get_include(), end='')\nexcept:pass\n"
         OUTPUT_VARIABLE Numpy_INCLUDE_DIRS)
 
-#include_directories(${Boost_INCLUDE_DIR})
-include_directories("${PROJECT_SOURCE_DIR}/include")
-include_directories(${Numpy_INCLUDE_DIRS})
 
-message( FATAL_ERROR "AAAA ${Numpy_INCLUDE_DIRS} BBB" )
+include_directories(
+        ${Boost_INCLUDE_DIRS}
+        ${Numpy_INCLUDE_DIRS}  # this should come before PYTHON includes because it also contains system numpy
+        ${PYTHON_INCLUDE_DIRS}
+        "${PROJECT_SOURCE_DIR}/include"
+        )
 
 add_library(${PROJECT_NAME} STATIC
     ${PROJECT_SOURCE_DIR}/src/image_creation/svg_image.cpp
