@@ -42,6 +42,8 @@ COMMAND "python2.7" -c
 include_directories("${PROJECT_SOURCE_DIR}/include")
 include_directories(${Numpy_INCLUDE_DIRS})
 
+message( FATAL_ERROR "AAAA ${Numpy_INCLUDE_DIRS} BBB" )
+
 add_library(${PROJECT_NAME} STATIC
     ${PROJECT_SOURCE_DIR}/src/image_creation/svg_image.cpp
     ${PROJECT_SOURCE_DIR}/src/motion_planners/planner.cpp
