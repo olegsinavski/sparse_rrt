@@ -8,9 +8,7 @@ set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
 add_definitions(-O3 )
 
 IF(APPLE)
-
    set(CMAKE_MACOSX_RPATH 1)
-
 ENDIF(APPLE)
 
 find_package(Boost COMPONENTS program_options python REQUIRED)
@@ -29,13 +27,11 @@ else(APPLE)
     # set(PYTHON_LIBRARIES "${PYTHON_PREFIX}/lib/libpython2.7.so")
 endif(APPLE)
 
-
 execute_process(
     COMMAND "python2.7" -c "from distutils import sysconfig; print(sysconfig.get_python_inc())"
     OUTPUT_VARIABLE PYTHON_INCLUDE_DIRS
     OUTPUT_STRIP_TRAILING_WHITESPACE
 )
-
 
 # Find actual numpy in use (as opposed to system numpy)
 execute_process(
@@ -50,7 +46,6 @@ execute_process(
 COMMAND "python2.7" -c
         "from __future__ import print_function\ntry: import numpy; print(numpy.get_include(), end='')\nexcept:pass\n"
         OUTPUT_VARIABLE Numpy_INCLUDE_DIRS)
-
 
 include_directories(
         ${Boost_INCLUDE_DIRS}
@@ -85,7 +80,6 @@ add_library(${PROJECT_NAME} STATIC
 #add_executable(${fname} ${f} )
 #target_link_libraries(${fname} ${PROJECT_NAME})
 #endforeach()
-
 
 add_library(sst_module SHARED
     ${PROJECT_SOURCE_DIR}/src/motion_planners/sst_wrapper.cpp)
