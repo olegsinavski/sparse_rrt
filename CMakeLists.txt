@@ -29,15 +29,27 @@ execute_process(
     OUTPUT_VARIABLE PYTHON_PREFIX
     OUTPUT_STRIP_TRAILING_WHITESPACE
 )
-set(PYTHON_INCLUDE_DIRS "${PYTHON_PREFIX}/include/python2.7")
 if(APPLE)
     set(PYTHON_LIBRARIES "${PYTHON_PREFIX}/lib/libpython2.7.dylib")
 else(APPLE)
-    set(PYTHON_LIBRARIES "${PYTHON_PREFIX}/lib/libpython2.7.so")
+    #set(PYTHON_LIBRARIES "${PYTHON_PREFIX}/lib/libpython2.7.so")
 endif(APPLE)
 
 
-# message( FATAL_ERROR "APPLE ${PYTHON_INCLUDE_DIRS}" )
+execute_process(
+    COMMAND "python2.7" -c "from distutils import sysconfig; print(sysconfig.get_python_inc())"
+    OUTPUT_VARIABLE PYTHON_INCLUDE_DIRS
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+#execute_process(
+#    COMMAND "python2.7" -c "from distutils import sysconfig; print(sysconfig.get_python_lib())"
+#    OUTPUT_VARIABLE PYTHON_LIBRARIES
+#    OUTPUT_STRIP_TRAILING_WHITESPACE
+#)
+
+
+# message( FATAL_ERROR "APPLE ${PYTHON_LIBRARIES}" )
 
 
 
