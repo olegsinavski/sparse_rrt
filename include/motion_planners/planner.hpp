@@ -93,7 +93,7 @@ public:
 	void visualize_tree(
 	    int image_counter,
 	    int image_width, int image_height,
-        double solution_node_diameter, int solution_line_width, int tree_line_width);
+        double solution_node_diameter, double solution_line_width, double tree_line_width);
 
 	/**
 	 * @brief Generate an image visualizing the nodes in the tree.
@@ -122,7 +122,7 @@ protected:
 	 * @param doc The image storage.
 	 * @param dim The size of the image.
 	 */
-	virtual void visualize_solution_path( svg::Document& doc, svg::Dimensions& dim, int solution_line_width);
+	virtual void visualize_solution_path( svg::Document& doc, svg::Dimensions& dim, double solution_line_width);
 
 	/**
 	 * @brief Create geometries for visualizing the nodes along the solution path.
@@ -149,7 +149,7 @@ protected:
 	 * @param doc The image storage.
 	 * @param dim The size of the image.
 	 */
-	virtual void visualize_edge(tree_node_t* node, svg::Document& doc, svg::Dimensions& dim, int tree_line_width);
+	virtual void visualize_edge(tree_node_t* node, svg::Document& doc, svg::Dimensions& dim, double tree_line_width);
 
 	/**
 	 * @brief Creates a single node geometry.

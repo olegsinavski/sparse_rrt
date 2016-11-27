@@ -30,7 +30,7 @@ void planner_t::set_goal_state(double* in_goal,double in_radius)
 void planner_t::visualize_tree(
     int image_counter,
     int image_width, int image_height,
-    double solution_node_diameter, int solution_line_width, int tree_line_width)
+    double solution_node_diameter, double solution_line_width, double tree_line_width)
 {
 	std::stringstream s;
     s<<"tree_"<<image_counter<<".svg";
@@ -92,7 +92,7 @@ void planner_t::visualize_nodes(int image_counter, int image_width, int image_he
 
     doc.save();
 }
-void planner_t::visualize_edge(tree_node_t* node, svg::Document& doc, svg::Dimensions& dim, int tree_line_width)
+void planner_t::visualize_edge(tree_node_t* node, svg::Document& doc, svg::Dimensions& dim, double tree_line_width)
 {
 
 	for (std::list<tree_node_t*>::iterator i = node->children.begin(); i != node->children.end(); ++i)
@@ -121,7 +121,7 @@ void planner_t::visualize_node(tree_node_t* node, svg::Document& doc, svg::Dimen
 
 }
 
-void planner_t::visualize_solution_path( svg::Document& doc, svg::Dimensions& dim, int solution_line_width)
+void planner_t::visualize_solution_path( svg::Document& doc, svg::Dimensions& dim, double solution_line_width)
 {
 	if(last_solution_path.size()!=0)
 	{

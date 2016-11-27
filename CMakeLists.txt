@@ -78,7 +78,7 @@ file(GLOB files ${PROJECT_SOURCE_DIR}/tests/*.cpp)
 foreach(f ${files})
 GET_FILENAME_COMPONENT(fname ${f} NAME_WE )
 add_executable(${fname} ${f} )
-target_link_libraries(${fname} ${PROJECT_NAME})
+target_link_libraries(${fname} ${PROJECT_NAME} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES})
 endforeach()
 
 add_library(sst_module SHARED
