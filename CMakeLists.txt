@@ -9,16 +9,9 @@ add_definitions(-O3 )
 
 IF(APPLE)
 
-   # message( FATAL_ERROR "APPLE" )
-   # Mac OS X bundle specific settings
-   # set(MACOSX_BUNDLE true)
-   # set(MACOSX_BUNDLE_BUNDLE_NAME ${MY_APP_NAME})
-
    set(CMAKE_MACOSX_RPATH 1)
 
 ENDIF(APPLE)
-
-
 
 find_package(Boost COMPONENTS program_options python REQUIRED)
 
@@ -32,7 +25,8 @@ execute_process(
 if(APPLE)
     set(PYTHON_LIBRARIES "${PYTHON_PREFIX}/lib/libpython2.7.dylib")
 else(APPLE)
-    #set(PYTHON_LIBRARIES "${PYTHON_PREFIX}/lib/libpython2.7.so")
+    # it seems like libpython2.7.so is not necessary on ubuntu
+    # set(PYTHON_LIBRARIES "${PYTHON_PREFIX}/lib/libpython2.7.so")
 endif(APPLE)
 
 
@@ -41,16 +35,6 @@ execute_process(
     OUTPUT_VARIABLE PYTHON_INCLUDE_DIRS
     OUTPUT_STRIP_TRAILING_WHITESPACE
 )
-
-#execute_process(
-#    COMMAND "python2.7" -c "from distutils import sysconfig; print(sysconfig.get_python_lib())"
-#    OUTPUT_VARIABLE PYTHON_LIBRARIES
-#    OUTPUT_STRIP_TRAILING_WHITESPACE
-#)
-
-
-# message( FATAL_ERROR "APPLE ${PYTHON_LIBRARIES}" )
-
 
 
 # Find actual numpy in use (as opposed to system numpy)
