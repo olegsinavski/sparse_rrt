@@ -24,16 +24,20 @@ find_package(Boost COMPONENTS program_options python REQUIRED)
 
 # Instead of find_package(PythonLibs REQUIRED), we manually search for python to make sure we link to the active version
 # (as opposed to system python if brew python is installed)
-
 execute_process(
-COMMAND "python2.7" -c "import sys;print(sys.prefix)"
-OUTPUT_VARIABLE PYTHON_PREFIX)
-
+    COMMAND "python2.7" -c "import sys;print(sys.prefix)"
+    OUTPUT_VARIABLE PYTHON_PREFIX
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
 set(PYTHON_INCLUDE_DIRS "${PYTHON_PREFIX}/include/python2.7")
-set(PYTHON_LIBRARIES "${PYTHON_PREFIX}/lib/libpython2.7.dylib")
+if(APPLE)
+    set(PYTHON_LIBRARIES "${PYTHON_PREFIX}/lib/libpython2.7.dylib")
+else(APPLE)
+    set(PYTHON_LIBRARIES "${PYTHON_PREFIX}/lib/libpython2.7.so")
+endif(APPLE)
 
 
-message( FATAL_ERROR "APPLE ${PYTHON_PREFIX}" )
+# message( FATAL_ERROR "APPLE ${PYTHON_INCLUDE_DIRS}" )
 
 
 
