@@ -45,7 +45,7 @@ public:
 	/**
 	 * @copydoc planner_t::step()
 	 */
-	virtual void step();
+	virtual void step(int min_time_steps, int max_time_steps, double integration_step);
 
 protected:
 	
@@ -101,7 +101,7 @@ protected:
 	 * @details Perform a local propagation from the nearest state.
 	 * @return If the trajectory is collision free or not.
 	 */
-	bool propagate();
+	bool propagate(int min_time_steps, int max_time_steps, double integration_step);
 
 	/**
 	 * @brief If propagation was successful, add the new state to the tree.

@@ -64,7 +64,7 @@ int main(int ac, char* av[])
 	}
 	else if(params::planner=="sst")
 	{
-		planner = new sst_t(system);
+		planner = new sst_t(system, params::sst_delta_near, params::sst_delta_drain);
 	}
 	planner->set_start_state(params::start_state);
 	planner->set_goal_state(params::goal_state,params::goal_radius);
@@ -83,7 +83,7 @@ int main(int ac, char* av[])
 	{
 		do
 		{
-			planner->step();
+			planner->step(params::min_time_steps, params::max_time_steps, params::integration_step);
 		}
 		while(!checker.check());
 		std::vector<std::pair<double*,double> > controls;
@@ -94,8 +94,8 @@ int main(int ac, char* av[])
 			solution_cost+=controls[i].second;
 		}
 		std::cout<<"Time: "<<checker.time()<<" Iterations: "<<checker.iterations()<<" Nodes: "<<planner->number_of_nodes<<" Solution Quality: " <<solution_cost<<std::endl ;
-		planner->visualize_tree(0);
-		planner->visualize_nodes(0);
+		planner->visualize_tree(0, params::image_width, params::image_height, params::solution_node_diameter, params::solution_line_width, params::tree_line_width);
+		planner->visualize_nodes(0, params::image_width, params::image_height, params::node_diameter, params::solution_node_diameter);
 	}
 	else
 	{
@@ -106,7 +106,7 @@ int main(int ac, char* av[])
 		{
 			do
 			{
-				planner->step();
+				planner->step(params::min_time_steps, params::max_time_steps, params::integration_step);
 				execution_done = checker.check();
 				stats_print = stats_check->check();
 			}
@@ -124,8 +124,8 @@ int main(int ac, char* av[])
 				stats_print = false;
 				if(params::intermediate_visualization)
 				{
-					planner->visualize_tree(count);
-					planner->visualize_nodes(count);
+					planner->visualize_tree(count, params::image_width, params::image_height, params::solution_node_diameter, params::solution_line_width, params::tree_line_width);
+					planner->visualize_nodes(count, params::image_width, params::image_height, params::node_diameter, params::solution_node_diameter);
 					count++;
 				}				
 				stats_check->reset();
@@ -140,8 +140,8 @@ int main(int ac, char* av[])
 					solution_cost+=controls[i].second;
 				}
 				std::cout<<"Time: "<<checker.time()<<" Iterations: "<<checker.iterations()<<" Nodes: "<<planner->number_of_nodes<<" Solution Quality: " <<solution_cost<<std::endl ;
-				planner->visualize_tree(count);
-				planner->visualize_nodes(count);
+				planner->visualize_tree(count, params::image_width, params::image_height, params::solution_node_diameter, params::solution_line_width, params::tree_line_width);
+				planner->visualize_nodes(count, params::image_width, params::image_height, params::node_diameter, params::solution_node_diameter);
 				break;
 			}
 		}

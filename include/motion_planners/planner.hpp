@@ -65,7 +65,7 @@ public:
 	 * @brief Perform an iteration of a motion planning algorithm.
 	 * @details Perform an iteration of a motion planning algorithm.
 	 */
-	virtual void step() = 0;
+	virtual void step(int min_time_steps, int max_time_steps, double integration_step) = 0;
 
 	/**
 	 * @brief Set the start state for the planner.
@@ -90,7 +90,10 @@ public:
 	 * 
 	 * @param image_counter A subscript for the image file name. Allows for multiple image output.
 	 */
-	void visualize_tree(int image_counter);
+	void visualize_tree(
+	    int image_counter,
+	    int image_width, int image_height,
+        double solution_node_diameter, int solution_line_width, int tree_line_width);
 
 	/**
 	 * @brief Generate an image visualizing the nodes in the tree.
@@ -99,7 +102,7 @@ public:
 	 * 
 	 * @param image_counter A subscript for the image file name. Allows for multiple image output.
 	 */
-	void visualize_nodes(int image_counter);
+	void visualize_nodes(int image_counter, int image_width, int image_height, double node_diameter, double solution_node_diameter);
 
 	/**
 	 * @brief Find the maximum cost node in the tree.
@@ -119,7 +122,7 @@ protected:
 	 * @param doc The image storage.
 	 * @param dim The size of the image.
 	 */
-	virtual void visualize_solution_path( svg::Document& doc, svg::Dimensions& dim);
+	virtual void visualize_solution_path( svg::Document& doc, svg::Dimensions& dim, int solution_line_width);
 
 	/**
 	 * @brief Create geometries for visualizing the nodes along the solution path.
@@ -128,7 +131,7 @@ protected:
 	 * @param doc The image storage.
 	 * @param dim The size of the image.
 	 */
-	virtual void visualize_solution_nodes( svg::Document& doc, svg::Dimensions& dim);
+	virtual void visualize_solution_nodes(svg::Document& doc, svg::Dimensions& dim, double solution_node_diameter);
 
 	/**
 	 * @brief A recursive function for finding the highest cost in the tree.
@@ -146,7 +149,7 @@ protected:
 	 * @param doc The image storage.
 	 * @param dim The size of the image.
 	 */
-	virtual void visualize_edge(tree_node_t* node, svg::Document& doc, svg::Dimensions& dim);
+	virtual void visualize_edge(tree_node_t* node, svg::Document& doc, svg::Dimensions& dim, int tree_line_width);
 
 	/**
 	 * @brief Creates a single node geometry.
@@ -156,7 +159,7 @@ protected:
 	 * @param doc The image storage.
 	 * @param dim The size of the image.
 	 */
-	virtual void visualize_node(tree_node_t* node, svg::Document& doc, svg::Dimensions& dim);
+	virtual void visualize_node(tree_node_t* node, svg::Document& doc, svg::Dimensions& dim, double node_diameter);
 
  	/**
  	 * @brief The stored solution from previous call to get_solution.

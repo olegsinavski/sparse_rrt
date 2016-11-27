@@ -77,11 +77,11 @@ void rrt_t::get_solution(std::vector<std::pair<double*,double> >& controls)
 		}
 	}
 }
-void rrt_t::step()
+void rrt_t::step(int min_time_steps, int max_time_steps, double integration_step)
 {
 	random_sample();
 	nearest_vertex();
-	if(propagate())
+	if(propagate(min_time_steps, max_time_steps, integration_step))
 	{
 		add_to_tree();
 	}
@@ -106,9 +106,9 @@ void rrt_t::nearest_vertex()
 	double distance;
 	nearest = (tree_node_t*)metric->find_closest(metric_query,&distance)->get_state();
 }
-bool rrt_t::propagate()
+bool rrt_t::propagate(int min_time_steps, int max_time_steps, double integration_step)
 {
-	return system->propagate(nearest->point,sample_control,params::min_time_steps,params::max_time_steps,sample_state,duration);
+	return system->propagate(nearest->point,sample_control, min_time_steps, max_time_steps, sample_state, duration, integration_step);
 }
 void rrt_t::add_to_tree()
 {

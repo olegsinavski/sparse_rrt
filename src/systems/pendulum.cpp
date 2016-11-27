@@ -47,7 +47,7 @@ void pendulum_t::random_control(double* control)
 	control[0] = uniform_random(MIN_TORQUE,MAX_TORQUE);
 }
 
-bool pendulum_t::propagate( double* start_state, double* control, int min_step, int max_step, double* result_state, double& duration )
+bool pendulum_t::propagate( double* start_state, double* control, int min_step, int max_step, double* result_state, double& duration, double integration_step)
 {
 	temp_state[0] = start_state[0]; temp_state[1] = start_state[1];
 	int num_steps = uniform_int_random(min_step,max_step);
@@ -56,8 +56,8 @@ bool pendulum_t::propagate( double* start_state, double* control, int min_step, 
 	{
 		double temp0 = temp_state[0];
 		double temp1 = temp_state[1];
-		temp_state[0] += params::integration_step*temp1;
-		temp_state[1] += params::integration_step*
+		temp_state[0] += integration_step*temp1;
+		temp_state[1] += integration_step*
 							((control[0] - MASS * (9.81) * LENGTH * cos(temp0)*0.5 
 										 - DAMPING * temp1)* 3 / (MASS * LENGTH * LENGTH));
 		enforce_bounds();
@@ -65,7 +65,7 @@ bool pendulum_t::propagate( double* start_state, double* control, int min_step, 
 	}
 	result_state[0] = temp_state[0];
 	result_state[1] = temp_state[1];
-	duration = num_steps*params::integration_step;
+	duration = num_steps*integration_step;
 	return validity;
 }
 

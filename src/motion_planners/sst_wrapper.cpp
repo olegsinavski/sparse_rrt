@@ -5,6 +5,12 @@
 #include <iostream>
 #include "utilities/numpy_boost_python.hpp"
 
+#include "motion_planners/sst.hpp"
+#include "systems/point.hpp"
+#include "utilities/condition_check.hpp"
+#include "utilities/random.hpp"
+#include "utilities/timer.hpp"
+
 namespace py = boost::python;
 
 void translate_exception(std::runtime_error const& e)
@@ -19,9 +25,130 @@ class SSTWrapper
 public:
     SSTWrapper()
     {
+
     }
 
     void run() {
+        // parameters
+        std::string planner_name = "sst";
+        std::string system_name = "point";
+
+        int random_seed = 0;
+        double start_state[] = {0., 0.};
+        double goal_state[] = {9., 9.};
+        double goal_radius = 0.5;
+
+        // The radius for BestNear (delta_n in the WAFR paper)
+        double sst_delta_near=.4;
+        // The radius for sparsification (delta_s in the WAFR paper)
+        double sst_delta_drain=.2;
+
+        std::string stopping_type = "time";
+        double stopping_check = 15;
+
+        std::string stats_type = "time";
+        double stats_check_value = 0;
+
+        bool intermediate_visualization = false;
+
+        int image_width = 500;
+        int image_height = 500;
+        double node_diameter = 5;
+        double solution_node_diameter = 4;
+        double solution_line_width=3;
+        double tree_line_width = 0.5;
+
+        int min_time_steps = 20;
+        int max_time_steps = 200;
+        double integration_step = 0.002;
+
+        init_random(random_seed);
+
+	    system_t* system = new point_t();
+	    planner_t* planner = new sst_t(system, sst_delta_near, sst_delta_drain);
+
+	    planner->set_start_state(start_state);
+	    planner->set_goal_state(goal_state, goal_radius);
+	    planner->setup_planning();
+
+	    condition_check_t checker(stopping_type, stopping_check);
+	    condition_check_t* stats_check=NULL;
+	    if(stats_check_value!=0)
+        {
+            stats_check = new condition_check_t(stats_type, stats_check_value);
+        }
+
+        checker.reset();
+        std::cout<<"Starting the planner: "<<planner_name<<" for the system: "<<system_name<<std::endl;
+        if(stats_check==NULL)
+        {
+            do
+            {
+                planner->step(min_time_steps, max_time_steps, integration_step);
+            }
+            while(!checker.check());
+            std::vector<std::pair<double*,double> > controls;
+            planner->get_solution(controls);
+            double solution_cost = 0;
+            for(unsigned i=0;i<controls.size();i++)
+            {
+                solution_cost+=controls[i].second;
+            }
+            std::cout<<"Time: "<<checker.time()<<" Iterations: "<<checker.iterations()<<" Nodes: "<<planner->number_of_nodes<<" Solution Quality: " <<solution_cost<<std::endl ;
+            planner->visualize_tree(0, image_width, image_height, solution_node_diameter, solution_line_width, tree_line_width);
+            planner->visualize_nodes(0, image_width, image_height, node_diameter, solution_node_diameter);
+        }
+        else
+        {
+            int count = 0;
+            bool execution_done = false;
+            bool stats_print = false;
+            while(true)
+            {
+                do
+                {
+                    planner->step(min_time_steps, max_time_steps, integration_step);
+                    execution_done = checker.check();
+                    stats_print = stats_check->check();
+                }
+                while(!execution_done && !stats_print);
+                if(stats_print)
+                {
+                    std::vector<std::pair<double*,double> > controls;
+                    planner->get_solution(controls);
+                    double solution_cost = 0;
+                    for(unsigned i=0;i<controls.size();i++)
+                    {
+                        solution_cost+=controls[i].second;
+                    }
+                    std::cout<<"Time: "<<checker.time()<<" Iterations: "<<checker.iterations()<<" Nodes: "<<planner->number_of_nodes<<" Solution Quality: " <<solution_cost<<std::endl ;
+                    stats_print = false;
+                    if(intermediate_visualization)
+                    {
+                        planner->visualize_tree(count, image_width, image_height, solution_node_diameter, solution_line_width, tree_line_width);
+                        planner->visualize_nodes(count, image_width, image_height, node_diameter, solution_node_diameter);
+                        count++;
+                    }
+                    stats_check->reset();
+                }
+                if (execution_done)
+                {
+                    std::vector<std::pair<double*,double> > controls;
+                    planner->get_solution(controls);
+                    double solution_cost = 0;
+                    for(unsigned i=0;i<controls.size();i++)
+                    {
+                        solution_cost+=controls[i].second;
+                    }
+                    std::cout<<"Time: "<<checker.time()<<" Iterations: "<<checker.iterations()<<" Nodes: "<<planner->number_of_nodes<<" Solution Quality: " <<solution_cost<<std::endl ;
+                    planner->visualize_tree(count, image_width, image_height, solution_node_diameter, solution_line_width, tree_line_width);
+                    planner->visualize_nodes(count, image_width, image_height, node_diameter, solution_node_diameter);
+                    break;
+                }
+            }
+        }
+        std::cout<<"Done planning."<<std::endl;
+
 
     }
 

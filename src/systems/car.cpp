@@ -39,7 +39,7 @@ void car_t::random_control(double* control)
 	control[1] = uniform_random(-.5,.5);
 }
 
-bool car_t::propagate( double* start_state, double* control, int min_step, int max_step, double* result_state, double& duration )
+bool car_t::propagate( double* start_state, double* control, int min_step, int max_step, double* result_state, double& duration, double integration_step)
 {
 	temp_state[0] = start_state[0]; temp_state[1] = start_state[1];temp_state[2] = start_state[2];
 
@@ -50,16 +50,16 @@ bool car_t::propagate( double* start_state, double* control, int min_step, int m
 		double temp0 = temp_state[0];
 		double temp1 = temp_state[1];
 		double temp2 = temp_state[2];
-		temp_state[0] += params::integration_step*cos(temp2)*control[0];
-		temp_state[1] += params::integration_step*sin(temp2)*control[0];
-		temp_state[2] += params::integration_step*control[1];
+		temp_state[0] += integration_step*cos(temp2)*control[0];
+		temp_state[1] += integration_step*sin(temp2)*control[0];
+		temp_state[2] += integration_step*control[1];
 		enforce_bounds();
 		validity = validity && valid_state();
 	}
 	result_state[0] = temp_state[0];
 	result_state[1] = temp_state[1];
 	result_state[2] = temp_state[2];
-	duration = num_steps*params::integration_step;
+	duration = num_steps*integration_step;
 	return validity;
 }
 

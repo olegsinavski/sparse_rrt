@@ -69,7 +69,10 @@ public:
 	/**
 	 * @copydoc planner_t::planner_t(system_t*)
 	 */
-	sst_t(system_t* in_system) : planner_t(in_system)
+	sst_t(system_t* in_system, double delta_near, double delta_drain)
+	    : planner_t(in_system)
+	    , sst_delta_near(delta_near)
+	    , sst_delta_drain(delta_drain)
 	{
 
 	}
@@ -88,7 +91,7 @@ public:
 	/**
 	 * @copydoc planner_t::step()
 	 */
-	 virtual void step();
+	 virtual void step(int min_time_steps, int max_time_steps, double integration_step);
 
 protected:
 	
@@ -155,7 +158,7 @@ protected:
 	 * @details Perform a local propagation from the nearest state.
 	 * @return If the trajectory is collision free or not.
 	 */
-	bool propagate();
+	bool propagate(int min_time_steps, int max_time_steps, double integration_step);
 
 	/**
 	 * @brief If propagation was successful, add the new state to the tree.
@@ -225,6 +228,9 @@ protected:
 	 * The nearest neighbor structure for witness samples.
 	 */
 	graph_nearest_neighbors_t* samples;
+
+	double sst_delta_near;
+	double sst_delta_drain;
 
 
 };

@@ -61,7 +61,7 @@ void cart_pole_t::random_control(double* control)
         control[0] = uniform_random(-300,300);
 }
 
-bool cart_pole_t::propagate( double* start_state, double* control, int min_step, int max_step, double* result_state, double& duration )
+bool cart_pole_t::propagate( double* start_state, double* control, int min_step, int max_step, double* result_state, double& duration, double integration_step)
 {
         temp_state[0] = start_state[0]; 
         temp_state[1] = start_state[1];
@@ -72,10 +72,10 @@ bool cart_pole_t::propagate( double* start_state, double* control, int min_step,
         for(int i=0;i<num_steps;i++)
         {
                 update_derivative(control);
-                temp_state[0] += params::integration_step*deriv[0];
-                temp_state[1] += params::integration_step*deriv[1];
-                temp_state[2] += params::integration_step*deriv[2];
-                temp_state[3] += params::integration_step*deriv[3];
+                temp_state[0] += integration_step*deriv[0];
+                temp_state[1] += integration_step*deriv[1];
+                temp_state[2] += integration_step*deriv[2];
+                temp_state[3] += integration_step*deriv[3];
                 enforce_bounds();
                 validity = validity && valid_state();
         }
@@ -83,7 +83,7 @@ bool cart_pole_t::propagate( double* start_state, double* control, int min_step,
         result_state[1] = temp_state[1];
         result_state[2] = temp_state[2];
         result_state[3] = temp_state[3];
-        duration = num_steps*params::integration_step;
+        duration = num_steps*integration_step;
         return validity;
 }
 

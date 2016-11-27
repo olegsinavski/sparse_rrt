@@ -93,7 +93,7 @@ public:
 	/**
 	 * @copydoc system_t::propagate(double*, double*, int, int, double*, double& )
 	 */
-	virtual bool propagate( double* start_state, double* control, int min_step, int max_step, double* result_state, double& duration );
+	virtual bool propagate( double* start_state, double* control, int min_step, int max_step, double* result_state, double& duration, double integration_step);
 
 	/**
 	 * @copydoc system_t::enforce_bounds()

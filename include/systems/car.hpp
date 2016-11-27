@@ -32,7 +32,7 @@ public:
 
 	virtual void random_control(double* control);
 
-	virtual bool propagate( double* start_state, double* control, int min_step, int max_step, double* result_state, double& duration );
+	virtual bool propagate( double* start_state, double* control, int min_step, int max_step, double* result_state, double& duration, double integration_step);
 
 	virtual void enforce_bounds();
 	

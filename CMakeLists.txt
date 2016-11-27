@@ -67,23 +67,23 @@ add_library(${PROJECT_NAME} STATIC
     ${PROJECT_SOURCE_DIR}/src/systems/rally_car.cpp
     ${PROJECT_SOURCE_DIR}/src/systems/two_link_acrobot.cpp
     ${PROJECT_SOURCE_DIR}/src/utilities/condition_check.cpp
-    #${PROJECT_SOURCE_DIR}/src/utilities/parameter_reader.cpp
+    ${PROJECT_SOURCE_DIR}/src/utilities/parameter_reader.cpp
     ${PROJECT_SOURCE_DIR}/src/utilities/random.cpp
     ${PROJECT_SOURCE_DIR}/src/utilities/timer.cpp
 )
-#target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
 
-#file(GLOB files ${PROJECT_SOURCE_DIR}/tests/*.cpp)
+file(GLOB files ${PROJECT_SOURCE_DIR}/tests/*.cpp)
 
-#foreach(f ${files})
-#GET_FILENAME_COMPONENT(fname ${f} NAME_WE )
-#add_executable(${fname} ${f} )
-#target_link_libraries(${fname} ${PROJECT_NAME})
-#endforeach()
+foreach(f ${files})
+GET_FILENAME_COMPONENT(fname ${f} NAME_WE )
+add_executable(${fname} ${f} )
+target_link_libraries(${fname} ${PROJECT_NAME})
+endforeach()
 
 add_library(sst_module SHARED
     ${PROJECT_SOURCE_DIR}/src/motion_planners/sst_wrapper.cpp)
-target_link_libraries(sst_module ${Boost_LIBRARIES} ${PYTHON_LIBRARIES})
+target_link_libraries(sst_module ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} ${PROJECT_NAME})
 
 # Don't prepend wrapper library name with lib and add to Python libs.
 set_target_properties(sst_module PROPERTIES

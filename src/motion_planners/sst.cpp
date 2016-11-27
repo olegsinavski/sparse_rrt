@@ -73,11 +73,11 @@ void sst_t::get_solution(std::vector<std::pair<double*,double> >& controls)
 		controls.back().second = path[i]->parent_edge->duration;
 	}
 }
-void sst_t::step()
+void sst_t::step(int min_time_steps, int max_time_steps, double integration_step)
 {
 	random_sample();
 	nearest_vertex();
-	if(propagate())
+	if(propagate(min_time_steps, max_time_steps, integration_step))
 	{
 		add_to_tree();
 	}
@@ -107,7 +107,7 @@ void sst_t::nearest_vertex()
 {
 	//performs the best near query
 	system->copy_state_point(metric_query->point,sample_state);
-	unsigned val = metric->find_delta_close_and_closest(metric_query,close_nodes,distances,params::sst_delta_near);
+	unsigned val = metric->find_delta_close_and_closest(metric_query,close_nodes, distances, this->sst_delta_near);
 
     double length = 999999999;
     for(unsigned i=0;i<val;i++)
@@ -121,9 +121,9 @@ void sst_t::nearest_vertex()
         }
     }
 }
-bool sst_t::propagate()
+bool sst_t::propagate(int min_time_steps, int max_time_steps, double integration_step)
 {
-	return system->propagate(nearest->point,sample_control,params::min_time_steps,params::max_time_steps,sample_state,duration);
+	return system->propagate(nearest->point,sample_control, min_time_steps, max_time_steps, sample_state, duration, integration_step);
 }
 void sst_t::add_to_tree()
 {
@@ -193,7 +193,7 @@ void sst_t::check_for_witness()
 	system->copy_state_point(metric_query->point,sample_state);
 	double distance;
 	witness_sample = (sample_node_t*)samples->find_closest(metric_query,&distance)->get_state();
-	if(distance > params::sst_delta_drain)
+	if(distance > this->sst_delta_drain)
 	{
 		//create a new sample
 		witness_sample = new sample_node_t();

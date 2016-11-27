@@ -123,7 +123,7 @@ public:
 	 * @param duration The amount of simulation time used.
 	 * @return True if this propagation was valid, false if not.
 	 */
-    virtual bool propagate( double* start_state, double* control, int min_step, int max_step, double* result_state, double& duration ) = 0;
+    virtual bool propagate( double* start_state, double* control, int min_step, int max_step, double* result_state, double& duration, double integration_step) = 0;
 
     /**
      * @brief Creates a point in image space corresponding to a given state.

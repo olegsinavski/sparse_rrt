@@ -68,7 +68,7 @@ void two_link_acrobot_t::random_control(double* control)
         control[0] = uniform_random(MIN_T,MAX_T);
 }
 
-bool two_link_acrobot_t::propagate( double* start_state, double* control, int min_step, int max_step, double* result_state, double& duration )
+bool two_link_acrobot_t::propagate( double* start_state, double* control, int min_step, int max_step, double* result_state, double& duration, double integration_step)
 {
         temp_state[0] = start_state[0]; 
         temp_state[1] = start_state[1];
@@ -79,10 +79,10 @@ bool two_link_acrobot_t::propagate( double* start_state, double* control, int mi
         for(int i=0;i<num_steps;i++)
         {
                 update_derivative(control);
-                temp_state[0] += params::integration_step*deriv[0];
-                temp_state[1] += params::integration_step*deriv[1];
-                temp_state[2] += params::integration_step*deriv[2];
-                temp_state[3] += params::integration_step*deriv[3];
+                temp_state[0] += integration_step*deriv[0];
+                temp_state[1] += integration_step*deriv[1];
+                temp_state[2] += integration_step*deriv[2];
+                temp_state[3] += integration_step*deriv[3];
                 enforce_bounds();
                 validity = validity && valid_state();
         }
@@ -90,7 +90,7 @@ bool two_link_acrobot_t::propagate( double* start_state, double* control, int mi
         result_state[1] = temp_state[1];
         result_state[2] = temp_state[2];
         result_state[3] = temp_state[3];
-        duration = num_steps*params::integration_step;
+        duration = num_steps*integration_step;
         return validity;
 }
 

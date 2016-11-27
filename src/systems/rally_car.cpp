@@ -92,7 +92,7 @@ void rally_car_t::random_control(double* control)
         control[2] = uniform_random(-700,1200);
 }
 
-bool rally_car_t::propagate( double* start_state, double* control, int min_step, int max_step, double* result_state, double& duration )
+bool rally_car_t::propagate( double* start_state, double* control, int min_step, int max_step, double* result_state, double& duration, double integration_step)
 {
         temp_state[0] = start_state[0]; 
         temp_state[1] = start_state[1];
@@ -107,14 +107,14 @@ bool rally_car_t::propagate( double* start_state, double* control, int min_step,
         for(int i=0;i<num_steps;i++)
         {
                 update_derivative(control);
-                temp_state[0] += params::integration_step*deriv[0];
-                temp_state[1] += params::integration_step*deriv[1];
-                temp_state[2] += params::integration_step*deriv[2];
-                temp_state[3] += params::integration_step*deriv[3];
-                temp_state[4] += params::integration_step*deriv[4];
-                temp_state[5] += params::integration_step*deriv[5];
-                temp_state[6] += params::integration_step*deriv[6];
-                temp_state[7] += params::integration_step*deriv[7];
+                temp_state[0] += integration_step*deriv[0];
+                temp_state[1] += integration_step*deriv[1];
+                temp_state[2] += integration_step*deriv[2];
+                temp_state[3] += integration_step*deriv[3];
+                temp_state[4] += integration_step*deriv[4];
+                temp_state[5] += integration_step*deriv[5];
+                temp_state[6] += integration_step*deriv[6];
+                temp_state[7] += integration_step*deriv[7];
                 enforce_bounds();
                 validity = validity && valid_state();
         }
@@ -126,7 +126,7 @@ bool rally_car_t::propagate( double* start_state, double* control, int min_step,
         result_state[5] = temp_state[5];
         result_state[6] = temp_state[6];
         result_state[7] = temp_state[7];
-        duration = num_steps*params::integration_step;
+        duration = num_steps*integration_step;
         return validity;
 }
 
