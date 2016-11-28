@@ -55,7 +55,6 @@ include_directories(
         )
 
 add_library(${PROJECT_NAME} STATIC
-    ${PROJECT_SOURCE_DIR}/src/motion_planners/planner.cpp
     ${PROJECT_SOURCE_DIR}/src/motion_planners/rrt.cpp
     ${PROJECT_SOURCE_DIR}/src/motion_planners/sst.cpp
     ${PROJECT_SOURCE_DIR}/src/nearest_neighbors/graph_nearest_neighbors.cpp

@@ -19,10 +19,10 @@
 void rrt_t::setup_planning()
 {
 	//init internal variables
-	sample_state = system->alloc_state_point();
-	sample_control = system->alloc_control_point();
+	sample_state = this->alloc_state_point();
+	sample_control = this->alloc_control_point();
 	metric_query = new tree_node_t();
-	metric_query->point = system->alloc_state_point();
+	metric_query->point = this->alloc_state_point();
 
     close_nodes = (proximity_node_t**)malloc(MAX_KK * sizeof (proximity_node_t*));
     distances = (double*)malloc(MAX_KK * sizeof (double));
@@ -33,8 +33,8 @@ void rrt_t::setup_planning()
 	//create the root of the tree
 	root = new tree_node_t();
 	number_of_nodes++;
-	root->point = system->alloc_state_point();
-	system->copy_state_point(root->point,start_state);
+	root->point = this->alloc_state_point();
+	this->copy_state_point(root->point,start_state);
 	//add root to nearest neighbor structure
 	add_point_to_metric(root);
 
@@ -42,8 +42,8 @@ void rrt_t::setup_planning()
 void rrt_t::get_solution(std::vector<std::pair<double*,double> >& controls)
 {
 	last_solution_path.clear();
-	system->copy_state_point(sample_state,goal_state);
-	system->copy_state_point(metric_query->point,sample_state);
+	this->copy_state_point(sample_state,goal_state);
+	this->copy_state_point(metric_query->point,sample_state);
 	unsigned val = metric->find_delta_close_and_closest(metric_query,close_nodes,distances,goal_radius);
 
     double length = 999999999;
@@ -71,8 +71,8 @@ void rrt_t::get_solution(std::vector<std::pair<double*,double> >& controls)
 		{
 			last_solution_path.push_back(path[i]);
 			controls.push_back(std::pair<double*,double>(NULL,0));
-			controls.back().first = system->alloc_control_point();
-			system->copy_control_point(controls.back().first,path[i]->parent_edge->control);
+			controls.back().first = this->alloc_control_point();
+			this->copy_control_point(controls.back().first,path[i]->parent_edge->control);
 			controls.back().second = path[i]->parent_edge->duration;
 		}
 	}
@@ -102,7 +102,7 @@ void rrt_t::random_sample()
 }
 void rrt_t::nearest_vertex()
 {
-	system->copy_state_point(metric_query->point,sample_state);
+	this->copy_state_point(metric_query->point,sample_state);
 	double distance;
 	nearest = (tree_node_t*)metric->find_closest(metric_query,&distance)->get_state();
 }
@@ -114,12 +114,12 @@ void rrt_t::add_to_tree()
 {
 	//create a new tree node
 	tree_node_t* new_node = new tree_node_t();
-	new_node->point = system->alloc_state_point();
-	system->copy_state_point(new_node->point,sample_state);
+	new_node->point = this->alloc_state_point();
+	this->copy_state_point(new_node->point,sample_state);
 	//create the link to the parent node
 	new_node->parent_edge = new tree_edge_t();
-	new_node->parent_edge->control = system->alloc_control_point();
-	system->copy_control_point(new_node->parent_edge->control,sample_control);
+	new_node->parent_edge->control = this->alloc_control_point();
+	this->copy_control_point(new_node->parent_edge->control,sample_control);
 	new_node->parent_edge->duration = duration;
 	//set this node's parent
 	new_node->parent = nearest;

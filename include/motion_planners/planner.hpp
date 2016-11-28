@@ -41,6 +41,9 @@ public:
 		start_state = NULL;
 		goal_state = NULL;
 		number_of_nodes=0;
+		state_dimension = in_system->get_state_dimension();
+		control_dimension = in_system->get_control_dimension();
+
 	}
 	virtual ~planner_t()
 	{
@@ -73,7 +76,11 @@ public:
 	 * 
 	 * @param in_start The start state.
 	 */
-	virtual void set_start_state(double* in_start);
+	void set_start_state(double* in_start) {
+	    if(start_state==NULL)
+		    start_state = this->alloc_state_point();
+        this->copy_state_point(start_state, in_start);
+	}
 
 	/**
 	 * @brief Set the goal state for the planner.
@@ -82,13 +89,65 @@ public:
 	 * @param in_goal The goal state
 	 * @param in_radius The radial size of the goal region centered at in_goal.
 	 */
-	virtual void set_goal_state(double* in_goal,double in_radius);
+	void set_goal_state(double* in_goal,double in_radius) {
+        if(goal_state==NULL)
+            goal_state = this->alloc_state_point();
+        this->copy_state_point(goal_state,in_goal);
+        goal_radius = in_radius;
+    }
+
 
 	/** @brief The number of nodes in the tree. */
 	unsigned number_of_nodes;
 
 	tree_node_t* get_root() { return this->root; }
     const std::vector<tree_node_t*>& get_last_solution_path() { return this->last_solution_path; }
+
+    /**
+	 * @brief Copies one state into another.
+	 * @details Copies one state into another.
+	 *
+	 * @param destination The destination memory.
+	 * @param source The point to copy.
+	 */
+	void copy_state_point(double* destination, double* source)
+	{
+		for(unsigned i=0;i<this->state_dimension;i++)
+			destination[i] = source[i];
+	}
+
+	/**
+	 * @brief Allocates a double array representing a state of this system.
+	 * @details Allocates a double array representing a state of this system.
+	 * @return Allocated memory for a state.
+	 */
+	double* alloc_state_point()
+	{
+		return new double[this->state_dimension];
+	}
+
+	/**
+	 * @brief Allocates a double array representing a control of this system.
+	 * @details Allocates a double array representing a control of this system.
+	 * @return Allocated memory for a control.
+	 */
+	double* alloc_control_point()
+	{
+		return new double[this->control_dimension];
+	}
+
+	/**
+	 * @brief Copies one control into another.
+	 * @details Copies one control into another.
+	 *
+	 * @param destination The destination memory.
+	 * @param source The control to copy.
+	 */
+	void copy_control_point(double* destination, double* source)
+	{
+		for(unsigned i=0;i<this->control_dimension;i++)
+			destination[i] = source[i];
+	}
 
 protected:
 
@@ -126,6 +185,9 @@ protected:
 	 * @brief The size of the spherical goal region around the goal state.
 	 */
 	double goal_radius;
+
+	unsigned int state_dimension;
+	unsigned int control_dimension;
 
 };
 

@@ -39,52 +39,6 @@ public:
 	}
 
 	/**
-	 * @brief Allocates a double array representing a state of this system.
-	 * @details Allocates a double array representing a state of this system.
-	 * @return Allocated memory for a state.
-	 */
-	double* alloc_state_point()
-	{
-		return new double[state_dimension];
-	}
-
-	/**
-	 * @brief Allocates a double array representing a control of this system.
-	 * @details Allocates a double array representing a control of this system.
-	 * @return Allocated memory for a control.
-	 */
-	double* alloc_control_point()
-	{
-		return new double[control_dimension];
-	}
-
-	/**
-	 * @brief Copies one state into another.
-	 * @details Copies one state into another.
-	 * 
-	 * @param destination The destination memory.
-	 * @param source The point to copy.
-	 */
-	void copy_state_point(double* destination, double* source)
-	{
-		for(unsigned i=0;i<state_dimension;i++)
-			destination[i] = source[i];
-	}
-
-	/**
-	 * @brief Copies one control into another.
-	 * @details Copies one control into another.
-	 * 
-	 * @param destination The destination memory.
-	 * @param source The control to copy.
-	 */
-	void copy_control_point(double* destination, double* source)
-	{
-		for(unsigned i=0;i<control_dimension;i++)
-			destination[i] = source[i];
-	}
-
-	/**
 	 * @brief Performs a random sampling for a new state.
 	 * @details Performs a random sampling for a new state.
 	 * 
