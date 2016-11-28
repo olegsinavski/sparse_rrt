@@ -31,3 +31,7 @@
 # Build directories
 build
 bin
+
+# IDE
+.idea
+cmake-build-debug
