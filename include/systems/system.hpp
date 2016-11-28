@@ -102,6 +102,9 @@ public:
     	return;
     }
 
+    virtual std::vector<std::pair<double, double> > get_state_bounds() = 0;
+    virtual std::vector<std::pair<double, double> > get_control_bounds() = 0;
+
 protected:
 
 	/**

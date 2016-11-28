@@ -96,3 +96,12 @@ svg::Point car_t::visualize_point(double* state, svg::Dimensions dims)
 	double y = (state[1]+10)/(20) * dims.height; 
 	return svg::Point(x,y);
 }
+
+std::vector<std::pair<double, double> > car_t::get_state_bounds() {
+
+}
+
+
+std::vector<std::pair<double, double> > car_t::get_control_bounds() {
+
+}
