@@ -85,13 +85,22 @@ public:
 
         checker.reset();
         std::cout<<"Starting the planner: "<<planner_name<<" for the system: "<<system_name<<std::endl;
-        if(stats_check==NULL)
+
+        int count = 0;
+        bool execution_done = false;
+        bool stats_print = false;
+        while(true)
         {
             do
             {
                 planner->step(system, min_time_steps, max_time_steps, integration_step);
+                execution_done = checker.check();
+                if (stats_check != NULL) {
+                    stats_print = stats_check->check();
+                }
             }
-            while(!checker.check());
+            while(!execution_done && !stats_print);
+
             std::vector<std::pair<double*,double> > controls;
             planner->get_solution(controls);
             double solution_cost = 0;
@@ -100,68 +109,24 @@ public:
                 solution_cost+=controls[i].second;
             }
             std::cout<<"Time: "<<checker.time()<<" Iterations: "<<checker.iterations()<<" Nodes: "<<planner->number_of_nodes<<" Solution Quality: " <<solution_cost<<std::endl ;
-            visualize_tree(
-                planner->get_root(), planner->get_last_solution_path(), system, start_state, goal_state,
-                0, image_width, image_height, solution_node_diameter, solution_line_width, tree_line_width);
-            visualize_nodes(
-                planner->get_root(), planner->get_last_solution_path(), system, start_state, goal_state,
-                0, image_width, image_height, node_diameter, solution_node_diameter);
-        }
-        else
-        {
-            int count = 0;
-            bool execution_done = false;
-            bool stats_print = false;
-            while(true)
+            stats_print = false;
+            if(intermediate_visualization || execution_done)
             {
-                do
-                {
-                    planner->step(system, min_time_steps, max_time_steps, integration_step);
-                    execution_done = checker.check();
-                    stats_print = stats_check->check();
-                }
-                while(!execution_done && !stats_print);
-                if(stats_print)
-                {
-                    std::vector<std::pair<double*,double> > controls;
-                    planner->get_solution(controls);
-                    double solution_cost = 0;
-                    for(unsigned i=0;i<controls.size();i++)
-                    {
-                        solution_cost+=controls[i].second;
-                    }
-                    std::cout<<"Time: "<<checker.time()<<" Iterations: "<<checker.iterations()<<" Nodes: "<<planner->number_of_nodes<<" Solution Quality: " <<solution_cost<<std::endl ;
-                    stats_print = false;
-                    if(intermediate_visualization)
-                    {
-                        visualize_tree(
-                            planner->get_root(), planner->get_last_solution_path(), system, start_state, goal_state,
-                            count, image_width, image_height, solution_node_diameter, solution_line_width, tree_line_width);
-                        visualize_nodes(
-                            planner->get_root(), planner->get_last_solution_path(), system, start_state, goal_state,
-                            count, image_width, image_height, node_diameter, solution_node_diameter);
-                        count++;
-                    }
-                    stats_check->reset();
-                }
-                if (execution_done)
-                {
-                    std::vector<std::pair<double*,double> > controls;
-                    planner->get_solution(controls);
-                    double solution_cost = 0;
-                    for(unsigned i=0;i<controls.size();i++)
-                    {
-                        solution_cost+=controls[i].second;
-                    }
-                    std::cout<<"Time: "<<checker.time()<<" Iterations: "<<checker.iterations()<<" Nodes: "<<planner->number_of_nodes<<" Solution Quality: " <<solution_cost<<std::endl ;
-                    visualize_tree(
-                        planner->get_root(), planner->get_last_solution_path(), system, start_state, goal_state,
-                        count, image_width, image_height, solution_node_diameter, solution_line_width, tree_line_width);
-                    visualize_nodes(
-                        planner->get_root(), planner->get_last_solution_path(), system, start_state, goal_state,
-                        count, image_width, image_height, node_diameter, solution_node_diameter);
-                    break;
-                }
+                visualize_tree(
+                    planner->get_root(), planner->get_last_solution_path(), system, start_state, goal_state,
+                    count, image_width, image_height, solution_node_diameter, solution_line_width, tree_line_width);
+                visualize_nodes(
+                    planner->get_root(), planner->get_last_solution_path(), system, start_state, goal_state,
+                    count, image_width, image_height, node_diameter, solution_node_diameter);
+                count++;
+            }
+            if (stats_check != NULL) {
+                stats_check->reset();
+            }
+
+            if (execution_done)
+            {
+                break;
             }
         }
         std::cout<<"Done planning."<<std::endl;
