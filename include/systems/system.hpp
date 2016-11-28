@@ -39,22 +39,6 @@ public:
 	}
 
 	/**
-	 * @brief Performs a random sampling for a new state.
-	 * @details Performs a random sampling for a new state.
-	 * 
-	 * @param state The state to modify with random values.
-	 */
-	virtual void random_state(double* state) = 0;
-
-	/**
-	 * @brief Performs a random sampling for a new control.
-	 * @details Performs a random sampling for a new control.
-	 * 
-	 * @param control The control to modify with random values.
-	 */
-	virtual void random_control(double* control) = 0;
-
-	/**
 	 * @brief Finds the distance between two states.
 	 * @details Finds the distance between two states.
 	 * 

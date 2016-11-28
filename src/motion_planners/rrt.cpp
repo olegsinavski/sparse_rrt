@@ -97,8 +97,8 @@ void rrt_t::add_point_to_metric(tree_node_t* state)
 
 void rrt_t::random_sample()
 {
-	system->random_state(sample_state);
-	system->random_control(sample_control);
+	this->random_state(sample_state);
+	this->random_control(sample_control);
 }
 void rrt_t::nearest_vertex()
 {

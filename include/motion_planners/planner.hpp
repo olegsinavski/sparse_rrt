@@ -19,6 +19,7 @@
 #include "systems/system.hpp"
 #include "nearest_neighbors/graph_nearest_neighbors.hpp"
 #include "motion_planners/tree_node.hpp"
+#include "utilities/random.hpp"
 
 /**
  * @brief The base class for motion planners.
@@ -42,8 +43,11 @@ public:
 		goal_state = NULL;
 		number_of_nodes=0;
 		state_dimension = in_system->get_state_dimension();
+        state_bounds = in_system->get_state_bounds();
+        assert(state_bounds.size() == state_dimension);
 		control_dimension = in_system->get_control_dimension();
-
+        control_bounds = in_system->get_control_bounds();
+        assert(control_bounds.size() == control_dimension);
 	}
 	virtual ~planner_t()
 	{
@@ -149,6 +153,32 @@ public:
 			destination[i] = source[i];
 	}
 
+	/**
+	 * @brief Performs a random sampling for a new state.
+	 * @details Performs a random sampling for a new state.
+	 *
+	 * @param state The state to modify with random values.
+	 */
+	void random_state(double* state)
+	{
+		for (int i = 0; i < this->state_bounds.size(); ++i) {
+            state[i] = uniform_random(this->state_bounds[i].first, this->state_bounds[i].second);
+        }
+	}
+
+	/**
+	 * @brief Performs a random sampling for a new control.
+	 * @details Performs a random sampling for a new control.
+	 *
+	 * @param control The control to modify with random values.
+	 */
+	void random_control(double* control)
+	{
+        for (int i = 0; i < this->state_bounds.size(); ++i) {
+            control[i] = uniform_random(this->control_bounds[i].first, this->control_bounds[i].second);
+        }
+	}
+
 protected:
 
  	/**
@@ -188,6 +218,9 @@ protected:
 
 	unsigned int state_dimension;
 	unsigned int control_dimension;
+
+    std::vector<std::pair<double, double> > state_bounds;
+    std::vector<std::pair<double, double> > control_bounds;
 
 };
 

@@ -32,16 +32,6 @@ public:
 	virtual double distance(double* point1, double* point2);
 
 	/**
-	 * @copydoc system_t::random_state(double*)
-	 */
-	virtual void random_state(double* state);
-
-	/**
-	 * @copydoc system_t::random_control(double*)
-	 */
-	virtual void random_control(double* control);
-
-	/**
 	 * @copydoc system_t::propagate(double*, double*, int, int, double*, double& )
 	 */
 	virtual bool propagate( double* start_state, double* control, int min_step, int max_step, double* result_state, double& duration, double integration_step);
@@ -60,6 +50,10 @@ public:
 	 * @copydoc system_t::visualize_point(double*, svg::Dimensions)
 	 */
 	svg::Point visualize_point(double* state, svg::Dimensions dims);
+
+    std::vector<std::pair<double, double>> get_state_bounds();
+
+	std::vector<std::pair<double, double>> get_control_bounds();
 };
 
 

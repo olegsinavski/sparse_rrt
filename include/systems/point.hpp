@@ -78,17 +78,7 @@ public:
 	/**
 	 * @copydoc system_t::distance(double*, double*)
 	 */
-	virtual double distance(double* point1, double* point2);
-
-	/**
-	 * @copydoc system_t::random_state(double*)
-	 */
-	virtual void random_state(double* state);
-
-	/**
-	 * @copydoc system_t::random_control(double*)
-	 */
-	virtual void random_control(double* control);
+	virtual double distance(double* point1, double* point2) override ;
 
 	/**
 	 * @copydoc system_t::propagate(double*, double*, int, int, double*, double& )
@@ -114,6 +104,9 @@ public:
 	 * @copydoc system_t::visualize_obstacles(svg::Document&, svg::Dimensions)
 	 */
     virtual void visualize_obstacles(svg::Document& doc ,svg::Dimensions dims);
+
+	std::vector<std::pair<double, double>> get_state_bounds() override;
+	std::vector<std::pair<double, double>> get_control_bounds() override;
 
 protected:
 

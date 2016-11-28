@@ -55,19 +55,6 @@ double two_link_acrobot_t::distance(double* point1,double* point2)
         return std::sqrt(pow(x-x2,2.0)+pow(y-y2,2.0));
 }
 
-void two_link_acrobot_t::random_state(double* state)
-{
-        state[0] = uniform_random(-M_PI,M_PI);
-        state[1] = uniform_random(-M_PI,M_PI);
-        state[2] = uniform_random(MIN_V_1,MAX_V_1);
-        state[3] = uniform_random(MIN_V_2,MAX_V_2);
-}
-
-void two_link_acrobot_t::random_control(double* control)
-{
-        control[0] = uniform_random(MIN_T,MAX_T);
-}
-
 bool two_link_acrobot_t::propagate( double* start_state, double* control, int min_step, int max_step, double* result_state, double& duration, double integration_step)
 {
         temp_state[0] = start_state[0]; 
@@ -164,3 +151,17 @@ void two_link_acrobot_t::update_derivative(double* control)
 }
 
 
+std::vector<std::pair<double, double> > two_link_acrobot_t::get_state_bounds() {
+    return {
+            {-M_PI,M_PI},
+            {-M_PI,M_PI},
+            {MIN_V_1,MAX_V_1},
+            {MIN_V_2,MAX_V_2},
+    };
+}
+
+std::vector<std::pair<double, double> > two_link_acrobot_t::get_control_bounds() {
+    return {
+            {MIN_T,MAX_T}
+    };
+}

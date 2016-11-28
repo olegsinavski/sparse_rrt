@@ -36,17 +36,6 @@ double pendulum_t::distance(double* point1,double* point2)
 	return std::sqrt( val * val + (point1[1]-point2[1]) * (point1[1]-point2[1]) );
 }
 
-void pendulum_t::random_state(double* state)
-{
-	state[0] = uniform_random(-M_PI,M_PI);
-	state[1] = uniform_random(MIN_W,MAX_W);
-}
-
-void pendulum_t::random_control(double* control)
-{
-	control[0] = uniform_random(MIN_TORQUE,MAX_TORQUE);
-}
-
 bool pendulum_t::propagate( double* start_state, double* control, int min_step, int max_step, double* result_state, double& duration, double integration_step)
 {
 	temp_state[0] = start_state[0]; temp_state[1] = start_state[1];
@@ -93,4 +82,18 @@ svg::Point pendulum_t::visualize_point(double* state, svg::Dimensions dims)
 	double x = (state[0]+M_PI)/(2*M_PI) * dims.width; 
 	double y = (state[1]-MIN_W)/(MAX_W-MIN_W) * dims.height; 
 	return svg::Point(x,y);
+}
+
+std::vector<std::pair<double, double> > pendulum_t::get_state_bounds() {
+	return {
+			{-M_PI,M_PI},
+			{MIN_W,MAX_W},
+	};
+}
+
+
+std::vector<std::pair<double, double> > pendulum_t::get_control_bounds() {
+	return {
+			{MIN_TORQUE,MAX_TORQUE},
+	};
 }

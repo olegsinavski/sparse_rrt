@@ -48,19 +48,6 @@ double cart_pole_t::distance(double* point1,double* point2)
         return std::sqrt( val * val + pow(point1[0]-point2[0],2.0) + pow(point1[1]-point2[1],2.0)+ pow(point1[3]-point2[3],2.0) );
 }
 
-void cart_pole_t::random_state(double* state)
-{
-        state[0] = uniform_random(MIN_X,MAX_X);
-        state[1] = uniform_random(MIN_V,MAX_V);
-        state[2] = uniform_random(-M_PI,M_PI);
-        state[3] = uniform_random(MIN_W,MAX_W);
-}
-
-void cart_pole_t::random_control(double* control)
-{
-        control[0] = uniform_random(-300,300);
-}
-
 bool cart_pole_t::propagate( double* start_state, double* control, int min_step, int max_step, double* result_state, double& duration, double integration_step)
 {
         temp_state[0] = start_state[0]; 
@@ -143,3 +130,18 @@ void cart_pole_t::update_derivative(double* control)
 }
 
 
+std::vector<std::pair<double, double> > cart_pole_t::get_state_bounds() {
+    return {
+            {MIN_X,MAX_X},
+            {MIN_V,MAX_V},
+            {-M_PI,M_PI},
+            {MIN_W,MAX_W},
+    };
+}
+
+
+std::vector<std::pair<double, double> > cart_pole_t::get_control_bounds() {
+    return {
+            {-300,300},
+    };
+}

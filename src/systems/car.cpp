@@ -26,19 +26,6 @@ double car_t::distance(double* point1,double* point2)
 	return std::sqrt( val * val + (point1[1]-point2[1]) * (point1[1]-point2[1])+(point1[0]-point2[0]) * (point1[0]-point2[0]) );
 }
 
-void car_t::random_state(double* state)
-{
-	state[0] = uniform_random(-10,10);
-	state[1] = uniform_random(-10,10);
-	state[2] = uniform_random(-M_PI,M_PI);
-}
-
-void car_t::random_control(double* control)
-{
-	control[0] = uniform_random(0,1);
-	control[1] = uniform_random(-.5,.5);
-}
-
 bool car_t::propagate( double* start_state, double* control, int min_step, int max_step, double* result_state, double& duration, double integration_step)
 {
 	temp_state[0] = start_state[0]; temp_state[1] = start_state[1];temp_state[2] = start_state[2];
@@ -98,10 +85,17 @@ svg::Point car_t::visualize_point(double* state, svg::Dimensions dims)
 }
 
 std::vector<std::pair<double, double> > car_t::get_state_bounds() {
-
+	return {
+        {-10,10},
+        {-10,10},
+        {-M_PI,M_PI},
+	};
 }
 
 
 std::vector<std::pair<double, double> > car_t::get_control_bounds() {
-
+    return {
+            {0, 1},
+            {-.5,.5},
+    };
 }

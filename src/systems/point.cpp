@@ -29,18 +29,6 @@ double point_t::distance(double* point1,double* point2)
 	return std::sqrt( (point1[0]-point2[0]) * (point1[0]-point2[0]) + (point1[1]-point2[1]) * (point1[1]-point2[1]) );
 }
 
-void point_t::random_state(double* state)
-{
-	state[0] = uniform_random(MIN_X,MAX_X);
-	state[1] = uniform_random(MIN_Y,MAX_Y);
-}
-
-void point_t::random_control(double* control)
-{
-	control[0] = uniform_random(MIN_V,MAX_V);
-	control[1] = uniform_random(MIN_THETA,MAX_THETA);
-}
-
 bool point_t::propagate( double* start_state, double* control, int min_step, int max_step, double* result_state, double& duration, double integration_step)
 {
 	temp_state[0] = start_state[0]; temp_state[1] = start_state[1];
@@ -115,3 +103,19 @@ void point_t::visualize_obstacles(svg::Document& doc ,svg::Dimensions dims)
 							svg::Color::Red);
 	}
 }
+
+std::vector<std::pair<double, double> > point_t::get_state_bounds() {
+	return {
+			{MIN_X,MAX_X},
+			{MIN_Y,MAX_Y}
+	};
+}
+
+
+std::vector<std::pair<double, double> > point_t::get_control_bounds() {
+	return {
+			{MIN_V, MAX_V},
+			{MIN_THETA, MAX_THETA},
+	};
+}
+
