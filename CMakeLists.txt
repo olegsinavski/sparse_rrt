@@ -55,7 +55,6 @@ include_directories(
         )
 
 add_library(${PROJECT_NAME} STATIC
-    ${PROJECT_SOURCE_DIR}/src/image_creation/svg_image.cpp
     ${PROJECT_SOURCE_DIR}/src/motion_planners/planner.cpp
     ${PROJECT_SOURCE_DIR}/src/motion_planners/rrt.cpp
     ${PROJECT_SOURCE_DIR}/src/motion_planners/sst.cpp
@@ -70,16 +69,18 @@ add_library(${PROJECT_NAME} STATIC
     ${PROJECT_SOURCE_DIR}/src/utilities/parameter_reader.cpp
     ${PROJECT_SOURCE_DIR}/src/utilities/random.cpp
     ${PROJECT_SOURCE_DIR}/src/utilities/timer.cpp
+    ${PROJECT_SOURCE_DIR}/src/image_creation/svg_image.cpp
+    ${PROJECT_SOURCE_DIR}/src/image_creation/planner_visualization.cpp
 )
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
 
 file(GLOB files ${PROJECT_SOURCE_DIR}/tests/*.cpp)
 
-foreach(f ${files})
-GET_FILENAME_COMPONENT(fname ${f} NAME_WE )
-add_executable(${fname} ${f} )
-target_link_libraries(${fname} ${PROJECT_NAME} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES})
-endforeach()
+#foreach(f ${files})
+#GET_FILENAME_COMPONENT(fname ${f} NAME_WE )
+#add_executable(${fname} ${f} )
+#target_link_libraries(${fname} ${PROJECT_NAME} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES})
+#endforeach()
 
 add_library(sst_module SHARED
     ${PROJECT_SOURCE_DIR}/src/motion_planners/sst_wrapper.cpp)

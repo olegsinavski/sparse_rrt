@@ -10,6 +10,7 @@
 #include "utilities/condition_check.hpp"
 #include "utilities/random.hpp"
 #include "utilities/timer.hpp"
+#include "image_creation/planner_visualization.hpp"
 
 namespace py = boost::python;
 
@@ -55,7 +56,7 @@ public:
         int image_height = 500;
         double node_diameter = 5;
         double solution_node_diameter = 4;
-        double solution_line_width=3;
+        double solution_line_width = 3;
         double tree_line_width = 0.5;
 
         int min_time_steps = 20;
@@ -95,8 +96,12 @@ public:
                 solution_cost+=controls[i].second;
             }
             std::cout<<"Time: "<<checker.time()<<" Iterations: "<<checker.iterations()<<" Nodes: "<<planner->number_of_nodes<<" Solution Quality: " <<solution_cost<<std::endl ;
-            planner->visualize_tree(0, image_width, image_height, solution_node_diameter, solution_line_width, tree_line_width);
-            planner->visualize_nodes(0, image_width, image_height, node_diameter, solution_node_diameter);
+            visualize_tree(
+                planner->get_root(), planner->get_last_solution_path(), system, start_state, goal_state,
+                0, image_width, image_height, solution_node_diameter, solution_line_width, tree_line_width);
+            visualize_nodes(
+                planner->get_root(), planner->get_last_solution_path(), system, start_state, goal_state,
+                0, image_width, image_height, node_diameter, solution_node_diameter);
         }
         else
         {
@@ -125,8 +130,12 @@ public:
                     stats_print = false;
                     if(intermediate_visualization)
                     {
-                        planner->visualize_tree(count, image_width, image_height, solution_node_diameter, solution_line_width, tree_line_width);
-                        planner->visualize_nodes(count, image_width, image_height, node_diameter, solution_node_diameter);
+                        visualize_tree(
+                            planner->get_root(), planner->get_last_solution_path(), system, start_state, goal_state,
+                            count, image_width, image_height, solution_node_diameter, solution_line_width, tree_line_width);
+                        visualize_nodes(
+                            planner->get_root(), planner->get_last_solution_path(), system, start_state, goal_state,
+                            count, image_width, image_height, node_diameter, solution_node_diameter);
                         count++;
                     }
                     stats_check->reset();
@@ -141,8 +150,12 @@ public:
                         solution_cost+=controls[i].second;
                     }
                     std::cout<<"Time: "<<checker.time()<<" Iterations: "<<checker.iterations()<<" Nodes: "<<planner->number_of_nodes<<" Solution Quality: " <<solution_cost<<std::endl ;
-                    planner->visualize_tree(count, image_width, image_height, solution_node_diameter, solution_line_width, tree_line_width);
-                    planner->visualize_nodes(count, image_width, image_height, node_diameter, solution_node_diameter);
+                    visualize_tree(
+                        planner->get_root(), planner->get_last_solution_path(), system, start_state, goal_state,
+                        count, image_width, image_height, solution_node_diameter, solution_line_width, tree_line_width);
+                    visualize_nodes(
+                        planner->get_root(), planner->get_last_solution_path(), system, start_state, goal_state,
+                        count, image_width, image_height, node_diameter, solution_node_diameter);
                     break;
                 }
             }
