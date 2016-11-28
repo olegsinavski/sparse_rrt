@@ -15,7 +15,6 @@
 
 #include <vector>
 
-#include "utilities/parameter_reader.hpp"
 #include "systems/system.hpp"
 #include "nearest_neighbors/graph_nearest_neighbors.hpp"
 #include "motion_planners/tree_node.hpp"
@@ -36,18 +35,17 @@ public:
 	 * 
 	 * @param in_system The system this planner will plan for.
 	 */
-	planner_t(system_t* in_system)
-	{
-		system = in_system;
-		start_state = NULL;
-		goal_state = NULL;
-		number_of_nodes=0;
-		state_dimension = in_system->get_state_dimension();
-        state_bounds = in_system->get_state_bounds();
-        assert(state_bounds.size() == state_dimension);
-		control_dimension = in_system->get_control_dimension();
-        control_bounds = in_system->get_control_bounds();
-        assert(control_bounds.size() == control_dimension);
+	planner_t(const std::vector<std::pair<double, double> >& a_state_bounds,
+              const std::vector<std::pair<double, double> >& a_control_bounds,
+              std::function<double(double*, double*)> distance_function
+    )
+        : state_dimension(a_state_bounds.size()), state_bounds(a_state_bounds)
+        , control_dimension(a_control_bounds.size()), control_bounds(a_control_bounds)
+        , distance(distance_function)
+        , start_state(NULL)
+        , goal_state(NULL)
+        , number_of_nodes(0)
+    {
 	}
 	virtual ~planner_t()
 	{
@@ -72,7 +70,7 @@ public:
 	 * @brief Perform an iteration of a motion planning algorithm.
 	 * @details Perform an iteration of a motion planning algorithm.
 	 */
-	virtual void step(int min_time_steps, int max_time_steps, double integration_step) = 0;
+	virtual void step(system_t* system, int min_time_steps, int max_time_steps, double integration_step) = 0;
 
 	/**
 	 * @brief Set the start state for the planner.
@@ -197,11 +195,6 @@ protected:
 	graph_nearest_neighbors_t* metric;
 
 	/**
-	 * @brief The system being planned for.
-	 */
-	system_t* system;
-
-	/**
 	 * @brief The start state of the motion planning query.
 	 */
 	double* start_state;
@@ -221,6 +214,8 @@ protected:
 
     std::vector<std::pair<double, double> > state_bounds;
     std::vector<std::pair<double, double> > control_bounds;
+
+    std::function<double(double*, double*)> distance;
 
 };
 

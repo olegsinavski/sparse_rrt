@@ -26,7 +26,10 @@ public:
 	/**
 	 * @copydoc planner_t::planner_t(system_t*)
 	 */
-	rrt_t(system_t* in_system) : planner_t(in_system)
+	rrt_t(const std::vector<std::pair<double, double> >& a_state_bounds,
+		  const std::vector<std::pair<double, double> >& a_control_bounds,
+		  std::function<double(double*, double*)> distance_function)
+			: planner_t(a_state_bounds, a_control_bounds, distance_function)
 	{
 
 	}
@@ -45,7 +48,7 @@ public:
 	/**
 	 * @copydoc planner_t::step()
 	 */
-	virtual void step(int min_time_steps, int max_time_steps, double integration_step);
+	virtual void step(system_t* system, int min_time_steps, int max_time_steps, double integration_step);
 
 protected:
 	
@@ -95,13 +98,6 @@ protected:
 	 * @details Find the nearest node to the randomly sampled state.
 	 */
 	void nearest_vertex();
-
-	/**
-	 * @brief Perform a local propagation from the nearest state.
-	 * @details Perform a local propagation from the nearest state.
-	 * @return If the trajectory is collision free or not.
-	 */
-	bool propagate(int min_time_steps, int max_time_steps, double integration_step);
 
 	/**
 	 * @brief If propagation was successful, add the new state to the tree.

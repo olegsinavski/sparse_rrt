@@ -12,11 +12,9 @@
 
 #include "nearest_neighbors/graph_nearest_neighbors.hpp"
 #include "motion_planners/tree_node.hpp"
-#include "systems/system.hpp"
 
 proximity_node_t::proximity_node_t( const tree_node_t* st )
 {
-    system = NULL;
     state = st;
 
     neighbors = (unsigned int*)malloc(INIT_CAP_NEIGHBORS*sizeof(unsigned int));
@@ -31,12 +29,12 @@ proximity_node_t::~proximity_node_t()
 
 double proximity_node_t::distance ( const tree_node_t* st )
 {
-    return system->distance(state->point,st->point);
+    return this->distance_function(state->point,st->point);
 }
 
 double proximity_node_t::distance ( const proximity_node_t* other )
 {
-    return system->distance(state->point,other->state->point);
+    return this->distance_function(state->point,other->state->point);
 }
 
 const tree_node_t* proximity_node_t::get_state( )
@@ -193,7 +191,7 @@ void graph_nearest_neighbors_t::average_valence()
 
 void graph_nearest_neighbors_t::add_node( proximity_node_t* graph_node )
 {    
-	graph_node->system = system;
+	graph_node->distance_function = this->distance_function;
     int k = percolation_threshold();
 
     int new_k = find_k_close( (tree_node_t*)(graph_node->get_state()), second_nodes, second_distances, k );

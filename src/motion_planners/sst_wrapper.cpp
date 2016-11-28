@@ -3,6 +3,8 @@
 #include <boost/python.hpp>
 #include <boost/format.hpp>
 #include <iostream>
+#include <functional>
+
 #include "utilities/numpy_boost_python.hpp"
 
 #include "motion_planners/sst.hpp"
@@ -66,7 +68,9 @@ public:
         init_random(random_seed);
 
 	    system_t* system = new point_t();
-	    planner_t* planner = new sst_t(system, sst_delta_near, sst_delta_drain);
+	    planner_t* planner = new sst_t(system->get_state_bounds(), system->get_control_bounds(),
+                                       std::bind( &system_t::distance, system, std::placeholders::_1, std::placeholders::_2),
+                                       sst_delta_near, sst_delta_drain);
 
 	    planner->set_start_state(start_state);
 	    planner->set_goal_state(goal_state, goal_radius);
@@ -85,7 +89,7 @@ public:
         {
             do
             {
-                planner->step(min_time_steps, max_time_steps, integration_step);
+                planner->step(system, min_time_steps, max_time_steps, integration_step);
             }
             while(!checker.check());
             std::vector<std::pair<double*,double> > controls;
@@ -112,7 +116,7 @@ public:
             {
                 do
                 {
-                    planner->step(min_time_steps, max_time_steps, integration_step);
+                    planner->step(system, min_time_steps, max_time_steps, integration_step);
                     execution_done = checker.check();
                     stats_print = stats_check->check();
                 }

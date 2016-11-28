@@ -29,7 +29,7 @@ void rrt_t::setup_planning()
 
 	//initialize the metric
 	metric = new graph_nearest_neighbors_t();
-	metric->set_system(system);
+	metric->set_distance(this->distance);
 	//create the root of the tree
 	root = new tree_node_t();
 	number_of_nodes++;
@@ -58,7 +58,7 @@ void rrt_t::get_solution(std::vector<std::pair<double*,double> >& controls)
         }
     }
 	//now nearest should be the closest node to the goal state
-	if(system->distance(goal_state,nearest->point) < goal_radius)
+	if(this->distance(goal_state,nearest->point) < goal_radius)
 	{
 		std::deque<tree_node_t*> path;
 		while(nearest->parent!=NULL)
@@ -77,11 +77,11 @@ void rrt_t::get_solution(std::vector<std::pair<double*,double> >& controls)
 		}
 	}
 }
-void rrt_t::step(int min_time_steps, int max_time_steps, double integration_step)
+void rrt_t::step(system_t* system, int min_time_steps, int max_time_steps, double integration_step)
 {
 	random_sample();
 	nearest_vertex();
-	if(propagate(min_time_steps, max_time_steps, integration_step))
+	if(system->propagate(nearest->point,sample_control, min_time_steps, max_time_steps, sample_state, duration, integration_step))
 	{
 		add_to_tree();
 	}
@@ -106,10 +106,7 @@ void rrt_t::nearest_vertex()
 	double distance;
 	nearest = (tree_node_t*)metric->find_closest(metric_query,&distance)->get_state();
 }
-bool rrt_t::propagate(int min_time_steps, int max_time_steps, double integration_step)
-{
-	return system->propagate(nearest->point,sample_control, min_time_steps, max_time_steps, sample_state, duration, integration_step);
-}
+
 void rrt_t::add_to_tree()
 {
 	//create a new tree node
@@ -128,6 +125,5 @@ void rrt_t::add_to_tree()
 	nearest->children.insert(nearest->children.begin(),new_node);
 	add_point_to_metric(new_node);
 	number_of_nodes++;
-
 }
 

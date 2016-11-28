@@ -31,7 +31,7 @@ void sst_t::setup_planning()
 
 	//initialize the metrics
 	metric = new graph_nearest_neighbors_t();
-	metric->set_system(system);
+	metric->set_distance(this->distance);
 	//create the root of the tree
 	root = new sst_node_t();
 	root->point = this->alloc_state_point();
@@ -40,7 +40,7 @@ void sst_t::setup_planning()
 	number_of_nodes++;
 
 	samples = new graph_nearest_neighbors_t();
-	samples->set_system(system);
+	samples->set_distance(this->distance);
 	witness_sample = new sample_node_t();
 	witness_sample->point = this->alloc_state_point();
 	this->copy_state_point(witness_sample->point,start_state);
@@ -73,11 +73,11 @@ void sst_t::get_solution(std::vector<std::pair<double*,double> >& controls)
 		controls.back().second = path[i]->parent_edge->duration;
 	}
 }
-void sst_t::step(int min_time_steps, int max_time_steps, double integration_step)
+void sst_t::step(system_t* system, int min_time_steps, int max_time_steps, double integration_step)
 {
 	random_sample();
 	nearest_vertex();
-	if(propagate(min_time_steps, max_time_steps, integration_step))
+	if(system->propagate(nearest->point,sample_control, min_time_steps, max_time_steps, sample_state, duration, integration_step))
 	{
 		add_to_tree();
 	}
@@ -121,10 +121,7 @@ void sst_t::nearest_vertex()
         }
     }
 }
-bool sst_t::propagate(int min_time_steps, int max_time_steps, double integration_step)
-{
-	return system->propagate(nearest->point,sample_control, min_time_steps, max_time_steps, sample_state, duration, integration_step);
-}
+
 void sst_t::add_to_tree()
 {
 	//check to see if a sample exists within the vicinity of the new node
@@ -150,12 +147,12 @@ void sst_t::add_to_tree()
 			nearest->children.insert(nearest->children.begin(),new_node);
 			number_of_nodes++;
 
-	        if(best_goal==NULL && system->distance(new_node->point,goal_state)<goal_radius)
+	        if(best_goal==NULL && this->distance(new_node->point,goal_state)<goal_radius)
 	        {
 	        	best_goal = new_node;
 	        	branch_and_bound((sst_node_t*)root);
 	        }
-	        else if(best_goal!=NULL && best_goal->cost > new_node->cost && system->distance(new_node->point,goal_state)<goal_radius)
+	        else if(best_goal!=NULL && best_goal->cost > new_node->cost && this->distance(new_node->point,goal_state)<goal_radius)
 	        {
 	        	best_goal = new_node;
 	        	branch_and_bound((sst_node_t*)root);

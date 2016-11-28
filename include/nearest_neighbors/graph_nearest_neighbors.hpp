@@ -16,7 +16,6 @@
 #include <boost/unordered_map.hpp>
 
 class tree_node_t;
-class system_t;
 
 #define INIT_NODE_SIZE    1000
 #define INIT_CAP_NEIGHBORS 200
@@ -104,7 +103,7 @@ class proximity_node_t
          */
         void replace_neighbor( unsigned prev, int new_index );
 
-        system_t* system;
+        std::function<double(double*, double*)> distance_function;
     protected:
         /**
          * @brief The node represented.
@@ -229,14 +228,14 @@ class graph_nearest_neighbors_t
         int find_delta_close( tree_node_t* state, proximity_node_t** close_nodes, double* distances, double delta );
 
 
-        void set_system(system_t* new_system)
+        void set_distance(std::function<double(double*, double*)> new_distance)
         {
-            system = new_system;
+            this->distance_function = new_distance;
         }
 
     protected:
 
-        system_t* system;
+        std::function<double(double*, double*)> distance_function;
 
         /**
          * Helper function for determining existance in a list.
