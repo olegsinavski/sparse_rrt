@@ -1,9 +1,12 @@
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required(VERSION 3.6)
 project(SparseRRT)
 
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
+set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
+
+set(INCLUDE_DIRECTORIES include)
 
 add_definitions(-O3 )
 
@@ -54,23 +57,27 @@ include_directories(
         "${PROJECT_SOURCE_DIR}/include"
         )
 
-add_library(${PROJECT_NAME} STATIC
-    ${PROJECT_SOURCE_DIR}/src/motion_planners/rrt.cpp
-    ${PROJECT_SOURCE_DIR}/src/motion_planners/sst.cpp
-    ${PROJECT_SOURCE_DIR}/src/nearest_neighbors/graph_nearest_neighbors.cpp
-    ${PROJECT_SOURCE_DIR}/src/systems/car.cpp
-    ${PROJECT_SOURCE_DIR}/src/systems/cart_pole.cpp
-    ${PROJECT_SOURCE_DIR}/src/systems/pendulum.cpp
-    ${PROJECT_SOURCE_DIR}/src/systems/point.cpp
-    ${PROJECT_SOURCE_DIR}/src/systems/rally_car.cpp
-    ${PROJECT_SOURCE_DIR}/src/systems/two_link_acrobot.cpp
-    ${PROJECT_SOURCE_DIR}/src/utilities/condition_check.cpp
-    ${PROJECT_SOURCE_DIR}/src/utilities/parameter_reader.cpp
-    ${PROJECT_SOURCE_DIR}/src/utilities/random.cpp
-    ${PROJECT_SOURCE_DIR}/src/utilities/timer.cpp
-    ${PROJECT_SOURCE_DIR}/src/image_creation/svg_image.cpp
-    ${PROJECT_SOURCE_DIR}/src/image_creation/planner_visualization.cpp
+
+set(SOURCE_FILES
+    src/motion_planners/rrt.cpp
+    src/motion_planners/sst.cpp
+    src/nearest_neighbors/graph_nearest_neighbors.cpp
+    src/systems/car.cpp
+    src/systems/cart_pole.cpp
+    src/systems/pendulum.cpp
+    src/systems/point.cpp
+    src/systems/rally_car.cpp
+    src/systems/two_link_acrobot.cpp
+    src/utilities/condition_check.cpp
+    src/utilities/parameter_reader.cpp
+    src/utilities/random.cpp
+    src/utilities/timer.cpp
+    src/image_creation/svg_image.cpp
+    src/image_creation/planner_visualization.cpp
 )
+
+add_library(${PROJECT_NAME} STATIC
+    ${SOURCE_FILES})
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
 
 file(GLOB files ${PROJECT_SOURCE_DIR}/tests/*.cpp)
