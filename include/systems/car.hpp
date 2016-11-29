@@ -28,7 +28,7 @@ public:
 
 	virtual double distance(double* point1, double* point2);
 
-	virtual bool propagate( double* start_state, double* control, int min_step, int max_step, double* result_state, double& duration, double integration_step);
+	virtual bool propagate( double* start_state, double* control, int num_steps, double* result_state, double integration_step);
 
 	virtual void enforce_bounds();
 	

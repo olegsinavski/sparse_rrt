@@ -60,7 +60,7 @@ void sst_t::get_solution(std::vector<std::pair<double*,double> >& controls)
 	std::deque<tree_node_t*> path;
 	while(nearest->parent!=NULL)
 	{
-		path.push_front(nearest);
+		path.push_front((tree_node_t *&&) nearest);
 		nearest = (sst_node_t*)nearest->parent;
 	}
 	last_solution_path.push_back(root);
@@ -75,9 +75,12 @@ void sst_t::get_solution(std::vector<std::pair<double*,double> >& controls)
 }
 void sst_t::step(system_t* system, int min_time_steps, int max_time_steps, double integration_step)
 {
-	random_sample();
+	this->random_state(sample_state);
+	this->random_control(sample_control);
 	nearest_vertex();
-	if(system->propagate(nearest->point,sample_control, min_time_steps, max_time_steps, sample_state, duration, integration_step))
+	int num_steps = this->random_generator.uniform_int_random(min_time_steps, max_time_steps);
+    this->duration = num_steps*integration_step;
+	if(system->propagate(nearest->point,sample_control, num_steps, sample_state, integration_step))
 	{
 		add_to_tree();
 	}
@@ -97,17 +100,11 @@ void sst_t::add_point_to_samples(tree_node_t* state)
 	samples->add_node(new_node);
 }
 
-
-void sst_t::random_sample()
-{
-	this->random_state(sample_state);
-	this->random_control(sample_control);
-}
 void sst_t::nearest_vertex()
 {
 	//performs the best near query
-	this->copy_state_point(metric_query->point,sample_state);
-	unsigned val = metric->find_delta_close_and_closest(metric_query,close_nodes, distances, this->sst_delta_near);
+	this->copy_state_point(metric_query->point, sample_state);
+	unsigned val = metric->find_delta_close_and_closest(metric_query, close_nodes, distances, this->sst_delta_near);
 
     double length = 999999999;
     for(unsigned i=0;i<val;i++)

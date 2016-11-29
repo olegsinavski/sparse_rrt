@@ -12,7 +12,6 @@
 
 
 #include "systems/two_link_acrobot.hpp"
-#include "utilities/random.hpp"
 
 
 #define _USE_MATH_DEFINES
@@ -55,13 +54,12 @@ double two_link_acrobot_t::distance(double* point1,double* point2)
         return std::sqrt(pow(x-x2,2.0)+pow(y-y2,2.0));
 }
 
-bool two_link_acrobot_t::propagate( double* start_state, double* control, int min_step, int max_step, double* result_state, double& duration, double integration_step)
+bool two_link_acrobot_t::propagate( double* start_state, double* control, int num_steps, double* result_state, double integration_step)
 {
         temp_state[0] = start_state[0]; 
         temp_state[1] = start_state[1];
         temp_state[2] = start_state[2];
         temp_state[3] = start_state[3];
-        int num_steps = uniform_int_random(min_step,max_step);
         bool validity = true;
         for(int i=0;i<num_steps;i++)
         {
@@ -77,7 +75,6 @@ bool two_link_acrobot_t::propagate( double* start_state, double* control, int mi
         result_state[1] = temp_state[1];
         result_state[2] = temp_state[2];
         result_state[3] = temp_state[3];
-        duration = num_steps*integration_step;
         return validity;
 }
 

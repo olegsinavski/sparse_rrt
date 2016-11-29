@@ -72,8 +72,9 @@ public:
 	sst_t(const std::vector<std::pair<double, double> >& a_state_bounds,
 		  const std::vector<std::pair<double, double> >& a_control_bounds,
 		  std::function<double(double*, double*)> distance_function,
+		  unsigned int random_seed,
 		  double delta_near, double delta_drain)
-		: planner_t(a_state_bounds, a_control_bounds, distance_function)
+		: planner_t(a_state_bounds, a_control_bounds, distance_function, random_seed)
 	    , sst_delta_near(delta_near)
 	    , sst_delta_drain(delta_drain)
 	{
@@ -142,12 +143,6 @@ protected:
 	 * @brief A set of distances used to get sets of nodes from the nearest neighbor structure.
 	 */
 	double* distances;
-
-	/**
-	 * @brief Perform the random sampling step of SST.
-	 * @details Perform the random sampling step of SST.
-	 */
-	void random_sample();
 
 	/**
 	 * @brief Finds a node to propagate from.

@@ -29,10 +29,10 @@ double point_t::distance(double* point1,double* point2)
 	return std::sqrt( (point1[0]-point2[0]) * (point1[0]-point2[0]) + (point1[1]-point2[1]) * (point1[1]-point2[1]) );
 }
 
-bool point_t::propagate( double* start_state, double* control, int min_step, int max_step, double* result_state, double& duration, double integration_step)
+bool point_t::propagate( double* start_state, double* control, int num_steps, double* result_state, double integration_step)
 {
-	temp_state[0] = start_state[0]; temp_state[1] = start_state[1];
-	int num_steps = uniform_int_random(min_step,max_step);
+	temp_state[0] = start_state[0];
+	temp_state[1] = start_state[1];
 	bool validity = true;
 	for(int i=0;i<num_steps;i++)
 	{
@@ -43,7 +43,6 @@ bool point_t::propagate( double* start_state, double* control, int min_step, int
 	}
 	result_state[0] = temp_state[0];
 	result_state[1] = temp_state[1];
-	duration = num_steps*integration_step;
 	return validity;
 }
 

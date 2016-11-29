@@ -28,8 +28,9 @@ public:
 	 */
 	rrt_t(const std::vector<std::pair<double, double> >& a_state_bounds,
 		  const std::vector<std::pair<double, double> >& a_control_bounds,
-		  std::function<double(double*, double*)> distance_function)
-			: planner_t(a_state_bounds, a_control_bounds, distance_function)
+		  std::function<double(double*, double*)> distance_function,
+          unsigned int random_seed)
+			: planner_t(a_state_bounds, a_control_bounds, distance_function, random_seed)
 	{
 
 	}
@@ -86,12 +87,6 @@ protected:
 	 * @brief A set of distances used to get solutions.
 	 */
 	double* distances;
-
-	/**
-	 * @brief Perform the random sampling step of RRT.
-	 * @details Perform the random sampling step of RRT.
-	 */
-	void random_sample();
 
 	/**
 	 * @brief Find the nearest node to the randomly sampled state.

@@ -83,7 +83,7 @@ double rally_car_t::distance(double* point1,double* point2)
 //}
 
 
-bool rally_car_t::propagate( double* start_state, double* control, int min_step, int max_step, double* result_state, double& duration, double integration_step)
+bool rally_car_t::propagate( double* start_state, double* control, int num_steps, double* result_state, double integration_step)
 {
         temp_state[0] = start_state[0]; 
         temp_state[1] = start_state[1];
@@ -93,7 +93,6 @@ bool rally_car_t::propagate( double* start_state, double* control, int min_step,
         temp_state[5] = start_state[5];
         temp_state[6] = start_state[6];
         temp_state[7] = start_state[7];
-        int num_steps = uniform_int_random(min_step,max_step);
         bool validity = true;
         for(int i=0;i<num_steps;i++)
         {
@@ -117,7 +116,6 @@ bool rally_car_t::propagate( double* start_state, double* control, int min_step,
         result_state[5] = temp_state[5];
         result_state[6] = temp_state[6];
         result_state[7] = temp_state[7];
-        duration = num_steps*integration_step;
         return validity;
 }
 

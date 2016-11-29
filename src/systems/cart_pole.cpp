@@ -48,13 +48,12 @@ double cart_pole_t::distance(double* point1,double* point2)
         return std::sqrt( val * val + pow(point1[0]-point2[0],2.0) + pow(point1[1]-point2[1],2.0)+ pow(point1[3]-point2[3],2.0) );
 }
 
-bool cart_pole_t::propagate( double* start_state, double* control, int min_step, int max_step, double* result_state, double& duration, double integration_step)
+bool cart_pole_t::propagate( double* start_state, double* control, int num_steps, double* result_state, double integration_step)
 {
         temp_state[0] = start_state[0]; 
         temp_state[1] = start_state[1];
         temp_state[2] = start_state[2];
         temp_state[3] = start_state[3];
-        int num_steps = uniform_int_random(min_step,max_step);
         bool validity = true;
         for(int i=0;i<num_steps;i++)
         {
@@ -70,7 +69,6 @@ bool cart_pole_t::propagate( double* start_state, double* control, int min_step,
         result_state[1] = temp_state[1];
         result_state[2] = temp_state[2];
         result_state[3] = temp_state[3];
-        duration = num_steps*integration_step;
         return validity;
 }
 

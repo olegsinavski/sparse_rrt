@@ -65,15 +65,14 @@ public:
         int max_time_steps = 200;
         double integration_step = 0.002;
 
-        init_random(random_seed);
-
 	    system_t* system = new point_t();
-	    planner_t* planner = new sst_t(system->get_state_bounds(), system->get_control_bounds(),
-                                       std::bind( &system_t::distance, system, std::placeholders::_1, std::placeholders::_2),
-                                       sst_delta_near, sst_delta_drain);
+	    planner_t* planner = new sst_t(
+            system->get_state_bounds(), system->get_control_bounds(),
+            std::bind( &system_t::distance, system, std::placeholders::_1, std::placeholders::_2),
+            random_seed,
+            sst_delta_near, sst_delta_drain);
 
-	    planner->set_start_state(start_state);
-	    planner->set_goal_state(goal_state, goal_radius);
+	    planner->set_start_goal_state(start_state, goal_state, goal_radius);
 	    planner->setup_planning();
 
 	    condition_check_t checker(stopping_type, stopping_check);
@@ -137,6 +136,20 @@ public:
 };
 
 
+struct bounds_to_python_str
+{
+    static PyObject* convert(std::vector<std::pair<double, double> > const& bounds)
+    {
+        numpy_boost<double, 2> array_bounds({(long)bounds.size(), 2});
+        for(int i = 0; i < bounds.size(); ++i) {
+            array_bounds[i][0] = bounds[i].first;
+            array_bounds[i][1] = bounds[i].second;
+        }
+        return boost::python::incref(array_bounds.py_ptr());
+    }
+};
+
+
 BOOST_PYTHON_MODULE(_sst_module)
 {
     import_array();
@@ -147,10 +160,21 @@ BOOST_PYTHON_MODULE(_sst_module)
 //    numpy_boost_python_register_type<double, 2>();
 //    numpy_boost_python_register_type<int, 2>();
 
-    //py::register_exception_translator<std::runtime_error>(&translate_exception);
+    py::register_exception_translator<std::runtime_error>(&translate_exception);
+
+    boost::python::to_python_converter<
+            std::vector<std::pair<double, double> >,
+            bounds_to_python_str>();
 
     py::class_<SSTWrapper, boost::noncopyable>(
         "SSTWrapper", boost::python::init<>())
             .def("run", &SSTWrapper::run)
+    ;
+
+
+    py::class_<point_t, boost::noncopyable>(
+        "Point", boost::python::init<>())
+            .def("get_state_bounds", &point_t::get_state_bounds)
+            .def("get_control_bounds", &point_t::get_control_bounds)
     ;
 }

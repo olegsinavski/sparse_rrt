@@ -37,14 +37,16 @@ public:
 	 */
 	planner_t(const std::vector<std::pair<double, double> >& a_state_bounds,
               const std::vector<std::pair<double, double> >& a_control_bounds,
-              std::function<double(double*, double*)> distance_function
+              std::function<double(double*, double*)> distance_function,
+              unsigned int random_seed
     )
         : state_dimension(a_state_bounds.size()), state_bounds(a_state_bounds)
         , control_dimension(a_control_bounds.size()), control_bounds(a_control_bounds)
         , distance(distance_function)
-        , start_state(NULL)
-        , goal_state(NULL)
+        , start_state(this->alloc_state_point())
+        , goal_state(this->alloc_state_point())
         , number_of_nodes(0)
+        , random_generator(random_seed)
     {
 	}
 	virtual ~planner_t()
@@ -73,27 +75,15 @@ public:
 	virtual void step(system_t* system, int min_time_steps, int max_time_steps, double integration_step) = 0;
 
 	/**
-	 * @brief Set the start state for the planner.
-	 * @details Set the start state for the planner.
-	 * 
+	 * @brief Set the start and goal state for the planner.
+	 * @details Set the start and goal state for the planner.
+	 *
 	 * @param in_start The start state.
-	 */
-	void set_start_state(double* in_start) {
-	    if(start_state==NULL)
-		    start_state = this->alloc_state_point();
-        this->copy_state_point(start_state, in_start);
-	}
-
-	/**
-	 * @brief Set the goal state for the planner.
-	 * @details Set the goal state for the planner.
-	 * 
 	 * @param in_goal The goal state
 	 * @param in_radius The radial size of the goal region centered at in_goal.
 	 */
-	void set_goal_state(double* in_goal,double in_radius) {
-        if(goal_state==NULL)
-            goal_state = this->alloc_state_point();
+	void set_start_goal_state(double* in_start, double* in_goal,double in_radius) {
+        this->copy_state_point(start_state, in_start);
         this->copy_state_point(goal_state,in_goal);
         goal_radius = in_radius;
     }
@@ -160,7 +150,7 @@ public:
 	void random_state(double* state)
 	{
 		for (int i = 0; i < this->state_bounds.size(); ++i) {
-            state[i] = uniform_random(this->state_bounds[i].first, this->state_bounds[i].second);
+            state[i] = this->random_generator.uniform_random(this->state_bounds[i].first, this->state_bounds[i].second);
         }
 	}
 
@@ -173,7 +163,7 @@ public:
 	void random_control(double* control)
 	{
         for (int i = 0; i < this->state_bounds.size(); ++i) {
-            control[i] = uniform_random(this->control_bounds[i].first, this->control_bounds[i].second);
+            control[i] = this->random_generator.uniform_random(this->control_bounds[i].first, this->control_bounds[i].second);
         }
 	}
 
@@ -217,6 +207,7 @@ protected:
 
     std::function<double(double*, double*)> distance;
 
+	RandomGenerator random_generator;
 };
 
 

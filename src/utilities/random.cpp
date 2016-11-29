@@ -12,24 +12,17 @@
 
 #include "utilities/random.hpp"
 
-#include <stdlib.h>
-
-void init_random(int seed)
+RandomGenerator::RandomGenerator(int seed)
+    :engine(seed)
 {
-    srand(seed);
 }
 
-double uniform_random()
+double RandomGenerator::uniform_random(double min, double max)
 {
-    return rand() / RAND_MAX;
+    return (((double)this->engine() / (double)std::default_random_engine::max()) * (max - min)) + min;
 }
 
-double uniform_random(double min, double max)
+int RandomGenerator::uniform_int_random(int min, int max)
 {
-    return (((double)rand() / (double)RAND_MAX) * (max - min)) + min;
-}
-
-int uniform_int_random(int min, int max)
-{
-    return (rand() % (max + 1 - min)) + min;
+    return (this->engine() % (max + 1 - min)) + min;
 }

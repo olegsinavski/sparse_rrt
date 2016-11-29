@@ -26,11 +26,10 @@ double car_t::distance(double* point1,double* point2)
 	return std::sqrt( val * val + (point1[1]-point2[1]) * (point1[1]-point2[1])+(point1[0]-point2[0]) * (point1[0]-point2[0]) );
 }
 
-bool car_t::propagate( double* start_state, double* control, int min_step, int max_step, double* result_state, double& duration, double integration_step)
+bool car_t::propagate( double* start_state, double* control, int num_steps, double* result_state, double integration_step)
 {
 	temp_state[0] = start_state[0]; temp_state[1] = start_state[1];temp_state[2] = start_state[2];
 
-	int num_steps = uniform_int_random(min_step,max_step);
 	bool validity = true;
 	for(int i=0;i<num_steps;i++)
 	{
@@ -46,7 +45,6 @@ bool car_t::propagate( double* start_state, double* control, int min_step, int m
 	result_state[0] = temp_state[0];
 	result_state[1] = temp_state[1];
 	result_state[2] = temp_state[2];
-	duration = num_steps*integration_step;
 	return validity;
 }
 

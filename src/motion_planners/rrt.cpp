@@ -79,9 +79,13 @@ void rrt_t::get_solution(std::vector<std::pair<double*,double> >& controls)
 }
 void rrt_t::step(system_t* system, int min_time_steps, int max_time_steps, double integration_step)
 {
-	random_sample();
+    this->random_state(sample_state);
+    this->random_control(sample_control);
+
 	nearest_vertex();
-	if(system->propagate(nearest->point,sample_control, min_time_steps, max_time_steps, sample_state, duration, integration_step))
+	int num_steps = this->random_generator.uniform_int_random(min_time_steps, max_time_steps);
+    this->duration = num_steps*integration_step;
+	if(system->propagate(nearest->point, sample_control, num_steps, sample_state, integration_step))
 	{
 		add_to_tree();
 	}
@@ -94,12 +98,6 @@ void rrt_t::add_point_to_metric(tree_node_t* state)
 	metric->add_node(new_node);
 }
 
-
-void rrt_t::random_sample()
-{
-	this->random_state(sample_state);
-	this->random_control(sample_control);
-}
 void rrt_t::nearest_vertex()
 {
 	this->copy_state_point(metric_query->point,sample_state);
