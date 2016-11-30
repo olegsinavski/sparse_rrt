@@ -18,13 +18,6 @@
 
 #include <cmath>
 
-double car_t::distance(double* point1,double* point2)
-{
-	double val = fabs(point1[2]-point2[2]);
-	if(val > M_PI)
-		val = 2*M_PI-val;
-	return std::sqrt( val * val + (point1[1]-point2[1]) * (point1[1]-point2[1])+(point1[0]-point2[0]) * (point1[0]-point2[0]) );
-}
 
 bool car_t::propagate( double* start_state, double* control, int num_steps, double* result_state, double integration_step)
 {
@@ -96,4 +89,12 @@ std::vector<std::pair<double, double> > car_t::get_control_bounds() {
             {0, 1},
             {-.5,.5},
     };
+}
+
+std::vector<bool> car_t::is_circular_topology() {
+	return {
+			false,
+			false,
+			true
+	};
 }

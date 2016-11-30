@@ -75,6 +75,7 @@ namespace detail {
   // Must be inlined to avoid multiple definitions since they are fully
   // specialized function templates.
   template<> inline int numpy_type_map<float>()                      { return NPY_FLOAT; }
+  template<> inline int numpy_type_map<bool>()                       { return NPY_BOOL; }
   template<> inline int numpy_type_map<std::complex<float> >()       { return NPY_CFLOAT; }
   template<> inline int numpy_type_map<double>()                     { return NPY_DOUBLE; }
   template<> inline int numpy_type_map<std::complex<double> >()      { return NPY_CDOUBLE; }

@@ -40,13 +40,6 @@
 #define MIN_W -2
 #define MAX_W 2
 
-double cart_pole_t::distance(double* point1,double* point2)
-{
-        double val = fabs(point1[STATE_THETA]-point2[STATE_THETA]);
-        if(val > M_PI)
-                val = 2*M_PI-val;
-        return std::sqrt( val * val + pow(point1[0]-point2[0],2.0) + pow(point1[1]-point2[1],2.0)+ pow(point1[3]-point2[3],2.0) );
-}
 
 bool cart_pole_t::propagate( double* start_state, double* control, int num_steps, double* result_state, double integration_step)
 {
@@ -141,5 +134,15 @@ std::vector<std::pair<double, double> > cart_pole_t::get_state_bounds() {
 std::vector<std::pair<double, double> > cart_pole_t::get_control_bounds() {
     return {
             {-300,300},
+    };
+}
+
+
+std::vector<bool> cart_pole_t::is_circular_topology() {
+    return {
+            false,
+            false,
+            true,
+            false
     };
 }

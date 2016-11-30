@@ -13,6 +13,7 @@
 #include "utilities/random.hpp"
 #include "utilities/timer.hpp"
 #include "image_creation/planner_visualization.hpp"
+#include "systems/distance_functions.h"
 
 namespace py = boost::python;
 
@@ -26,9 +27,40 @@ void translate_exception(std::runtime_error const& e)
 class SSTWrapper
 {
 public:
-    SSTWrapper()
+    SSTWrapper(
+        const numpy_boost<double, 2>& state_bounds_array,
+        const numpy_boost<double, 2>& control_bounds_array,
+        const numpy_boost<bool, 1>& is_circular_topology_array,
+        unsigned int random_seed,
+        double sst_delta_near,
+        double sst_delta_drain
+    )
     {
+        if (state_bounds_array.shape()[0] != control_bounds_array.shape()[0]) {
+            throw std::runtime_error("State and control bounds arrays have to be equal size");
+        }
 
+        if (state_bounds_array.shape()[0]  != is_circular_topology_array.shape()[0]) {
+            throw std::runtime_error("State and topology arrays have to be equal size");
+        }
+
+        typedef std::pair<double, double> bounds_t;
+        std::vector<bounds_t> state_bounds;
+        std::vector<bounds_t> control_bounds;
+        std::vector<bool> is_circular_topology;
+        for (int i =0; i<state_bounds_array.shape()[0]; i++) {
+            state_bounds.push_back(bounds_t(state_bounds_array[i][0], state_bounds_array[i][1]));
+            control_bounds.push_back(bounds_t(control_bounds_array[i][0], control_bounds_array[i][1]));
+            is_circular_topology.push_back(is_circular_topology_array[i]);
+        }
+
+        planner.reset(
+            new sst_t(
+                    control_bounds, control_bounds,
+                    euclidian_distance(is_circular_topology),
+                    random_seed,
+                    sst_delta_near, sst_delta_drain)
+        );
     }
 
     void run() {
@@ -66,11 +98,6 @@ public:
         double integration_step = 0.002;
 
 	    system_t* system = new point_t();
-	    planner_t* planner = new sst_t(
-            system->get_state_bounds(), system->get_control_bounds(),
-            std::bind( &system_t::distance, system, std::placeholders::_1, std::placeholders::_2),
-            random_seed,
-            sst_delta_near, sst_delta_drain);
 
 	    planner->set_start_goal_state(start_state, goal_state, goal_radius);
 	    planner->setup_planning();
@@ -133,10 +160,14 @@ public:
 
     }
 
+
+private:
+    std::unique_ptr<sst_t> planner;
+
 };
 
 
-struct bounds_to_python_str
+struct bounds_to_python
 {
     static PyObject* convert(std::vector<std::pair<double, double> > const& bounds)
     {
@@ -150,24 +181,43 @@ struct bounds_to_python_str
 };
 
 
+struct flags_to_python
+{
+    static PyObject* convert(std::vector<bool> const& flags)
+    {
+        numpy_boost<bool, 1> array_flags({(long)flags.size()});
+        for(int i = 0; i < flags.size(); ++i) {
+            array_flags[i] = flags[i];
+        }
+        return boost::python::incref(array_flags.py_ptr());
+    }
+};
+
+
 BOOST_PYTHON_MODULE(_sst_module)
 {
     import_array();
-//    numpy_boost_python_register_type<uint8_t, 2>();
-//    numpy_boost_python_register_type<int32_t, 1>();
-//    numpy_boost_python_register_type<int32_t, 2>();
-//    numpy_boost_python_register_type<double, 1>();
-//    numpy_boost_python_register_type<double, 2>();
-//    numpy_boost_python_register_type<int, 2>();
+    numpy_boost_python_register_type<uint8_t, 2>();
+    numpy_boost_python_register_type<int32_t, 1>();
+    numpy_boost_python_register_type<int32_t, 2>();
+    numpy_boost_python_register_type<double, 1>();
+    numpy_boost_python_register_type<double, 2>();
+    numpy_boost_python_register_type<bool, 1>();
+    numpy_boost_python_register_type<int, 2>();
 
     py::register_exception_translator<std::runtime_error>(&translate_exception);
 
-    boost::python::to_python_converter<
-            std::vector<std::pair<double, double> >,
-            bounds_to_python_str>();
+    boost::python::to_python_converter<std::vector<std::pair<double, double>>, bounds_to_python>();
+    boost::python::to_python_converter<std::vector<bool>, flags_to_python>();
 
     py::class_<SSTWrapper, boost::noncopyable>(
-        "SSTWrapper", boost::python::init<>())
+        "SSTWrapper", boost::python::init<
+                    const numpy_boost<double, 2>&,
+                    const numpy_boost<double, 2>&,
+                    const numpy_boost<bool, 1>&,
+                    unsigned int,
+                    double,
+                    double>())
             .def("run", &SSTWrapper::run)
     ;
 
@@ -176,5 +226,6 @@ BOOST_PYTHON_MODULE(_sst_module)
         "Point", boost::python::init<>())
             .def("get_state_bounds", &point_t::get_state_bounds)
             .def("get_control_bounds", &point_t::get_control_bounds)
+            .def("is_circular_topology", &point_t::is_circular_topology)
     ;
 }

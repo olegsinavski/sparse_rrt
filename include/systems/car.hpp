@@ -26,8 +26,6 @@ public:
 	}
 	virtual ~car_t(){}
 
-	virtual double distance(double* point1, double* point2);
-
 	virtual bool propagate( double* start_state, double* control, int num_steps, double* result_state, double integration_step);
 
 	virtual void enforce_bounds();
@@ -38,6 +36,8 @@ public:
 
 	virtual std::vector<std::pair<double, double> > get_state_bounds();
     virtual std::vector<std::pair<double, double> > get_control_bounds();
+	std::vector<bool> is_circular_topology() override;
+
 };
 
 

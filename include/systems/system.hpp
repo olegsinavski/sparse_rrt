@@ -39,17 +39,6 @@ public:
 	}
 
 	/**
-	 * @brief Finds the distance between two states.
-	 * @details Finds the distance between two states.
-	 * 
-	 * @param point1 First point.
-	 * @param point2 Second point.
-	 * 
-	 * @return The distance between point1 and point2.
-	 */
-	virtual double distance(double* point1, double* point2) = 0;
-
-	/**
 	 * @brief Performs a local propagation using simple numerical integration.
 	 * @details Performs a local propagation using simple numerical integration.
 	 * 
@@ -86,8 +75,15 @@ public:
     	return;
     }
 
-    virtual std::vector<std::pair<double, double> > get_state_bounds() = 0;
-    virtual std::vector<std::pair<double, double> > get_control_bounds() = 0;
+    virtual std::vector<std::pair<double, double>> get_state_bounds() = 0;
+    virtual std::vector<std::pair<double, double>> get_control_bounds() = 0;
+
+    /**
+     * @brief Array of flags indicating that a degree of freedom has circular topology
+     * @details Array of flags indicating that a degree of freedom has circular topology
+     *
+     */
+	virtual std::vector<bool> is_circular_topology() = 0;
 
 protected:
 

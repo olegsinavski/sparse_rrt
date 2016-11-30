@@ -162,3 +162,13 @@ std::vector<std::pair<double, double> > two_link_acrobot_t::get_control_bounds()
             {MIN_T,MAX_T}
     };
 }
+
+
+std::vector<bool> two_link_acrobot_t::is_circular_topology() {
+    return {
+            true,
+            true,
+            false,
+            false
+    };
+}

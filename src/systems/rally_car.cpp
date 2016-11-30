@@ -54,13 +54,6 @@
 #define MIN_Y -35
 #define MAX_Y 25
 
-double rally_car_t::distance(double* point1,double* point2)
-{
-        double val = fabs(point1[4]-point2[4]);
-        if(val > M_PI)
-                val = 2*M_PI-val;
-        return std::sqrt( val * val + (point1[1]-point2[1]) * (point1[1]-point2[1]) +(point1[0]-point2[0]) * (point1[0]-point2[0]) );
-}
 
 //void rally_car_t::random_state(double* state)
 //{
@@ -296,6 +289,19 @@ std::vector<std::pair<double, double> > rally_car_t::get_control_bounds() {
                 {-700,0},
                 {-700,1200}
         };
+}
+
+std::vector<bool> rally_car_t::is_circular_topology() {
+    return {
+            false,
+            false,
+            false,
+            false,
+            true,
+            false,
+            false,
+            false
+    };
 }
 
 

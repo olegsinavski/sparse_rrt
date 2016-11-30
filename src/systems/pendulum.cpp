@@ -28,13 +28,6 @@
 #define MASS 1
 #define DAMPING .05
 
-double pendulum_t::distance(double* point1,double* point2)
-{
-	double val = fabs(point1[0]-point2[0]);
-	if(val > M_PI)
-		val = 2*M_PI-val;
-	return std::sqrt( val * val + (point1[1]-point2[1]) * (point1[1]-point2[1]) );
-}
 
 bool pendulum_t::propagate( double* start_state, double* control, int num_steps, double* result_state, double integration_step)
 {
@@ -93,5 +86,12 @@ std::vector<std::pair<double, double> > pendulum_t::get_state_bounds() {
 std::vector<std::pair<double, double> > pendulum_t::get_control_bounds() {
 	return {
 			{MIN_TORQUE,MAX_TORQUE},
+	};
+}
+
+std::vector<bool> pendulum_t::is_circular_topology() {
+	return {
+            true,
+			false
 	};
 }

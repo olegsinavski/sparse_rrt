@@ -13,6 +13,7 @@
 #include "systems/point.hpp"
 #include "utilities/random.hpp"
 #include <cmath>
+#include <assert.h>
 
 #define MIN_X -10
 #define MAX_X 10
@@ -24,10 +25,6 @@
 #define MIN_THETA -3.14
 #define MAX_THETA 3.14
 
-double point_t::distance(double* point1,double* point2)
-{
-	return std::sqrt( (point1[0]-point2[0]) * (point1[0]-point2[0]) + (point1[1]-point2[1]) * (point1[1]-point2[1]) );
-}
 
 bool point_t::propagate( double* start_state, double* control, int num_steps, double* result_state, double integration_step)
 {
@@ -118,3 +115,10 @@ std::vector<std::pair<double, double> > point_t::get_control_bounds() {
 	};
 }
 
+
+std::vector<bool> point_t::is_circular_topology() {
+    return {
+            false,
+            false
+    };
+}

@@ -59,22 +59,22 @@ include_directories(
 
 
 set(SOURCE_FILES
-    src/motion_planners/rrt.cpp
-    src/motion_planners/sst.cpp
-    src/nearest_neighbors/graph_nearest_neighbors.cpp
-    src/systems/car.cpp
-    src/systems/cart_pole.cpp
-    src/systems/pendulum.cpp
-    src/systems/point.cpp
-    src/systems/rally_car.cpp
-    src/systems/two_link_acrobot.cpp
-    src/utilities/condition_check.cpp
-    src/utilities/parameter_reader.cpp
-    src/utilities/random.cpp
-    src/utilities/timer.cpp
-    src/image_creation/svg_image.cpp
-    src/image_creation/planner_visualization.cpp
-)
+        src/motion_planners/rrt.cpp
+        src/motion_planners/sst.cpp
+        src/nearest_neighbors/graph_nearest_neighbors.cpp
+        src/systems/car.cpp
+        src/systems/cart_pole.cpp
+        src/systems/pendulum.cpp
+        src/systems/point.cpp
+        src/systems/rally_car.cpp
+        src/systems/two_link_acrobot.cpp
+        src/utilities/condition_check.cpp
+        src/utilities/parameter_reader.cpp
+        src/utilities/random.cpp
+        src/utilities/timer.cpp
+        src/image_creation/svg_image.cpp
+        src/image_creation/planner_visualization.cpp
+        src/systems/distance_functions.cpp include/systems/distance_functions.h)
 
 add_library(${PROJECT_NAME} STATIC
     ${SOURCE_FILES})
@@ -96,5 +96,5 @@ target_link_libraries(sst_module ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} ${PROJEC
 set_target_properties(sst_module PROPERTIES
         PREFIX "_"
         SUFFIX ".so"
-        #LIBRARY_OUTPUT_DIRECTORY ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_PYTHON_DESTINATION}
+        LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/sparse_rrt
         )

@@ -27,11 +27,6 @@ public:
 	virtual ~pendulum_t(){}
 
 	/**
-	 * @copydoc system_t::distance(double*, double*)
-	 */
-	virtual double distance(double* point1, double* point2);
-
-	/**
 	 * @copydoc system_t::propagate(double*, double*, int, int, double*, double& )
 	 */
 	virtual bool propagate( double* start_state, double* control, int num_steps, double* result_state, double integration_step);
@@ -51,9 +46,9 @@ public:
 	 */
 	svg::Point visualize_point(double* state, svg::Dimensions dims);
 
-    std::vector<std::pair<double, double>> get_state_bounds();
-
-	std::vector<std::pair<double, double>> get_control_bounds();
+	std::vector<std::pair<double, double>> get_state_bounds() override;
+	std::vector<std::pair<double, double>> get_control_bounds() override;
+	std::vector<bool> is_circular_topology() override;
 };
 
 
