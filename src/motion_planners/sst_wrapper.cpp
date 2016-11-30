@@ -31,18 +31,28 @@ public:
         const numpy_boost<double, 2>& state_bounds_array,
         const numpy_boost<double, 2>& control_bounds_array,
         const numpy_boost<bool, 1>& is_circular_topology_array,
+        const numpy_boost<double, 1>& start_state,
+        const numpy_boost<double, 1>& goal_state,
+        double goal_radius,
         unsigned int random_seed,
         double sst_delta_near,
         double sst_delta_drain
     )
     {
-        std::cout << random_seed << sst_delta_near << sst_delta_drain << std::endl;
         if (state_bounds_array.shape()[0] != control_bounds_array.shape()[0]) {
             throw std::runtime_error("State and control bounds arrays have to be equal size");
         }
 
         if (state_bounds_array.shape()[0]  != is_circular_topology_array.shape()[0]) {
             throw std::runtime_error("State and topology arrays have to be equal size");
+        }
+
+        if (state_bounds_array.shape()[0] != start_state.shape()[0]) {
+            throw std::runtime_error("State bounds and start state arrays have to be equal size");
+        }
+
+        if (state_bounds_array.shape()[0] != goal_state.shape()[0]) {
+            throw std::runtime_error("State bounds and goal state arrays have to be equal size");
         }
 
         typedef std::pair<double, double> bounds_t;
@@ -55,7 +65,6 @@ public:
             is_circular_topology.push_back(is_circular_topology_array[i]);
         }
 
-        system_t* system = new point_t();
         planner.reset(
                 new sst_t(
                         state_bounds, control_bounds,
@@ -64,16 +73,15 @@ public:
                         sst_delta_near, sst_delta_drain)
         );
 
+        planner->set_start_goal_state(&start_state[0], &goal_state[0], goal_radius);
+        planner->setup_planning();
+
     }
 
     void run() {
         // parameters
         std::string planner_name = "sst";
         std::string system_name = "point";
-
-        double start_state[] = {0., 0.};
-        double goal_state[] = {9., 9.};
-        double goal_radius = 0.5;
 
         std::string stopping_type = "iterations";
         double stopping_check = 410000;
@@ -82,26 +90,12 @@ public:
         double stats_check_value = 0;
 
         bool intermediate_visualization = false;
-
-        int image_width = 500;
-        int image_height = 500;
-        double node_diameter = 5;
-        double solution_node_diameter = 4;
-        double solution_line_width = 3;
-        double tree_line_width = 0.5;
-
+        
         int min_time_steps = 20;
         int max_time_steps = 200;
         double integration_step = 0.002;
 
-        unsigned int random_seed = 0;
-        double sst_delta_near = 0.4;
-        double sst_delta_drain = 0.2;
-
 	    system_t* system = new point_t();
-
-	    planner->set_start_goal_state(start_state, goal_state, goal_radius);
-	    planner->setup_planning();
 
 	    condition_check_t checker(stopping_type, stopping_check);
 	    condition_check_t* stats_check=NULL;
@@ -139,12 +133,7 @@ public:
             stats_print = false;
             if(intermediate_visualization || execution_done)
             {
-                visualize_tree(
-                    planner->get_root(), planner->get_last_solution_path(), system, start_state, goal_state,
-                    count, image_width, image_height, solution_node_diameter, solution_line_width, tree_line_width);
-                visualize_nodes(
-                    planner->get_root(), planner->get_last_solution_path(), system, start_state, goal_state,
-                    count, image_width, image_height, node_diameter, solution_node_diameter);
+                //this->visualize(count, system);
                 count++;
             }
             if (stats_check != NULL) {
@@ -158,7 +147,32 @@ public:
         }
         std::cout<<"Done planning."<<std::endl;
 
+    }
 
+
+    void visualize(int count, system_t* system) {
+
+        int image_width = 500;
+        int image_height = 500;
+        double node_diameter = 5;
+        double solution_node_diameter = 4;
+        double solution_line_width = 3;
+        double tree_line_width = 0.5;
+
+        visualize_tree(
+                planner->get_root(), planner->get_last_solution_path(), system,
+                planner->get_start_state(), planner->get_goal_state(),
+                count, image_width, image_height, solution_node_diameter, solution_line_width, tree_line_width);
+        visualize_nodes(
+                planner->get_root(), planner->get_last_solution_path(), system,
+                planner->get_start_state(), planner->get_goal_state(),
+                count, image_width, image_height, node_diameter, solution_node_diameter);
+    }
+
+
+    void visualize_wrapper(int count, py::object system) {
+        system_t& s = py::extract<system_t&>(system);
+        this->visualize(count, &s);
     }
 
 
@@ -216,15 +230,21 @@ BOOST_PYTHON_MODULE(_sst_module)
                     const numpy_boost<double, 2>&,
                     const numpy_boost<double, 2>&,
                     const numpy_boost<bool, 1>&,
+                    const numpy_boost<double, 1>&,
+                    const numpy_boost<double, 1>&,
+                    double,
                     unsigned int,
                     double,
                     double>((py::arg("state_bounds"), py::arg("control_bounds"), py::arg("is_circular_topology"),
+                             py::arg("start_state"), py::arg("goal_state"), py::arg("goal_radius"),
                              py::arg("random_seed"), py::arg("sst_delta_near"), py::arg("sst_delta_drain"))))
             .def("run", &SSTWrapper::run)
+            .def("visualize", &SSTWrapper::visualize_wrapper)
     ;
 
+    py::class_<system_t, boost::noncopyable>("System", py::no_init);
 
-    py::class_<point_t, boost::noncopyable>(
+    py::class_<point_t, py::bases<system_t>, boost::noncopyable>(
         "Point", boost::python::init<>())
             .def("get_state_bounds", &point_t::get_state_bounds)
             .def("get_control_bounds", &point_t::get_control_bounds)

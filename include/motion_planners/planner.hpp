@@ -82,7 +82,7 @@ public:
 	 * @param in_goal The goal state
 	 * @param in_radius The radial size of the goal region centered at in_goal.
 	 */
-	void set_start_goal_state(double* in_start, double* in_goal,double in_radius) {
+	void set_start_goal_state(const double* in_start, const double* in_goal,double in_radius) {
         this->copy_state_point(start_state, in_start);
         this->copy_state_point(goal_state,in_goal);
         goal_radius = in_radius;
@@ -102,7 +102,7 @@ public:
 	 * @param destination The destination memory.
 	 * @param source The point to copy.
 	 */
-	void copy_state_point(double* destination, double* source)
+	void copy_state_point(double* destination, const double* source) const
 	{
 		for(unsigned i=0;i<this->state_dimension;i++)
 			destination[i] = source[i];
@@ -166,6 +166,9 @@ public:
             control[i] = this->random_generator.uniform_random(this->control_bounds[i].first, this->control_bounds[i].second);
         }
 	}
+
+	double* get_start_state() {return this->start_state;};
+    double* get_goal_state() {return this->goal_state;};
 
 protected:
 
