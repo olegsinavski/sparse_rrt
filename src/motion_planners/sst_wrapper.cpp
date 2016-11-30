@@ -212,13 +212,14 @@ BOOST_PYTHON_MODULE(_sst_module)
     boost::python::to_python_converter<std::vector<bool>, flags_to_python>();
 
     py::class_<SSTWrapper, boost::noncopyable>(
-        "SSTWrapper", boost::python::init<
+        "SSTWrapper", py::init<
                     const numpy_boost<double, 2>&,
                     const numpy_boost<double, 2>&,
                     const numpy_boost<bool, 1>&,
                     unsigned int,
                     double,
-                    double>())
+                    double>((py::arg("state_bounds"), py::arg("control_bounds"), py::arg("is_circular_topology"),
+                             py::arg("random_seed"), py::arg("sst_delta_near"), py::arg("sst_delta_drain"))))
             .def("run", &SSTWrapper::run)
     ;
 
