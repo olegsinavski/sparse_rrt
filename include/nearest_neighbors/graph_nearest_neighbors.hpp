@@ -42,7 +42,7 @@ class proximity_node_t
          * @param st The node to determine distance with.
          * @return The distance value.
          */
-        double distance ( const tree_node_t* st ); 
+        double distance ( const double* st );
         
         /**
          * Determines distance with another node.
@@ -50,7 +50,7 @@ class proximity_node_t
          * @param other The node to determine distance with.
          * @return The distance value.
          */
-        double distance ( const proximity_node_t* other );
+        //double distance ( const proximity_node_t* other );
 
         /**
          * Gets the internal node that is represented.
@@ -103,7 +103,7 @@ class proximity_node_t
          */
         void replace_neighbor( unsigned prev, int new_index );
 
-        std::function<double(double*, double*)> distance_function;
+        std::function<double(const double*, const double*)> distance_function;
     protected:
         /**
          * @brief The node represented.
@@ -192,7 +192,7 @@ class graph_nearest_neighbors_t
          * @param distance The resulting distance between the closest point and the query point.
          * @return The closest point.
          */
-        proximity_node_t* find_closest( tree_node_t* state, double* distance );          
+        proximity_node_t* find_closest( const double* state, double* distance );
         
         /**
          * Find the k closest nodes to the query point. This is performed using a graph search starting from sqrt(nr_points) random points.
@@ -203,7 +203,7 @@ class graph_nearest_neighbors_t
          * @param k The number to return.
          * @return The number of nodes actually returned.
          */
-        int find_k_close( tree_node_t* state, proximity_node_t** close_nodes, double* distances, int k );
+        int find_k_close( const double* state, proximity_node_t** close_nodes, double* distances, int k );
         
         /**
          * Find all nodes within a radius and the closest node. 
@@ -214,7 +214,7 @@ class graph_nearest_neighbors_t
          * @param delta The radius to search within.
          * @return The number of nodes returned.
          */
-        int find_delta_close_and_closest( tree_node_t* state, proximity_node_t** close_nodes, double* distances, double delta );
+        int find_delta_close_and_closest( const double* state, proximity_node_t** close_nodes, double* distances, double delta );
         
         /**
          * Find all nodes within a radius. 
@@ -225,17 +225,17 @@ class graph_nearest_neighbors_t
          * @param delta The radius to search within.
          * @return The number of nodes returned.
          */
-        int find_delta_close( tree_node_t* state, proximity_node_t** close_nodes, double* distances, double delta );
+        int find_delta_close( const double* state, proximity_node_t** close_nodes, double* distances, double delta );
 
 
-        void set_distance(std::function<double(double*, double*)> new_distance)
+        void set_distance(std::function<double(const double*, const double*)> new_distance)
         {
             this->distance_function = new_distance;
         }
 
     protected:
 
-        std::function<double(double*, double*)> distance_function;
+        std::function<double(const double*, const double*)> distance_function;
 
         /**
          * Helper function for determining existance in a list.

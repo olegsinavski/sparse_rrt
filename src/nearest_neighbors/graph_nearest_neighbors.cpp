@@ -27,15 +27,15 @@ proximity_node_t::~proximity_node_t()
     free( neighbors );
 }
 
-double proximity_node_t::distance ( const tree_node_t* st )
+double proximity_node_t::distance ( const double* st )
 {
-    return this->distance_function(state->point,st->point);
+    return this->distance_function(state->point, st);
 }
 
-double proximity_node_t::distance ( const proximity_node_t* other )
-{
-    return this->distance_function(state->point,other->state->point);
-}
+//double proximity_node_t::distance ( const proximity_node_t* other )
+//{
+//    return this->distance_function(state->point,other->state->point);
+//}
 
 const tree_node_t* proximity_node_t::get_state( )
 {
@@ -194,7 +194,7 @@ void graph_nearest_neighbors_t::add_node( proximity_node_t* graph_node )
 	graph_node->distance_function = this->distance_function;
     int k = percolation_threshold();
 
-    int new_k = find_k_close( (tree_node_t*)(graph_node->get_state()), second_nodes, second_distances, k );
+    int new_k = find_k_close(graph_node->get_state()->point, second_nodes, second_distances, k );
 
     if( nr_nodes >= cap_nodes-1 )
     {
@@ -241,7 +241,7 @@ void graph_nearest_neighbors_t::remove_node( proximity_node_t* graph_node )
     }
 }
 
-proximity_node_t* graph_nearest_neighbors_t::find_closest( tree_node_t* state, double* the_distance )
+proximity_node_t* graph_nearest_neighbors_t::find_closest( const double* state, double* the_distance )
 {
     if( nr_nodes == 0 )
         return NULL;
@@ -283,7 +283,7 @@ proximity_node_t* graph_nearest_neighbors_t::find_closest( tree_node_t* state, d
 }
 
 
-int graph_nearest_neighbors_t::find_k_close( tree_node_t* state, proximity_node_t** close_nodes, double* distances, int k )
+int graph_nearest_neighbors_t::find_k_close( const double* state, proximity_node_t** close_nodes, double* distances, int k )
 {
     if( nr_nodes == 0 )
         return 0;
@@ -391,7 +391,7 @@ int graph_nearest_neighbors_t::find_k_close( tree_node_t* state, proximity_node_
     }
 }
 
-int graph_nearest_neighbors_t::find_delta_close_and_closest( tree_node_t* state, proximity_node_t** close_nodes, double* distances, double delta )
+int graph_nearest_neighbors_t::find_delta_close_and_closest( const double* state, proximity_node_t** close_nodes, double* distances, double delta )
 {
     if( nr_nodes == 0 )
         return 0;
@@ -459,7 +459,7 @@ int graph_nearest_neighbors_t::find_delta_close_and_closest( tree_node_t* state,
     return nr_points;
 }
 
-int graph_nearest_neighbors_t::find_delta_close( tree_node_t* state, proximity_node_t** close_nodes, double* distances, double delta )
+int graph_nearest_neighbors_t::find_delta_close( const double* state, proximity_node_t** close_nodes, double* distances, double delta )
 {
     if( nr_nodes == 0 )
         return 0;

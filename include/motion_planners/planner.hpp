@@ -37,7 +37,7 @@ public:
 	 */
 	planner_t(const std::vector<std::pair<double, double> >& a_state_bounds,
               const std::vector<std::pair<double, double> >& a_control_bounds,
-              std::function<double(double*, double*)> distance_function,
+              std::function<double(const double*, const double*)> distance_function,
               unsigned int random_seed
     )
         : state_dimension(a_state_bounds.size()), state_bounds(a_state_bounds)
@@ -202,7 +202,7 @@ protected:
     std::vector<std::pair<double, double> > state_bounds;
     std::vector<std::pair<double, double> > control_bounds;
 
-    std::function<double(double*, double*)> distance;
+    std::function<double(const double*, const double*)> distance;
 
 	RandomGenerator random_generator;
 };

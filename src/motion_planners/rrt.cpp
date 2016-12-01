@@ -43,7 +43,7 @@ void rrt_t::get_solution(std::vector<std::vector<double>>& solution_path, std::v
 {
     this->copy_state_point(sample_state,goal_state);
     this->copy_state_point(metric_query->point,sample_state);
-    unsigned val = metric->find_delta_close_and_closest(metric_query,close_nodes,distances,goal_radius);
+    unsigned val = metric->find_delta_close_and_closest(sample_state,close_nodes,distances,goal_radius);
 
     double length = 999999999;
     for(unsigned i=0;i<val;i++)
@@ -114,7 +114,7 @@ void rrt_t::nearest_vertex()
 {
     this->copy_state_point(metric_query->point,sample_state);
     double distance;
-    nearest = (tree_node_t*)metric->find_closest(metric_query,&distance)->get_state();
+    nearest = (tree_node_t*)metric->find_closest(sample_state, &distance)->get_state();
 }
 
 void rrt_t::add_to_tree()

@@ -45,7 +45,7 @@
 #define MIN_T -4
 #define MAX_T 4
 
-double two_link_acrobot_t::distance(double* point1,double* point2)
+double two_link_acrobot_t::distance(const double* point1, const double* point2)
 {
         double x = (LENGTH) * cos(point1[STATE_THETA_1] - M_PI / 2)+(LENGTH) * cos(point1[STATE_THETA_1] + point1[STATE_THETA_2] - M_PI / 2);
         double y = (LENGTH) * sin(point1[STATE_THETA_1] - M_PI / 2)+(LENGTH) * sin(point1[STATE_THETA_1] + point1[STATE_THETA_2] - M_PI / 2);

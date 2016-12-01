@@ -119,7 +119,7 @@ sst_node_t* sst_t::nearest_vertex(const double* sample_state)
 {
 	//performs the best near query
 	this->copy_state_point(metric_query->point, sample_state);
-	unsigned val = metric->find_delta_close_and_closest(metric_query, close_nodes, distances, this->sst_delta_near);
+	unsigned val = metric->find_delta_close_and_closest(sample_state, close_nodes, distances, this->sst_delta_near);
 
     double length = 999999999;
     sst_node_t* nearest = nullptr;
@@ -204,7 +204,7 @@ sample_node_t* sst_t::find_witness(const double* sample_state)
 {
 	this->copy_state_point(metric_query->point, sample_state);
 	double distance;
-    sample_node_t* witness_sample = (sample_node_t*)samples->find_closest(metric_query, &distance)->get_state();
+    sample_node_t* witness_sample = (sample_node_t*)samples->find_closest(sample_state, &distance)->get_state();
 	if(distance > this->sst_delta_drain)
 	{
 		//create a new sample

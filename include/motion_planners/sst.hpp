@@ -71,7 +71,7 @@ public:
 	 */
 	sst_t(const std::vector<std::pair<double, double> >& a_state_bounds,
 		  const std::vector<std::pair<double, double> >& a_control_bounds,
-		  std::function<double(double*, double*)> distance_function,
+		  std::function<double(const double*, const double*)> distance_function,
 		  unsigned int random_seed,
 		  double delta_near, double delta_drain)
 		: planner_t(a_state_bounds, a_control_bounds, distance_function, random_seed)
@@ -98,7 +98,7 @@ public:
 	 virtual void step(system_t* system, int min_time_steps, int max_time_steps, double integration_step);
 
 protected:
-	
+
 	/**
 	 * @brief Storage used to query the nearest neighbor structure.
 	 */

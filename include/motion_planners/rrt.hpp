@@ -28,7 +28,7 @@ public:
 	 */
 	rrt_t(const std::vector<std::pair<double, double> >& a_state_bounds,
 		  const std::vector<std::pair<double, double> >& a_control_bounds,
-		  std::function<double(double*, double*)> distance_function,
+		  std::function<double(const double*, const double*)> distance_function,
           unsigned int random_seed)
 			: planner_t(a_state_bounds, a_control_bounds, distance_function, random_seed)
 	{

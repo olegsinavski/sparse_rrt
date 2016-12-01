@@ -7,9 +7,9 @@
 #include "systems/two_link_acrobot.hpp"
 
 
-std::function<double(double*, double*)> euclidian_distance(const std::vector<bool> is_circular_topology) {
+std::function<double(const double*, const double*)> euclidian_distance(const std::vector<bool> is_circular_topology) {
 
-    return [is_circular_topology] (double* point1, double* point2) {
+    return [is_circular_topology] (const double* point1, const double* point2) {
         double result = 0;
         for (int i=0; i<is_circular_topology.size(); ++i) {
             if (is_circular_topology[i]) {
@@ -26,7 +26,7 @@ std::function<double(double*, double*)> euclidian_distance(const std::vector<boo
 }
 
 
-std::function<double(double*, double*)> two_link_acrobot_distance()
+std::function<double(const double*, const double*)> two_link_acrobot_distance()
 {
     return two_link_acrobot_t::distance;
 }
