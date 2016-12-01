@@ -100,39 +100,14 @@ public:
 protected:
 	
 	/**
-	 * @brief A randomly sampled state.
-	 */
-	double* sample_state;
-
-	/**
-	 * @brief A randomly sampled control.
-	 */
-	double* sample_control;
-
-	/**
-	 * @brief A resulting duration of a propagation step.
-	 */
-	double duration;
-
-	/**
 	 * @brief Storage used to query the nearest neighbor structure.
 	 */
 	tree_node_t* metric_query;
 
 	/**
-	 * @brief The result of a query in the nearest neighbor structure.
-	 */
-	sst_node_t* nearest;
-
-	/**
 	 * @brief The best goal node found so far.
 	 */
 	sst_node_t* best_goal;
-
-	/**
-	 * @brief A temporary storage for quering for close witnesses.
-	 */
-	sample_node_t* witness_sample;
 
 	/**
 	 * @brief A set of nodes used to get sets of nodes from the nearest neighbor structure.
@@ -149,13 +124,13 @@ protected:
 	 * @details Finds a node to propagate from. It does this through a procedure called BestNear w
 	 * which examines a neighborhood around a randomly sampled point and returns the lowest cost one.
 	 */
-	void nearest_vertex();
+	sst_node_t* nearest_vertex(const double* sample_state);
 
 	/**
 	 * @brief If propagation was successful, add the new state to the tree.
 	 * @details If propagation was successful, add the new state to the tree.
 	 */
-	void add_to_tree();
+	void add_to_tree(const double* sample_state, const double* sample_control, sst_node_t* nearest, double duration);
 
 	/**
 	 * @brief Add a state into the nearest neighbor structure for retrieval in later iterations.
@@ -177,7 +152,7 @@ protected:
 	 * @brief Check if the currently created state is close to a witness.
 	 * @details Check if the currently created state is close to a witness.
 	 */
-	void check_for_witness();
+	sample_node_t* find_witness(const double* sample_state);
 
 	/**
 	 * @brief Removes a node from the nearest neighbor structure.

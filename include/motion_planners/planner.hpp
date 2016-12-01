@@ -134,7 +134,7 @@ public:
 	 * @param destination The destination memory.
 	 * @param source The control to copy.
 	 */
-	void copy_control_point(double* destination, double* source)
+	void copy_control_point(double* destination, const double* source)
 	{
 		for(unsigned i=0;i<this->control_dimension;i++)
 			destination[i] = source[i];

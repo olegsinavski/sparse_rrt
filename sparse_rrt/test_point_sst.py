@@ -49,13 +49,13 @@ def test_point_sst():
                 solution_cost = None
                 assert(expected_solution_cost is None)
             else:
-                solution_cost = np.sum(solution[1])
+                solution_cost = np.sum(solution[2])
                 assert(abs(solution_cost - expected_solution_cost) < 1e-9)
 
             print("Time: %.2fs, Iterations: %d, Nodes: %d, Solution Quality: %s" %
                   (time.time() - start_time,  iteration, planner.get_number_of_nodes(), solution_cost))
 
-    controls, costs = planner.get_solution()
+    path, controls, costs = planner.get_solution()
     solution_cost = np.sum(costs)
 
     print("Time: %.2fs, Iterations: %d, Nodes: %d, Solution Quality: %f" %
@@ -64,9 +64,7 @@ def test_point_sst():
     assert(planner.get_number_of_nodes() == 5716)
     assert(abs(solution_cost - 2.062) < 1e-9)
 
-    planner.visualize(0, system)
-
-
 
 if __name__ == '__main__':
     test_point_sst()
+    print('Passed all tests!')
