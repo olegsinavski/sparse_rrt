@@ -61,7 +61,7 @@ public:
      * 
      * @return A point in image space.
      */
-    virtual svg::Point visualize_point(double* state,svg::Dimensions dims) = 0;
+    virtual svg::Point visualize_point(const double* state,svg::Dimensions dims) = 0;
 
     /**
      * @brief Visualize the obstacles for this system.

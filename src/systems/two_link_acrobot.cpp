@@ -105,7 +105,7 @@ bool two_link_acrobot_t::valid_state()
     return true;
 }
 
-svg::Point two_link_acrobot_t::visualize_point(double* state, svg::Dimensions dims)
+svg::Point two_link_acrobot_t::visualize_point(const double* state, svg::Dimensions dims)
 {
         double x = (LENGTH) * cos(state[STATE_THETA_1] - M_PI / 2)+(LENGTH) * cos(state[STATE_THETA_1] + state[STATE_THETA_2] - M_PI / 2);
         double y = (LENGTH) * sin(state[STATE_THETA_1] - M_PI / 2)+(LENGTH) * sin(state[STATE_THETA_1] + state[STATE_THETA_2] - M_PI / 2);

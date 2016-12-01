@@ -49,28 +49,40 @@ void sst_t::setup_planning()
 	witness_sample->rep = (sst_node_t*)root;
 
 }
-void sst_t::get_solution(std::vector<std::pair<double*,double> >& controls)
+void sst_t::get_solution(std::vector<std::vector<double>>& solution_path, std::vector<std::vector<double>>& controls, std::vector<double>& costs)
 {
-	last_solution_path.clear();
 	if(best_goal==NULL)
 		return;
-	nearest = best_goal;
+	sst_node_t* solution_node = best_goal;
 	
-	//now nearest should be the closest node to the goal state
+	//now solution_node should be the closest node to the goal state
 	std::deque<tree_node_t*> path;
-	while(nearest->parent!=NULL)
+	while(solution_node->parent!=NULL)
 	{
-		path.push_front((tree_node_t *&&) nearest);
-		nearest = (sst_node_t*)nearest->parent;
+		path.push_front((tree_node_t *&&) solution_node);
+        solution_node = (sst_node_t*)solution_node->parent;
 	}
-	last_solution_path.push_back(root);
+
+    std::vector<double> root_state;
+    for (unsigned c=0; c<this->state_dimension; c++) {
+        root_state.push_back(root->point[c]);
+    }
+    solution_path.push_back(root_state);
+
 	for(unsigned i=0;i<path.size();i++)
 	{
-		last_solution_path.push_back(path[i]);
-		controls.push_back(std::pair<double*,double>(NULL,0));
-		controls.back().first = this->alloc_control_point();
-		this->copy_control_point(controls.back().first,path[i]->parent_edge->control);
-		controls.back().second = path[i]->parent_edge->duration;
+        std::vector<double> current_state;
+        for (unsigned c=0; c<this->state_dimension; c++) {
+            current_state.push_back(path[i]->point[c]);
+        }
+        solution_path.push_back(current_state);
+
+        std::vector<double> current_control;
+        for (unsigned c=0; c<this->control_dimension; c++) {
+            current_control.push_back(path[i]->parent_edge->control[c]);
+        }
+        controls.push_back(current_control);
+        costs.push_back(path[i]->parent_edge->duration);
 	}
 }
 void sst_t::step(system_t* system, int min_time_steps, int max_time_steps, double integration_step)
@@ -80,7 +92,7 @@ void sst_t::step(system_t* system, int min_time_steps, int max_time_steps, doubl
 	nearest_vertex();
 	int num_steps = this->random_generator.uniform_int_random(min_time_steps, max_time_steps);
     this->duration = num_steps*integration_step;
-	if(system->propagate(nearest->point,sample_control, num_steps, sample_state, integration_step))
+	if(system->propagate(nearest->point, sample_control, num_steps, sample_state, integration_step))
 	{
 		add_to_tree();
 	}

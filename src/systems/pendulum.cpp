@@ -68,7 +68,7 @@ bool pendulum_t::valid_state()
 	return true;
 }
 
-svg::Point pendulum_t::visualize_point(double* state, svg::Dimensions dims)
+svg::Point pendulum_t::visualize_point(const double* state, svg::Dimensions dims)
 {
 	double x = (state[0]+M_PI)/(2*M_PI) * dims.width; 
 	double y = (state[1]-MIN_W)/(MAX_W-MIN_W) * dims.height; 

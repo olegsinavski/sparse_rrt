@@ -32,7 +32,7 @@ public:
 	
 	virtual bool valid_state();
 
-	svg::Point visualize_point(double* state, svg::Dimensions dims);
+	svg::Point visualize_point(const double* state, svg::Dimensions dims);
 
 	virtual std::vector<std::pair<double, double> > get_state_bounds();
     virtual std::vector<std::pair<double, double> > get_control_bounds();

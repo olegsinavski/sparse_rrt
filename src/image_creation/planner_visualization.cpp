@@ -34,14 +34,14 @@ void visualize_edge(tree_node_t* node, system_t* system, svg::Document& doc, svg
  * @param doc The image storage.
  * @param dim The size of the image.
  */
-void visualize_solution_path(const std::vector<tree_node_t*>& last_solution_path, system_t* system, svg::Document& doc, svg::Dimensions& dim, double solution_line_width)
+void visualize_solution_path(const std::vector<std::vector<double>>& last_solution_path, system_t* system, svg::Document& doc, svg::Dimensions& dim, double solution_line_width)
 {
 	if(last_solution_path.size()!=0)
 	{
 		svg::Polyline traj_line(svg::Stroke(solution_line_width, svg::Color::Black));
 		for(unsigned i=0;i<last_solution_path.size();i++)
 		{
-			traj_line<<system->visualize_point(last_solution_path[i]->point,dim);
+			traj_line<<system->visualize_point(&last_solution_path[i][0],dim);
 		}
 		doc<<traj_line;
 	}
@@ -115,7 +115,7 @@ void visualize_node(
  */
 
 void visualize_solution_nodes(
-    const std::vector<tree_node_t*>& last_solution_path,
+    const std::vector<std::vector<double>>& last_solution_path,
     system_t* system,
     svg::Document& doc, svg::Dimensions& dim, double solution_node_diameter)
 {
@@ -124,7 +124,7 @@ void visualize_solution_nodes(
 	{
 		for(unsigned i=0;i<last_solution_path.size();i++)
 		{
-			svg::Circle circle(system->visualize_point(last_solution_path[i]->point,dim), solution_node_diameter, svg::Fill( svg::Color(0,255,0) ));
+			svg::Circle circle(system->visualize_point(&last_solution_path[i][0],dim), solution_node_diameter, svg::Fill( svg::Color(0,255,0) ));
 			doc<<circle;
 		}
 	}
@@ -133,19 +133,16 @@ void visualize_solution_nodes(
 
 
 void visualize_tree(
+    std::string const & file_name,
     tree_node_t* root,
-    const std::vector<tree_node_t*>& last_solution_path,
+    const std::vector<std::vector<double>>& last_solution_path,
     system_t* system,
     double* start_state, double* goal_state,
-    int image_counter,
     int image_width, int image_height,
     double solution_node_diameter, double solution_line_width, double tree_line_width)
 {
-	std::stringstream s;
-    s<<"tree_"<<image_counter<<".svg";
-    std::string dir(s.str());
     svg::Dimensions dimensions(image_width, image_height);
-    svg::Document doc(dir, svg::Layout(dimensions, svg::Layout::BottomLeft));
+    svg::Document doc(file_name, svg::Layout(dimensions, svg::Layout::BottomLeft));
 
     visualize_edge(root, system, doc, dimensions, tree_line_width);
 
@@ -161,17 +158,15 @@ void visualize_tree(
 }
 
 void visualize_nodes(
+    std::string const & file_name,
     tree_node_t* root,
-    const std::vector<tree_node_t*>& last_solution_path,
+    const std::vector<std::vector<double>>& last_solution_path,
     system_t* system,
     double* start_state, double* goal_state,
-    int image_counter, int image_width, int image_height, double node_diameter, double solution_node_diameter)
+    int image_width, int image_height, double node_diameter, double solution_node_diameter)
 {
-	std::stringstream s;
-    s<<"nodes_"<<image_counter<<".svg";
-    std::string dir(s.str());
     svg::Dimensions dimensions(image_width, image_height);
-    svg::Document doc(dir, svg::Layout(dimensions, svg::Layout::BottomLeft));
+    svg::Document doc(file_name, svg::Layout(dimensions, svg::Layout::BottomLeft));
 
     std::vector<tree_node_t*> sorted_nodes;
     double max_cost = 0;

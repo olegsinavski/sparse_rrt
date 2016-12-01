@@ -66,7 +66,7 @@ public:
 	 * 
 	 * @param controls The list of controls and durations which comprise the solution.
 	 */
-	virtual void get_solution(std::vector<std::pair<double*,double> >& controls) = 0;
+	virtual void get_solution(std::vector<std::vector<double>>& solution_path, std::vector<std::vector<double>>& controls, std::vector<double>& costs) = 0;
 
 	/**
 	 * @brief Perform an iteration of a motion planning algorithm.
@@ -93,7 +93,6 @@ public:
 	unsigned number_of_nodes;
 
 	tree_node_t* get_root() { return this->root; }
-    const std::vector<tree_node_t*>& get_last_solution_path() { return this->last_solution_path; }
 
     /**
 	 * @brief Copies one state into another.
@@ -171,11 +170,6 @@ public:
     double* get_goal_state() {return this->goal_state;};
 
 protected:
-
- 	/**
- 	 * @brief The stored solution from previous call to get_solution.
- 	 */
-    std::vector<tree_node_t*> last_solution_path;
 
     /**
      * @brief The tree of the motion planner starts here.

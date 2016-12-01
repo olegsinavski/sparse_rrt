@@ -460,7 +460,7 @@ namespace svg
         std::string content;
         Font font;
     };
-    
+
     // Sample charting class.
     class LineChart : public Shape
     {
@@ -472,7 +472,7 @@ namespace svg
         {
             if (polyline.points.empty())
                 return *this;
-            
+
             polylines.push_back(polyline);
             return *this;
         }
@@ -480,11 +480,11 @@ namespace svg
         {
             if (polylines.empty())
                 return "";
-            
+
             std::string ret;
             for (unsigned i = 0; i < polylines.size(); ++i)
                 ret += polylineToString(polylines[i], layout);
-            
+
             return ret + axisString(layout);
         }
         void offset(Point const & offset)
@@ -497,12 +497,12 @@ namespace svg
         Dimensions margin;
         double scale;
         std::vector<Polyline> polylines;
-        
+
         optional<Dimensions> getDimensions() const
         {
             if (polylines.empty())
                 return optional<Dimensions>();
-            
+
             optional<Point> min = getMinPoint(polylines[0].points);
             optional<Point> max = getMaxPoint(polylines[0].points);
             for (unsigned i = 0; i < polylines.size(); ++i) {
@@ -515,7 +515,7 @@ namespace svg
                 if (getMaxPoint(polylines[i].points)->y > max->y)
                     max->y = getMaxPoint(polylines[i].points)->y;
             }
-            
+
             return optional<Dimensions>(Dimensions(max->x - min->x, max->y - min->y));
         }
         std::string axisString(Layout const & layout) const
@@ -523,31 +523,31 @@ namespace svg
             optional<Dimensions> dimensions = getDimensions();
             if (!dimensions)
                 return "";
-            
+
             // Make the axis 10% wider and higher than the data points.
             double width = dimensions->width * 1.1;
             double height = dimensions->height * 1.1;
-            
+
             // Draw the axis.
             Polyline axis(Color::Transparent, axis_stroke);
             axis << Point(margin.width, margin.height + height) << Point(margin.width, margin.height)
             << Point(margin.width + width, margin.height);
-            
+
             return axis.toString(layout);
         }
         std::string polylineToString(Polyline const & polyline, Layout const & layout) const
         {
             Polyline shifted_polyline = polyline;
             shifted_polyline.offset(Point(margin.width, margin.height));
-            
+
             std::vector<Circle> vertices;
             for (unsigned i = 0; i < shifted_polyline.points.size(); ++i)
                 vertices.push_back(Circle(shifted_polyline.points[i], getDimensions()->height / 30.0, Color::Black));
-            
+
             return shifted_polyline.toString(layout) + vectorToString(vertices, layout);
         }
     };
-    
+
     class Document
     {
     public:

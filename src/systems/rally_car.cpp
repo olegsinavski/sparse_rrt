@@ -177,7 +177,7 @@ bool rally_car_t::valid_state()
         return !obstacle_collision;
 }
 
-svg::Point rally_car_t::visualize_point(double* state, svg::Dimensions dims)
+svg::Point rally_car_t::visualize_point(const double* state, svg::Dimensions dims)
 {
         double x = (state[0]-MIN_X)/(MAX_X-MIN_X) * dims.width; 
         double y = (state[1]-MIN_Y)/(MAX_Y-MIN_Y) * dims.height; 

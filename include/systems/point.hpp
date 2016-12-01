@@ -93,7 +93,7 @@ public:
 	/**
 	 * @copydoc system_t::visualize_point(double*, svg::Dimensions)
 	 */
-	svg::Point visualize_point(double* state, svg::Dimensions dims) override;
+	svg::Point visualize_point(const double* state, svg::Dimensions dims) override;
 
 	/**
 	 * @copydoc system_t::visualize_obstacles(svg::Document&, svg::Dimensions)

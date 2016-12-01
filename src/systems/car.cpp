@@ -68,7 +68,7 @@ bool car_t::valid_state()
 			(temp_state[1]!=10);
 }
 
-svg::Point car_t::visualize_point(double* state, svg::Dimensions dims)
+svg::Point car_t::visualize_point(const double* state, svg::Dimensions dims)
 {
 	double x = (state[0]+10)/(20) * dims.width; 
 	double y = (state[1]+10)/(20) * dims.height; 

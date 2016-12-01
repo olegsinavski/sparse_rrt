@@ -35,3 +35,6 @@ bin
 # IDE
 .idea
 cmake-build-debug
+
+# python
+*.pyc
