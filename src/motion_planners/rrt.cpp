@@ -21,11 +21,6 @@ void rrt_t::setup_planning()
     //init internal variables
     sample_state = this->alloc_state_point();
     sample_control = this->alloc_control_point();
-    metric_query = new tree_node_t();
-    metric_query->point = this->alloc_state_point();
-
-    close_nodes = (proximity_node_t**)malloc(MAX_KK * sizeof (proximity_node_t*));
-    distances = (double*)malloc(MAX_KK * sizeof (double));
 
     //initialize the metric
     metric = new graph_nearest_neighbors_t();
@@ -42,11 +37,10 @@ void rrt_t::setup_planning()
 void rrt_t::get_solution(std::vector<std::vector<double>>& solution_path, std::vector<std::vector<double>>& controls, std::vector<double>& costs)
 {
     this->copy_state_point(sample_state,goal_state);
-    this->copy_state_point(metric_query->point,sample_state);
-    unsigned val = metric->find_delta_close_and_closest(sample_state,close_nodes,distances,goal_radius);
+    std::vector<proximity_node_t*> close_nodes = metric->find_delta_close_and_closest(sample_state, goal_radius);
 
     double length = 999999999;
-    for(unsigned i=0;i<val;i++)
+    for(unsigned i=0;i<close_nodes.size();i++)
     {
         tree_node_t* v = (tree_node_t*)(close_nodes[i]->get_state());
         double temp = v->cost ;
@@ -112,7 +106,6 @@ void rrt_t::add_point_to_metric(tree_node_t* state)
 
 void rrt_t::nearest_vertex()
 {
-    this->copy_state_point(metric_query->point,sample_state);
     double distance;
     nearest = (tree_node_t*)metric->find_closest(sample_state, &distance)->get_state();
 }

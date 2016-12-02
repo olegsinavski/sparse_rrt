@@ -177,11 +177,6 @@ protected:
 	tree_node_t* root;
 
 	/**
-	 * @brief The nearest neighbor data structure.
-	 */
-	graph_nearest_neighbors_t* metric;
-
-	/**
 	 * @brief The start state of the motion planning query.
 	 */
 	double* start_state;

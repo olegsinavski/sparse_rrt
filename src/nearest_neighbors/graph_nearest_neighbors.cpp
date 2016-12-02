@@ -305,7 +305,7 @@ int graph_nearest_neighbors_t::find_k_close( const double* state, proximity_node
 	    while( exists == true )
 	    {
 		index = rand() % nr_nodes;
-		exists = does_node_exist( nodes[index], close_nodes, i );
+		exists = does_node_exist( nodes[index]);
 	    }
 	    close_nodes[i] = nodes[index];
 	    added_nodes[nodes[index]] = true;
@@ -320,7 +320,7 @@ int graph_nearest_neighbors_t::find_k_close( const double* state, proximity_node
 	for( int i=0; i<nr_samples; i++ )
 	{
 	    int index = rand() % nr_nodes;
-	    if( does_node_exist( nodes[index], close_nodes, k ) == false )
+	    if( does_node_exist( nodes[index] ) == false )
 	    {
 		double distance = nodes[index]->distance( state );
 		if( distance < min_distance )
@@ -354,7 +354,7 @@ int graph_nearest_neighbors_t::find_k_close( const double* state, proximity_node
             int lowest_replacement = k;
             for( int j=0; j<nr_neighbors; j++ )
             {
-                if( does_node_exist( nodes[ neighbors[j] ], close_nodes, k ) == false )
+                if( does_node_exist( nodes[ neighbors[j] ] ) == false )
                 {
                     double distance = nodes[ neighbors[j] ]->distance( state );
                     if( distance < distances[k-1] )
@@ -391,10 +391,11 @@ int graph_nearest_neighbors_t::find_k_close( const double* state, proximity_node
     }
 }
 
-int graph_nearest_neighbors_t::find_delta_close_and_closest( const double* state, proximity_node_t** close_nodes, double* distances, double delta )
+std::vector<proximity_node_t*> graph_nearest_neighbors_t::find_delta_close_and_closest( const double* state, double delta )
 {
+    std::vector<proximity_node_t*> close_nodes;
     if( nr_nodes == 0 )
-        return 0;
+        return close_nodes;
     
 	added_nodes.clear();
     int nr_samples = sampling_function();
@@ -431,8 +432,7 @@ int graph_nearest_neighbors_t::find_delta_close_and_closest( const double* state
 
     int nr_points = 0;
     added_nodes[nodes[min_index]];
-    close_nodes[0] = nodes[min_index];
-    distances[0]   = min_distance;
+    close_nodes.push_back(nodes[min_index]);
     nr_points++;
     if( min_distance < delta )
     {
@@ -442,21 +442,20 @@ int graph_nearest_neighbors_t::find_delta_close_and_closest( const double* state
 		    unsigned int* neighbors = close_nodes[counter]->get_neighbors( &nr_neighbors );	
 		    for( int j=0; j<nr_neighbors; j++ )
 		    {
-				if( does_node_exist( nodes[ neighbors[j] ], close_nodes, nr_points ) == false )
+				if( does_node_exist( nodes[ neighbors[j] ]) == false )
 				{
 				    double distance = nodes[ neighbors[j] ]->distance( state );
 				    if( distance < delta && nr_points < MAX_KK)
 				    {
-						close_nodes[ nr_points ] = nodes[ neighbors[j] ];
-						added_nodes[close_nodes[nr_points]];
-						distances[ nr_points ] = distance;
+                        close_nodes.push_back(nodes[ neighbors[j] ]);
+						added_nodes[close_nodes.back()];
 						nr_points++;
 				    }
 				}
 		    }
 		}
     }
-    return nr_points;
+    return close_nodes;
 }
 
 int graph_nearest_neighbors_t::find_delta_close( const double* state, proximity_node_t** close_nodes, double* distances, double delta )
@@ -511,7 +510,7 @@ int graph_nearest_neighbors_t::find_delta_close( const double* state, proximity_
 		    unsigned int* neighbors = close_nodes[counter]->get_neighbors( &nr_neighbors );	
 		    for( int j=0; j<nr_neighbors; j++ )
 		    {
-				if( does_node_exist( nodes[ neighbors[j] ], close_nodes, nr_points ) == false )
+				if( does_node_exist( nodes[ neighbors[j] ]) == false )
 				{
 				    double distance = nodes[ neighbors[j] ]->distance( state );
 				    if( distance < delta && nr_points < MAX_KK)
@@ -528,17 +527,9 @@ int graph_nearest_neighbors_t::find_delta_close( const double* state, proximity_
     return nr_points;
 }
 
-bool graph_nearest_neighbors_t::does_node_exist( proximity_node_t* query_node, proximity_node_t** node_list, int list_size )
+bool graph_nearest_neighbors_t::does_node_exist( proximity_node_t* query_node)
 {
-    bool exists = false;
-
-    exists = added_nodes.find(query_node)!=added_nodes.end();
- //    for( int q=0; q<list_size && exists == false; q++ )
- //    {
-	// if( query_node == node_list[q] )
-	//     exists = true;
- //    }
-    return exists;
+    return added_nodes.find(query_node)!=added_nodes.end();;
 }
 
 int graph_nearest_neighbors_t::sampling_function()

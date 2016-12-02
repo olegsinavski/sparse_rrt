@@ -99,25 +99,15 @@ public:
 
 protected:
 
-	/**
-	 * @brief Storage used to query the nearest neighbor structure.
-	 */
-	tree_node_t* metric_query;
+    /**
+     * @brief The nearest neighbor data structure.
+     */
+    graph_nearest_neighbors_t metric;
 
 	/**
 	 * @brief The best goal node found so far.
 	 */
 	sst_node_t* best_goal;
-
-	/**
-	 * @brief A set of nodes used to get sets of nodes from the nearest neighbor structure.
-	 */
-	proximity_node_t** close_nodes;
-
-	/**
-	 * @brief A set of distances used to get sets of nodes from the nearest neighbor structure.
-	 */
-	double* distances;
 
 	/**
 	 * @brief Finds a node to propagate from.
@@ -193,7 +183,7 @@ protected:
 	/**
 	 * The nearest neighbor structure for witness samples.
 	 */
-	graph_nearest_neighbors_t* samples;
+	graph_nearest_neighbors_t samples;
 
 	double sst_delta_near;
 	double sst_delta_drain;

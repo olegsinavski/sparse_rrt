@@ -214,7 +214,7 @@ class graph_nearest_neighbors_t
          * @param delta The radius to search within.
          * @return The number of nodes returned.
          */
-        int find_delta_close_and_closest( const double* state, proximity_node_t** close_nodes, double* distances, double delta );
+        std::vector<proximity_node_t*> find_delta_close_and_closest( const double* state, double delta );
         
         /**
          * Find all nodes within a radius. 
@@ -241,11 +241,9 @@ class graph_nearest_neighbors_t
          * Helper function for determining existance in a list.
          * @brief Helper function for determining existance in a list.
          * @param query_node The node to search for.
-         * @param node_list The list to search.
-         * @param list_size The size of the list.
          * @return If query_node exists in node_list.
          */
-        bool does_node_exist( proximity_node_t* query_node, proximity_node_t** node_list, int list_size );
+        bool does_node_exist( proximity_node_t* query_node);
         
         /**
          * Determine the number of nodes to sample for initial populations in queries.

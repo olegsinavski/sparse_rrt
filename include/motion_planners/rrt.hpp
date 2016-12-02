@@ -52,6 +52,11 @@ public:
 	virtual void step(system_t* system, int min_time_steps, int max_time_steps, double integration_step);
 
 protected:
+
+    /**
+     * @brief The nearest neighbor data structure.
+     */
+    graph_nearest_neighbors_t* metric;
 	
 	/**
 	 * @brief A randomly sampled state.
@@ -70,23 +75,9 @@ protected:
 	double duration;
 
 	/**
-	 * @brief Storage used to query the nearest neighbor structure.
-	 */
-	tree_node_t* metric_query;
-
-	/**
 	 * @brief The result of a query in the nearest neighbor structure.
 	 */
 	tree_node_t* nearest;
-	
-	/**
-	 * @brief A set of nodes used to get solutions.
-	 */
-	proximity_node_t** close_nodes;
-	/**
-	 * @brief A set of distances used to get solutions.
-	 */
-	double* distances;
 
 	/**
 	 * @brief Find the nearest node to the randomly sampled state.

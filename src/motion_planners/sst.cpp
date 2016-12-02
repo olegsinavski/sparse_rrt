@@ -20,16 +20,9 @@
 void sst_t::setup_planning()
 {
 	best_goal = NULL;
-	//init internal variables
-	metric_query = new sst_node_t();
-	metric_query->point = this->alloc_state_point();
-
-    close_nodes = (proximity_node_t**)malloc(MAX_KK * sizeof (proximity_node_t*));
-    distances = (double*)malloc(MAX_KK * sizeof (double));
 
 	//initialize the metrics
-	metric = new graph_nearest_neighbors_t();
-	metric->set_distance(this->distance);
+	metric.set_distance(this->distance);
 	//create the root of the tree
 	root = new sst_node_t();
 	root->point = this->alloc_state_point();
@@ -37,8 +30,7 @@ void sst_t::setup_planning()
 	add_point_to_metric(root);
 	number_of_nodes++;
 
-	samples = new graph_nearest_neighbors_t();
-	samples->set_distance(this->distance);
+	samples.set_distance(this->distance);
 
     sample_node_t* first_witness_sample = new sample_node_t();
     first_witness_sample->point = this->alloc_state_point();
@@ -86,6 +78,14 @@ void sst_t::get_solution(std::vector<std::vector<double>>& solution_path, std::v
 }
 void sst_t::step(system_t* system, int min_time_steps, int max_time_steps, double integration_step)
 {
+    /*
+     * Generate a random sample
+     * Find the closest existing node
+     * Generate random control
+     * Propagate for random time with constant random control from the closest node
+     * If resulting state is valid, add a resulting state into the tree and perform sst-specific graph manipulations
+     */
+
     double* sample_state = this->alloc_state_point();
     double* sample_control = this->alloc_control_point();
 	this->random_state(sample_state);
@@ -105,25 +105,24 @@ void sst_t::add_point_to_metric(tree_node_t* state)
 {
 	proximity_node_t* new_node = new proximity_node_t(state);
 	state->prox_node = new_node;
-	metric->add_node(new_node);
+	metric.add_node(new_node);
 }
 
 void sst_t::add_point_to_samples(tree_node_t* state)
 {
 	proximity_node_t* new_node = new proximity_node_t(state);
 	state->prox_node = new_node;
-	samples->add_node(new_node);
+	samples.add_node(new_node);
 }
 
 sst_node_t* sst_t::nearest_vertex(const double* sample_state)
 {
 	//performs the best near query
-	this->copy_state_point(metric_query->point, sample_state);
-	unsigned val = metric->find_delta_close_and_closest(sample_state, close_nodes, distances, this->sst_delta_near);
+    std::vector<proximity_node_t*> close_nodes = metric.find_delta_close_and_closest(sample_state, this->sst_delta_near);
 
     double length = 999999999;
     sst_node_t* nearest = nullptr;
-    for(unsigned i=0;i<val;i++)
+    for(unsigned i=0;i<close_nodes.size();i++)
     {
         tree_node_t* v = (tree_node_t*)(close_nodes[i]->get_state());
         double temp = v->cost ;
@@ -202,9 +201,8 @@ void sst_t::add_to_tree(const double* sample_state, const double* sample_control
 
 sample_node_t* sst_t::find_witness(const double* sample_state)
 {
-	this->copy_state_point(metric_query->point, sample_state);
 	double distance;
-    sample_node_t* witness_sample = (sample_node_t*)samples->find_closest(sample_state, &distance)->get_state();
+    sample_node_t* witness_sample = (sample_node_t*)samples.find_closest(sample_state, &distance)->get_state();
 	if(distance > this->sst_delta_drain)
 	{
 		//create a new sample
@@ -237,7 +235,8 @@ void sst_t::branch_and_bound(sst_node_t* node)
 void sst_t::remove_point_from_metric(tree_node_t* node)
 {
 	proximity_node_t* old_node = node->prox_node;
-	metric->remove_node(old_node);
+    node->prox_node = nullptr;
+	metric.remove_node(old_node);
 	delete old_node;
 }
 

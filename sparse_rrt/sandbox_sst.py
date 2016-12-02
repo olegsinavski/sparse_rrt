@@ -80,7 +80,7 @@ def run_point_sst(config_path):
             if solution is None:
                 solution_cost = None
             else:
-                solution_cost = np.sum(solution[1])
+                solution_cost = np.sum(solution[2])
 
             print("Time: %.2fs, Iterations: %d, Nodes: %d, Solution Quality: %s" %
                   (time.time() - start_time,  iteration, planner.get_number_of_nodes(), solution_cost))
@@ -90,7 +90,7 @@ def run_point_sst(config_path):
             cv2.waitKey(1)
 
 
-    controls, costs = planner.get_solution()
+    path, controls, costs = planner.get_solution()
     solution_cost = np.sum(costs)
 
     print("Time: %.2fs, Iterations: %d, Nodes: %d, Solution Quality: %f" %
