@@ -43,14 +43,6 @@ class proximity_node_t
          * @return The distance value.
          */
         double distance ( const double* st );
-        
-        /**
-         * Determines distance with another node.
-         * @brief Determines distance with another node.
-         * @param other The node to determine distance with.
-         * @return The distance value.
-         */
-        //double distance ( const proximity_node_t* other );
 
         /**
          * Gets the internal node that is represented.
@@ -243,7 +235,7 @@ class graph_nearest_neighbors_t
          * @param query_node The node to search for.
          * @return If query_node exists in node_list.
          */
-        bool does_node_exist( proximity_node_t* query_node);
+        bool does_node_exist(boost::unordered_map<proximity_node_t*,bool> const& added_nodes, proximity_node_t* query_node);
         
         /**
          * Determine the number of nodes to sample for initial populations in queries.
@@ -283,8 +275,6 @@ class graph_nearest_neighbors_t
          * @brief Temporary storage for query functions.
          */
         double* second_distances;
-
-        boost::unordered_map<proximity_node_t*,bool> added_nodes;
 
 };
 

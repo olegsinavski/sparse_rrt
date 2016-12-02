@@ -32,11 +32,6 @@ double proximity_node_t::distance ( const double* st )
     return this->distance_function(state->point, st);
 }
 
-//double proximity_node_t::distance ( const proximity_node_t* other )
-//{
-//    return this->distance_function(state->point,other->state->point);
-//}
-
 const tree_node_t* proximity_node_t::get_state( )
 {
     return state;
@@ -158,8 +153,6 @@ int resort( proximity_node_t** close_nodes, double* distances, int index )
 
 graph_nearest_neighbors_t::graph_nearest_neighbors_t()
 {
-	added_nodes.clear();
-
     nodes = (proximity_node_t**)malloc(INIT_NODE_SIZE*sizeof(proximity_node_t*));
     nr_nodes = 0;
     cap_nodes = INIT_NODE_SIZE;
@@ -287,8 +280,8 @@ int graph_nearest_neighbors_t::find_k_close( const double* state, proximity_node
 {
     if( nr_nodes == 0 )
         return 0;
-    
-	added_nodes.clear();
+
+    boost::unordered_map<proximity_node_t*,bool> added_nodes;
     
 	if(k > MAX_KK)
 	{
@@ -305,7 +298,7 @@ int graph_nearest_neighbors_t::find_k_close( const double* state, proximity_node
 	    while( exists == true )
 	    {
 		index = rand() % nr_nodes;
-		exists = does_node_exist( nodes[index]);
+		exists = does_node_exist(added_nodes, nodes[index]);
 	    }
 	    close_nodes[i] = nodes[index];
 	    added_nodes[nodes[index]] = true;
@@ -320,7 +313,7 @@ int graph_nearest_neighbors_t::find_k_close( const double* state, proximity_node
 	for( int i=0; i<nr_samples; i++ )
 	{
 	    int index = rand() % nr_nodes;
-	    if( does_node_exist( nodes[index] ) == false )
+	    if( does_node_exist(added_nodes, nodes[index] ) == false )
 	    {
 		double distance = nodes[index]->distance( state );
 		if( distance < min_distance )
@@ -354,7 +347,7 @@ int graph_nearest_neighbors_t::find_k_close( const double* state, proximity_node
             int lowest_replacement = k;
             for( int j=0; j<nr_neighbors; j++ )
             {
-                if( does_node_exist( nodes[ neighbors[j] ] ) == false )
+                if( does_node_exist(added_nodes, nodes[ neighbors[j] ] ) == false )
                 {
                     double distance = nodes[ neighbors[j] ]->distance( state );
                     if( distance < distances[k-1] )
@@ -396,8 +389,9 @@ std::vector<proximity_node_t*> graph_nearest_neighbors_t::find_delta_close_and_c
     std::vector<proximity_node_t*> close_nodes;
     if( nr_nodes == 0 )
         return close_nodes;
-    
-	added_nodes.clear();
+
+    boost::unordered_map<proximity_node_t*,bool> added_nodes;
+
     int nr_samples = sampling_function();
     double min_distance = 99999999;
     int min_index = -1;
@@ -442,7 +436,7 @@ std::vector<proximity_node_t*> graph_nearest_neighbors_t::find_delta_close_and_c
 		    unsigned int* neighbors = close_nodes[counter]->get_neighbors( &nr_neighbors );	
 		    for( int j=0; j<nr_neighbors; j++ )
 		    {
-				if( does_node_exist( nodes[ neighbors[j] ]) == false )
+				if( does_node_exist(added_nodes, nodes[ neighbors[j] ]) == false )
 				{
 				    double distance = nodes[ neighbors[j] ]->distance( state );
 				    if( distance < delta && nr_points < MAX_KK)
@@ -462,8 +456,8 @@ int graph_nearest_neighbors_t::find_delta_close( const double* state, proximity_
 {
     if( nr_nodes == 0 )
         return 0;
-    
-	added_nodes.clear();
+
+    boost::unordered_map<proximity_node_t*,bool> added_nodes;
     int nr_samples = sampling_function();
     double min_distance = 99999999;
     int min_index = -1;
@@ -510,7 +504,7 @@ int graph_nearest_neighbors_t::find_delta_close( const double* state, proximity_
 		    unsigned int* neighbors = close_nodes[counter]->get_neighbors( &nr_neighbors );	
 		    for( int j=0; j<nr_neighbors; j++ )
 		    {
-				if( does_node_exist( nodes[ neighbors[j] ]) == false )
+				if( does_node_exist(added_nodes, nodes[ neighbors[j] ]) == false )
 				{
 				    double distance = nodes[ neighbors[j] ]->distance( state );
 				    if( distance < delta && nr_points < MAX_KK)
@@ -527,9 +521,9 @@ int graph_nearest_neighbors_t::find_delta_close( const double* state, proximity_
     return nr_points;
 }
 
-bool graph_nearest_neighbors_t::does_node_exist( proximity_node_t* query_node)
+bool graph_nearest_neighbors_t::does_node_exist(boost::unordered_map<proximity_node_t*,bool> const& added_nodes, proximity_node_t* query_node)
 {
-    return added_nodes.find(query_node)!=added_nodes.end();;
+    return added_nodes.find(query_node)!=added_nodes.end();
 }
 
 int graph_nearest_neighbors_t::sampling_function()

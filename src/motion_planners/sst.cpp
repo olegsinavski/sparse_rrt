@@ -50,8 +50,8 @@ void sst_t::get_solution(std::vector<std::vector<double>>& solution_path, std::v
 	std::deque<tree_node_t*> path;
 	while(nearest_path_node->parent!=NULL)
 	{
-		path.push_front((tree_node_t *&&) nearest_path_node);
-        nearest_path_node = (sst_node_t*)nearest_path_node->parent;
+		path.push_front(nearest_path_node);
+        nearest_path_node = nearest_path_node->parent;
 	}
 
     std::vector<double> root_state;
@@ -202,7 +202,7 @@ void sst_t::add_to_tree(const double* sample_state, const double* sample_control
 sample_node_t* sst_t::find_witness(const double* sample_state)
 {
 	double distance;
-    sample_node_t* witness_sample = (sample_node_t*)samples.find_closest(sample_state, &distance)->get_state();
+    sample_node_t* witness_sample = samples.find_closest(sample_state, &distance)->get_state();
 	if(distance > this->sst_delta_drain)
 	{
 		//create a new sample

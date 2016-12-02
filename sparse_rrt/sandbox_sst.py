@@ -73,21 +73,24 @@ def run_point_sst(config_path):
     start_time = time.time()
 
     for iteration in range(number_of_iterations):
+        print('x')
         planner.step(system, min_time_steps, max_time_steps, integration_step)
-        if iteration % 1000 == 0:
-            solution = planner.get_solution()
-
-            if solution is None:
-                solution_cost = None
-            else:
-                solution_cost = np.sum(solution[2])
-
-            print("Time: %.2fs, Iterations: %d, Nodes: %d, Solution Quality: %s" %
-                  (time.time() - start_time,  iteration, planner.get_number_of_nodes(), solution_cost))
-
-            im = planner.visualize_tree(system)
-            cv2.imshow('tree', im)
-            cv2.waitKey(1)
+        print('a')
+        # if iteration % 1000 == 0:
+        #     print('b')
+        #     solution = planner.get_solution()
+        #
+        #     if solution is None:
+        #         solution_cost = None
+        #     else:
+        #         solution_cost = np.sum(solution[2])
+        #
+        #     print("Time: %.2fs, Iterations: %d, Nodes: %d, Solution Quality: %s" %
+        #           (time.time() - start_time,  iteration, planner.get_number_of_nodes(), solution_cost))
+        #
+        #     im = planner.visualize_tree(system)
+        #     cv2.imshow('tree', im)
+        #     cv2.waitKey(1)
 
 
     path, controls, costs = planner.get_solution()
