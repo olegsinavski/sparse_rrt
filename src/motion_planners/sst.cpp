@@ -202,7 +202,7 @@ void sst_t::add_to_tree(const double* sample_state, const double* sample_control
 sample_node_t* sst_t::find_witness(const double* sample_state)
 {
 	double distance;
-    sample_node_t* witness_sample = samples.find_closest(sample_state, &distance)->get_state();
+    sample_node_t* witness_sample = (sample_node_t*)samples.find_closest(sample_state, &distance)->get_state();
 	if(distance > this->sst_delta_drain)
 	{
 		//create a new sample

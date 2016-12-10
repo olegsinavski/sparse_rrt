@@ -161,7 +161,7 @@ public:
 	 */
 	void random_control(double* control)
 	{
-        for (int i = 0; i < this->state_bounds.size(); ++i) {
+        for (int i = 0; i < this->control_bounds.size(); ++i) {
             control[i] = this->random_generator.uniform_random(this->control_bounds[i].first, this->control_bounds[i].second);
         }
 	}

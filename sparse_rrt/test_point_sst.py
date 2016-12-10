@@ -65,6 +65,31 @@ def test_point_sst():
     assert(abs(solution_cost - 2.062) < 1e-9)
 
 
+def test_car_pose_sst():
+    system = _sst_module.CartPole()
+
+
+    planner = _sst_module.SSTWrapper(
+        state_bounds=system.get_state_bounds(),
+        control_bounds=system.get_control_bounds(),
+        is_circular_topology=system.is_circular_topology(),
+        start_state=np.array([-20, 0, 3.14, 0]),
+        goal_state=np.array([20, 0, 3.14, 0]),
+        goal_radius=1.5,
+        random_seed=0,
+        sst_delta_near=2.,
+        sst_delta_drain=1.2
+    )
+
+    min_time_steps = 10
+    max_time_steps = 50
+    integration_step = 0.02
+
+    for iteration in range(10000):
+        planner.step(system, min_time_steps, max_time_steps, integration_step)
+
+
 if __name__ == '__main__':
     test_point_sst()
+    test_car_pose_sst()
     print('Passed all tests!')
