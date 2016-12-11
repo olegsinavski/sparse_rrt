@@ -53,13 +53,13 @@ def test_point_sst():
                 assert(abs(solution_cost - expected_solution_cost) < 1e-9)
 
             print("Time: %.2fs, Iterations: %d, Nodes: %d, Solution Quality: %s" %
-                  (time.time() - start_time,  iteration, planner.get_number_of_nodes(), solution_cost))
+                  (time.time() - start_time, iteration, planner.get_number_of_nodes(), solution_cost))
 
     path, controls, costs = planner.get_solution()
     solution_cost = np.sum(costs)
 
     print("Time: %.2fs, Iterations: %d, Nodes: %d, Solution Quality: %f" %
-          (time.time() - start_time,  number_of_iterations, planner.get_number_of_nodes(), solution_cost))
+          (time.time() - start_time, number_of_iterations, planner.get_number_of_nodes(), solution_cost))
 
     assert(planner.get_number_of_nodes() == 5716)
     assert(abs(solution_cost - 2.062) < 1e-9)
@@ -67,7 +67,6 @@ def test_point_sst():
 
 def test_car_pose_sst():
     system = _sst_module.CartPole()
-
 
     planner = _sst_module.SSTWrapper(
         state_bounds=system.get_state_bounds(),
