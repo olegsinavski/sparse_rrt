@@ -54,45 +54,29 @@
 #define MIN_Y -35
 #define MAX_Y 25
 
-double rally_car_t::distance(double* point1,double* point2)
-{
-        double val = fabs(point1[4]-point2[4]);
-        if(val > M_PI)
-                val = 2*M_PI-val;
-        return std::sqrt( val * val + (point1[1]-point2[1]) * (point1[1]-point2[1]) +(point1[0]-point2[0]) * (point1[0]-point2[0]) );
-}
 
-void rally_car_t::random_state(double* state)
-{
-        state[0] = uniform_random(MIN_X,MAX_X);
-        state[1] = uniform_random(MIN_Y,MAX_Y);
-        // state[2] = uniform_random(-18,18);
-        // state[3] = uniform_random(-18,18);
-        // state[5] = uniform_random(-17,17);
-        // state[6] = uniform_random(-40,40);
-        // state[7] = uniform_random(-40,40);
+//void rally_car_t::random_state(double* state)
+//{
+//        state[0] = uniform_random(MIN_X,MAX_X);
+//        state[1] = uniform_random(MIN_Y,MAX_Y);
+//        // state[2] = uniform_random(-18,18);
+//        // state[3] = uniform_random(-18,18);
+//        // state[5] = uniform_random(-17,17);
+//        // state[6] = uniform_random(-40,40);
+//        // state[7] = uniform_random(-40,40);
+//
+//        //compute the angle that is created
+//        double theta = atan2(state[1],state[0]);
+//        theta+=M_PI/2;
+//        theta = uniform_random(theta-M_PI/6.0,theta+M_PI/6.0);
+//        if(theta > 2*M_PI)
+//            theta -= 2*M_PI;
+//        state[4]  = theta;
+//        // state[4] = uniform_random(-M_PI,M_PI);
+//}
 
-                //compute the angle that is created
-        double theta = atan2(state[1],state[0]);
-        theta+=M_PI/2;
-        theta = uniform_random(theta-M_PI/6.0,theta+M_PI/6.0);
-        if(theta > 2*M_PI)
-            theta -= 2*M_PI;
-        state[4]  = theta;
-        // state[4] = uniform_random(-M_PI,M_PI);
-}
 
-void rally_car_t::random_control(double* control)
-{
-// input_control_space:
-//   min: [-1.0472, -700, -700]
-//   max: [1.0472, 0, 1200]
-        control[0] = uniform_random(-1.0472,1.0472);
-        control[1] = uniform_random(-700,0);
-        control[2] = uniform_random(-700,1200);
-}
-
-bool rally_car_t::propagate( double* start_state, double* control, int min_step, int max_step, double* result_state, double& duration )
+bool rally_car_t::propagate( double* start_state, double* control, int num_steps, double* result_state, double integration_step)
 {
         temp_state[0] = start_state[0]; 
         temp_state[1] = start_state[1];
@@ -102,19 +86,18 @@ bool rally_car_t::propagate( double* start_state, double* control, int min_step,
         temp_state[5] = start_state[5];
         temp_state[6] = start_state[6];
         temp_state[7] = start_state[7];
-        int num_steps = uniform_int_random(min_step,max_step);
         bool validity = true;
         for(int i=0;i<num_steps;i++)
         {
                 update_derivative(control);
-                temp_state[0] += params::integration_step*deriv[0];
-                temp_state[1] += params::integration_step*deriv[1];
-                temp_state[2] += params::integration_step*deriv[2];
-                temp_state[3] += params::integration_step*deriv[3];
-                temp_state[4] += params::integration_step*deriv[4];
-                temp_state[5] += params::integration_step*deriv[5];
-                temp_state[6] += params::integration_step*deriv[6];
-                temp_state[7] += params::integration_step*deriv[7];
+                temp_state[0] += integration_step*deriv[0];
+                temp_state[1] += integration_step*deriv[1];
+                temp_state[2] += integration_step*deriv[2];
+                temp_state[3] += integration_step*deriv[3];
+                temp_state[4] += integration_step*deriv[4];
+                temp_state[5] += integration_step*deriv[5];
+                temp_state[6] += integration_step*deriv[6];
+                temp_state[7] += integration_step*deriv[7];
                 enforce_bounds();
                 validity = validity && valid_state();
         }
@@ -126,7 +109,6 @@ bool rally_car_t::propagate( double* start_state, double* control, int min_step,
         result_state[5] = temp_state[5];
         result_state[6] = temp_state[6];
         result_state[7] = temp_state[7];
-        duration = num_steps*params::integration_step;
         return validity;
 }
 
@@ -195,7 +177,7 @@ bool rally_car_t::valid_state()
         return !obstacle_collision;
 }
 
-svg::Point rally_car_t::visualize_point(double* state, svg::Dimensions dims)
+svg::Point rally_car_t::visualize_point(const double* state, svg::Dimensions dims)
 {
         double x = (state[0]-MIN_X)/(MAX_X-MIN_X) * dims.width; 
         double y = (state[1]-MIN_Y)/(MAX_Y-MIN_Y) * dims.height; 
@@ -286,6 +268,40 @@ void rally_car_t::visualize_obstacles(svg::Document& doc ,svg::Dimensions dims)
                                         (obstacles[i].high_y-obstacles[i].low_y)/(MAX_Y-MIN_Y) * dims.height,
                                         svg::Color::Red);
         }
+}
+
+std::vector<std::pair<double, double> > rally_car_t::get_state_bounds() {
+        return {
+                {MIN_X,MAX_X},
+                {MIN_Y,MAX_Y},
+                {-18,18},
+                {-18,18},
+                {-M_PI,M_PI},
+                {-17,17},
+                {-40,40},
+                {-40,40}
+        };
+}
+
+std::vector<std::pair<double, double> > rally_car_t::get_control_bounds() {
+        return {
+                {-1.0472,1.0472},
+                {-700,0},
+                {-700,1200}
+        };
+}
+
+std::vector<bool> rally_car_t::is_circular_topology() {
+    return {
+            false,
+            false,
+            false,
+            false,
+            true,
+            false,
+            false,
+            false
+    };
 }
 
 

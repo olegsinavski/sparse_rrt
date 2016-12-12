@@ -39,79 +39,6 @@ public:
 	}
 
 	/**
-	 * @brief Allocates a double array representing a state of this system.
-	 * @details Allocates a double array representing a state of this system.
-	 * @return Allocated memory for a state.
-	 */
-	double* alloc_state_point()
-	{
-		return new double[state_dimension];
-	}
-
-	/**
-	 * @brief Allocates a double array representing a control of this system.
-	 * @details Allocates a double array representing a control of this system.
-	 * @return Allocated memory for a control.
-	 */
-	double* alloc_control_point()
-	{
-		return new double[control_dimension];
-	}
-
-	/**
-	 * @brief Copies one state into another.
-	 * @details Copies one state into another.
-	 * 
-	 * @param destination The destination memory.
-	 * @param source The point to copy.
-	 */
-	void copy_state_point(double* destination, double* source)
-	{
-		for(unsigned i=0;i<state_dimension;i++)
-			destination[i] = source[i];
-	}
-
-	/**
-	 * @brief Copies one control into another.
-	 * @details Copies one control into another.
-	 * 
-	 * @param destination The destination memory.
-	 * @param source The control to copy.
-	 */
-	void copy_control_point(double* destination, double* source)
-	{
-		for(unsigned i=0;i<control_dimension;i++)
-			destination[i] = source[i];
-	}
-
-	/**
-	 * @brief Performs a random sampling for a new state.
-	 * @details Performs a random sampling for a new state.
-	 * 
-	 * @param state The state to modify with random values.
-	 */
-	virtual void random_state(double* state) = 0;
-
-	/**
-	 * @brief Performs a random sampling for a new control.
-	 * @details Performs a random sampling for a new control.
-	 * 
-	 * @param control The control to modify with random values.
-	 */
-	virtual void random_control(double* control) = 0;
-
-	/**
-	 * @brief Finds the distance between two states.
-	 * @details Finds the distance between two states.
-	 * 
-	 * @param point1 First point.
-	 * @param point2 Second point.
-	 * 
-	 * @return The distance between point1 and point2.
-	 */
-	virtual double distance(double* point1, double* point2) = 0;
-
-	/**
 	 * @brief Performs a local propagation using simple numerical integration.
 	 * @details Performs a local propagation using simple numerical integration.
 	 * 
@@ -123,7 +50,7 @@ public:
 	 * @param duration The amount of simulation time used.
 	 * @return True if this propagation was valid, false if not.
 	 */
-    virtual bool propagate( double* start_state, double* control, int min_step, int max_step, double* result_state, double& duration ) = 0;
+    virtual bool propagate( double* start_state, double* control, int num_steps, double* result_state, double integration_step) = 0;
 
     /**
      * @brief Creates a point in image space corresponding to a given state.
@@ -134,7 +61,7 @@ public:
      * 
      * @return A point in image space.
      */
-    virtual svg::Point visualize_point(double* state,svg::Dimensions dims) = 0;
+    virtual svg::Point visualize_point(const double* state,svg::Dimensions dims) = 0;
 
     /**
      * @brief Visualize the obstacles for this system.
@@ -147,6 +74,16 @@ public:
     {
     	return;
     }
+
+    virtual std::vector<std::pair<double, double>> get_state_bounds() = 0;
+    virtual std::vector<std::pair<double, double>> get_control_bounds() = 0;
+
+    /**
+     * @brief Array of flags indicating that a degree of freedom has circular topology
+     * @details Array of flags indicating that a degree of freedom has circular topology
+     *
+     */
+	virtual std::vector<bool> is_circular_topology() = 0;
 
 protected:
 

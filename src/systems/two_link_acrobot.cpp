@@ -12,7 +12,6 @@
 
 
 #include "systems/two_link_acrobot.hpp"
-#include "utilities/random.hpp"
 
 
 #define _USE_MATH_DEFINES
@@ -46,7 +45,7 @@
 #define MIN_T -4
 #define MAX_T 4
 
-double two_link_acrobot_t::distance(double* point1,double* point2)
+double two_link_acrobot_t::distance(const double* point1, const double* point2)
 {
         double x = (LENGTH) * cos(point1[STATE_THETA_1] - M_PI / 2)+(LENGTH) * cos(point1[STATE_THETA_1] + point1[STATE_THETA_2] - M_PI / 2);
         double y = (LENGTH) * sin(point1[STATE_THETA_1] - M_PI / 2)+(LENGTH) * sin(point1[STATE_THETA_1] + point1[STATE_THETA_2] - M_PI / 2);
@@ -55,34 +54,20 @@ double two_link_acrobot_t::distance(double* point1,double* point2)
         return std::sqrt(pow(x-x2,2.0)+pow(y-y2,2.0));
 }
 
-void two_link_acrobot_t::random_state(double* state)
-{
-        state[0] = uniform_random(-M_PI,M_PI);
-        state[1] = uniform_random(-M_PI,M_PI);
-        state[2] = uniform_random(MIN_V_1,MAX_V_1);
-        state[3] = uniform_random(MIN_V_2,MAX_V_2);
-}
-
-void two_link_acrobot_t::random_control(double* control)
-{
-        control[0] = uniform_random(MIN_T,MAX_T);
-}
-
-bool two_link_acrobot_t::propagate( double* start_state, double* control, int min_step, int max_step, double* result_state, double& duration )
+bool two_link_acrobot_t::propagate( double* start_state, double* control, int num_steps, double* result_state, double integration_step)
 {
         temp_state[0] = start_state[0]; 
         temp_state[1] = start_state[1];
         temp_state[2] = start_state[2];
         temp_state[3] = start_state[3];
-        int num_steps = uniform_int_random(min_step,max_step);
         bool validity = true;
         for(int i=0;i<num_steps;i++)
         {
                 update_derivative(control);
-                temp_state[0] += params::integration_step*deriv[0];
-                temp_state[1] += params::integration_step*deriv[1];
-                temp_state[2] += params::integration_step*deriv[2];
-                temp_state[3] += params::integration_step*deriv[3];
+                temp_state[0] += integration_step*deriv[0];
+                temp_state[1] += integration_step*deriv[1];
+                temp_state[2] += integration_step*deriv[2];
+                temp_state[3] += integration_step*deriv[3];
                 enforce_bounds();
                 validity = validity && valid_state();
         }
@@ -90,7 +75,6 @@ bool two_link_acrobot_t::propagate( double* start_state, double* control, int mi
         result_state[1] = temp_state[1];
         result_state[2] = temp_state[2];
         result_state[3] = temp_state[3];
-        duration = num_steps*params::integration_step;
         return validity;
 }
 
@@ -121,7 +105,7 @@ bool two_link_acrobot_t::valid_state()
     return true;
 }
 
-svg::Point two_link_acrobot_t::visualize_point(double* state, svg::Dimensions dims)
+svg::Point two_link_acrobot_t::visualize_point(const double* state, svg::Dimensions dims)
 {
         double x = (LENGTH) * cos(state[STATE_THETA_1] - M_PI / 2)+(LENGTH) * cos(state[STATE_THETA_1] + state[STATE_THETA_2] - M_PI / 2);
         double y = (LENGTH) * sin(state[STATE_THETA_1] - M_PI / 2)+(LENGTH) * sin(state[STATE_THETA_1] + state[STATE_THETA_2] - M_PI / 2);
@@ -164,3 +148,27 @@ void two_link_acrobot_t::update_derivative(double* control)
 }
 
 
+std::vector<std::pair<double, double> > two_link_acrobot_t::get_state_bounds() {
+    return {
+            {-M_PI,M_PI},
+            {-M_PI,M_PI},
+            {MIN_V_1,MAX_V_1},
+            {MIN_V_2,MAX_V_2},
+    };
+}
+
+std::vector<std::pair<double, double> > two_link_acrobot_t::get_control_bounds() {
+    return {
+            {MIN_T,MAX_T}
+    };
+}
+
+
+std::vector<bool> two_link_acrobot_t::is_circular_topology() {
+    return {
+            true,
+            true,
+            false,
+            false
+    };
+}

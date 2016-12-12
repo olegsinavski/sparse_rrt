@@ -13,6 +13,7 @@
 #include "systems/point.hpp"
 #include "utilities/random.hpp"
 #include <cmath>
+#include <assert.h>
 
 #define MIN_X -10
 #define MAX_X 10
@@ -24,38 +25,21 @@
 #define MIN_THETA -3.14
 #define MAX_THETA 3.14
 
-double point_t::distance(double* point1,double* point2)
-{
-	return std::sqrt( (point1[0]-point2[0]) * (point1[0]-point2[0]) + (point1[1]-point2[1]) * (point1[1]-point2[1]) );
-}
 
-void point_t::random_state(double* state)
+bool point_t::propagate( double* start_state, double* control, int num_steps, double* result_state, double integration_step)
 {
-	state[0] = uniform_random(MIN_X,MAX_X);
-	state[1] = uniform_random(MIN_Y,MAX_Y);
-}
-
-void point_t::random_control(double* control)
-{
-	control[0] = uniform_random(MIN_V,MAX_V);
-	control[1] = uniform_random(MIN_THETA,MAX_THETA);
-}
-
-bool point_t::propagate( double* start_state, double* control, int min_step, int max_step, double* result_state, double& duration )
-{
-	temp_state[0] = start_state[0]; temp_state[1] = start_state[1];
-	int num_steps = uniform_int_random(min_step,max_step);
+	temp_state[0] = start_state[0];
+	temp_state[1] = start_state[1];
 	bool validity = true;
 	for(int i=0;i<num_steps;i++)
 	{
-		temp_state[0] += params::integration_step*control[0]*cos(control[1]);
-		temp_state[1] += params::integration_step*control[0]*sin(control[1]);
+		temp_state[0] += integration_step*control[0]*cos(control[1]);
+		temp_state[1] += integration_step*control[0]*sin(control[1]);
 		enforce_bounds();
 		validity = validity && valid_state();
 	}
 	result_state[0] = temp_state[0];
 	result_state[1] = temp_state[1];
-	duration = num_steps*params::integration_step;
 	return validity;
 }
 
@@ -95,7 +79,7 @@ bool point_t::valid_state()
 			(temp_state[1]!=MAX_Y);
 }
 
-svg::Point point_t::visualize_point(double* state, svg::Dimensions dims)
+svg::Point point_t::visualize_point(const double* state, svg::Dimensions dims)
 {
 	double x = (state[0]-MIN_X)/(MAX_X-MIN_X) * dims.width; 
 	double y = (state[1]-MIN_Y)/(MAX_Y-MIN_Y) * dims.height; 
@@ -114,4 +98,27 @@ void point_t::visualize_obstacles(svg::Document& doc ,svg::Dimensions dims)
 							(obstacles[i].high_y-obstacles[i].low_y)/(MAX_Y-MIN_Y) * dims.height,
 							svg::Color::Red);
 	}
+}
+
+std::vector<std::pair<double, double> > point_t::get_state_bounds() {
+	return {
+			{MIN_X,MAX_X},
+			{MIN_Y,MAX_Y}
+	};
+}
+
+
+std::vector<std::pair<double, double> > point_t::get_control_bounds() {
+	return {
+			{MIN_V, MAX_V},
+			{MIN_THETA, MAX_THETA},
+	};
+}
+
+
+std::vector<bool> point_t::is_circular_topology() {
+    return {
+            false,
+            false
+    };
 }

@@ -20,97 +20,109 @@
 void sst_t::setup_planning()
 {
 	best_goal = NULL;
-	//init internal variables
-	sample_state = system->alloc_state_point();
-	sample_control = system->alloc_control_point();
-	metric_query = new sst_node_t();
-	metric_query->point = system->alloc_state_point();
-
-    close_nodes = (proximity_node_t**)malloc(MAX_KK * sizeof (proximity_node_t*));
-    distances = (double*)malloc(MAX_KK * sizeof (double));
 
 	//initialize the metrics
-	metric = new graph_nearest_neighbors_t();
-	metric->set_system(system);
+	metric.set_distance(this->distance);
 	//create the root of the tree
 	root = new sst_node_t();
-	root->point = system->alloc_state_point();
-	system->copy_state_point(root->point,start_state);
+	root->point = this->alloc_state_point();
+	this->copy_state_point(root->point,start_state);
 	add_point_to_metric(root);
 	number_of_nodes++;
 
-	samples = new graph_nearest_neighbors_t();
-	samples->set_system(system);
-	witness_sample = new sample_node_t();
-	witness_sample->point = system->alloc_state_point();
-	system->copy_state_point(witness_sample->point,start_state);
-	add_point_to_samples(witness_sample);
+	samples.set_distance(this->distance);
 
-	witness_sample->rep = (sst_node_t*)root;
+    sample_node_t* first_witness_sample = new sample_node_t();
+    first_witness_sample->point = this->alloc_state_point();
+	this->copy_state_point(first_witness_sample->point, start_state);
+    first_witness_sample->rep = (sst_node_t*)root;
 
+	add_point_to_samples(first_witness_sample);
 }
-void sst_t::get_solution(std::vector<std::pair<double*,double> >& controls)
+
+void sst_t::get_solution(std::vector<std::vector<double>>& solution_path, std::vector<std::vector<double>>& controls, std::vector<double>& costs)
 {
-	last_solution_path.clear();
 	if(best_goal==NULL)
 		return;
-	nearest = best_goal;
+	tree_node_t* nearest_path_node = best_goal;
 	
-	//now nearest should be the closest node to the goal state
+	//now nearest_path_node should be the closest node to the goal state
 	std::deque<tree_node_t*> path;
-	while(nearest->parent!=NULL)
+	while(nearest_path_node->parent!=NULL)
 	{
-		path.push_front(nearest);
-		nearest = (sst_node_t*)nearest->parent;
+		path.push_front(nearest_path_node);
+        nearest_path_node = nearest_path_node->parent;
 	}
-	last_solution_path.push_back(root);
+
+    std::vector<double> root_state;
+    for (unsigned c=0; c<this->state_dimension; c++) {
+        root_state.push_back(root->point[c]);
+    }
+    solution_path.push_back(root_state);
+
 	for(unsigned i=0;i<path.size();i++)
 	{
-		last_solution_path.push_back(path[i]);
-		controls.push_back(std::pair<double*,double>(NULL,0));
-		controls.back().first = system->alloc_control_point();
-		system->copy_control_point(controls.back().first,path[i]->parent_edge->control);
-		controls.back().second = path[i]->parent_edge->duration;
+        std::vector<double> current_state;
+        for (unsigned c=0; c<this->state_dimension; c++) {
+            current_state.push_back(path[i]->point[c]);
+        }
+        solution_path.push_back(current_state);
+
+        std::vector<double> current_control;
+        for (unsigned c=0; c<this->control_dimension; c++) {
+            current_control.push_back(path[i]->parent_edge->control[c]);
+        }
+        controls.push_back(current_control);
+        costs.push_back(path[i]->parent_edge->duration);
 	}
 }
-void sst_t::step()
+void sst_t::step(system_t* system, int min_time_steps, int max_time_steps, double integration_step)
 {
-	random_sample();
-	nearest_vertex();
-	if(propagate())
+    /*
+     * Generate a random sample
+     * Find the closest existing node
+     * Generate random control
+     * Propagate for random time with constant random control from the closest node
+     * If resulting state is valid, add a resulting state into the tree and perform sst-specific graph manipulations
+     */
+
+    double* sample_state = this->alloc_state_point();
+    double* sample_control = this->alloc_control_point();
+	this->random_state(sample_state);
+	this->random_control(sample_control);
+    sst_node_t* nearest = nearest_vertex(sample_state);
+	int num_steps = this->random_generator.uniform_int_random(min_time_steps, max_time_steps);
+    double duration = num_steps*integration_step;
+	if(system->propagate(nearest->point, sample_control, num_steps, sample_state, integration_step))
 	{
-		add_to_tree();
+		add_to_tree(sample_state, sample_control, nearest, duration);
 	}
+    delete sample_state;
+    delete sample_control;
 }
 
 void sst_t::add_point_to_metric(tree_node_t* state)
 {
 	proximity_node_t* new_node = new proximity_node_t(state);
 	state->prox_node = new_node;
-	metric->add_node(new_node);
+	metric.add_node(new_node);
 }
 
 void sst_t::add_point_to_samples(tree_node_t* state)
 {
 	proximity_node_t* new_node = new proximity_node_t(state);
 	state->prox_node = new_node;
-	samples->add_node(new_node);
+	samples.add_node(new_node);
 }
 
-
-void sst_t::random_sample()
-{
-	system->random_state(sample_state);
-	system->random_control(sample_control);
-}
-void sst_t::nearest_vertex()
+sst_node_t* sst_t::nearest_vertex(const double* sample_state)
 {
 	//performs the best near query
-	system->copy_state_point(metric_query->point,sample_state);
-	unsigned val = metric->find_delta_close_and_closest(metric_query,close_nodes,distances,params::sst_delta_near);
+    std::vector<proximity_node_t*> close_nodes = metric.find_delta_close_and_closest(sample_state, this->sst_delta_near);
 
     double length = 999999999;
-    for(unsigned i=0;i<val;i++)
+    sst_node_t* nearest = nullptr;
+    for(unsigned i=0;i<close_nodes.size();i++)
     {
         tree_node_t* v = (tree_node_t*)(close_nodes[i]->get_state());
         double temp = v->cost ;
@@ -120,15 +132,14 @@ void sst_t::nearest_vertex()
             nearest = (sst_node_t*)v;
         }
     }
+    assert (nearest != nullptr);
+    return nearest;
 }
-bool sst_t::propagate()
-{
-	return system->propagate(nearest->point,sample_control,params::min_time_steps,params::max_time_steps,sample_state,duration);
-}
-void sst_t::add_to_tree()
+
+void sst_t::add_to_tree(const double* sample_state, const double* sample_control, sst_node_t* nearest, double duration)
 {
 	//check to see if a sample exists within the vicinity of the new node
-	check_for_witness();
+    sample_node_t* witness_sample = find_witness(sample_state);
 
 	if(witness_sample->rep==NULL || witness_sample->rep->cost > nearest->cost + duration)
 	{
@@ -136,12 +147,12 @@ void sst_t::add_to_tree()
 		{
 			//create a new tree node
 			sst_node_t* new_node = new sst_node_t();
-			new_node->point = system->alloc_state_point();
-			system->copy_state_point(new_node->point,sample_state);
+			new_node->point = this->alloc_state_point();
+			this->copy_state_point(new_node->point,sample_state);
 			//create the link to the parent node
 			new_node->parent_edge = new tree_edge_t();
-			new_node->parent_edge->control = system->alloc_control_point();
-			system->copy_control_point(new_node->parent_edge->control,sample_control);
+			new_node->parent_edge->control = this->alloc_control_point();
+			this->copy_control_point(new_node->parent_edge->control, sample_control);
 			new_node->parent_edge->duration = duration;
 			//set this node's parent
 			new_node->parent = nearest;
@@ -150,12 +161,12 @@ void sst_t::add_to_tree()
 			nearest->children.insert(nearest->children.begin(),new_node);
 			number_of_nodes++;
 
-	        if(best_goal==NULL && system->distance(new_node->point,goal_state)<goal_radius)
+	        if(best_goal==NULL && this->distance(new_node->point,goal_state)<goal_radius)
 	        {
 	        	best_goal = new_node;
 	        	branch_and_bound((sst_node_t*)root);
 	        }
-	        else if(best_goal!=NULL && best_goal->cost > new_node->cost && system->distance(new_node->point,goal_state)<goal_radius)
+	        else if(best_goal!=NULL && best_goal->cost > new_node->cost && this->distance(new_node->point,goal_state)<goal_radius)
 	        {
 	        	best_goal = new_node;
 	        	branch_and_bound((sst_node_t*)root);
@@ -188,19 +199,19 @@ void sst_t::add_to_tree()
 
 }
 
-void sst_t::check_for_witness()
+sample_node_t* sst_t::find_witness(const double* sample_state)
 {
-	system->copy_state_point(metric_query->point,sample_state);
 	double distance;
-	witness_sample = (sample_node_t*)samples->find_closest(metric_query,&distance)->get_state();
-	if(distance > params::sst_delta_drain)
+    sample_node_t* witness_sample = (sample_node_t*)samples.find_closest(sample_state, &distance)->get_state();
+	if(distance > this->sst_delta_drain)
 	{
 		//create a new sample
 		witness_sample = new sample_node_t();
-		witness_sample->point = system->alloc_state_point();
-		system->copy_state_point(witness_sample->point,sample_state);
+		witness_sample->point = this->alloc_state_point();
+		this->copy_state_point(witness_sample->point, sample_state);
 		add_point_to_samples(witness_sample);
 	}
+    return witness_sample;
 }
 
 void sst_t::branch_and_bound(sst_node_t* node)
@@ -224,7 +235,8 @@ void sst_t::branch_and_bound(sst_node_t* node)
 void sst_t::remove_point_from_metric(tree_node_t* node)
 {
 	proximity_node_t* old_node = node->prox_node;
-	metric->remove_node(old_node);
+    node->prox_node = nullptr;
+	metric.remove_node(old_node);
 	delete old_node;
 }
 

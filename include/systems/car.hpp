@@ -26,19 +26,18 @@ public:
 	}
 	virtual ~car_t(){}
 
-	virtual double distance(double* point1, double* point2);
-
-	virtual void random_state(double* state);
-
-	virtual void random_control(double* control);
-
-	virtual bool propagate( double* start_state, double* control, int min_step, int max_step, double* result_state, double& duration );
+	virtual bool propagate( double* start_state, double* control, int num_steps, double* result_state, double integration_step);
 
 	virtual void enforce_bounds();
 	
 	virtual bool valid_state();
 
-	svg::Point visualize_point(double* state, svg::Dimensions dims);
+	svg::Point visualize_point(const double* state, svg::Dimensions dims);
+
+	virtual std::vector<std::pair<double, double> > get_state_bounds();
+    virtual std::vector<std::pair<double, double> > get_control_bounds();
+	std::vector<bool> is_circular_topology() override;
+
 };
 
 

@@ -76,44 +76,33 @@ public:
 	virtual ~point_t(){}
 
 	/**
-	 * @copydoc system_t::distance(double*, double*)
-	 */
-	virtual double distance(double* point1, double* point2);
-
-	/**
-	 * @copydoc system_t::random_state(double*)
-	 */
-	virtual void random_state(double* state);
-
-	/**
-	 * @copydoc system_t::random_control(double*)
-	 */
-	virtual void random_control(double* control);
-
-	/**
 	 * @copydoc system_t::propagate(double*, double*, int, int, double*, double& )
 	 */
-	virtual bool propagate( double* start_state, double* control, int min_step, int max_step, double* result_state, double& duration );
+	virtual bool propagate( double* start_state, double* control, int num_steps, double* result_state, double integration_step) override;
 
 	/**
 	 * @copydoc system_t::enforce_bounds()
 	 */
-	virtual void enforce_bounds();
+	virtual void enforce_bounds() override;
 	
 	/**
 	 * @copydoc system_t::valid_state()
 	 */
-	virtual bool valid_state();
+	virtual bool valid_state() override;
 
 	/**
 	 * @copydoc system_t::visualize_point(double*, svg::Dimensions)
 	 */
-	svg::Point visualize_point(double* state, svg::Dimensions dims);
+	svg::Point visualize_point(const double* state, svg::Dimensions dims) override;
 
 	/**
 	 * @copydoc system_t::visualize_obstacles(svg::Document&, svg::Dimensions)
 	 */
-    virtual void visualize_obstacles(svg::Document& doc ,svg::Dimensions dims);
+    virtual void visualize_obstacles(svg::Document& doc ,svg::Dimensions dims) override;
+
+	std::vector<std::pair<double, double>> get_state_bounds() override;
+	std::vector<std::pair<double, double>> get_control_bounds() override;
+	std::vector<bool> is_circular_topology() override;
 
 protected:
 

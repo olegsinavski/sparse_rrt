@@ -23,8 +23,7 @@ condition_check_t::condition_check_t(std::string type, double check )
 		condition_type = 1;
 	else
 	{
-		std::cout<<"Condition type is invalid!"<<std::endl;
-		exit(0);
+		throw std::runtime_error("Condition type is invalid!");
 	}
 }
 void condition_check_t::reset()

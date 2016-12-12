@@ -32,22 +32,12 @@ public:
 	/**
 	 * @copydoc system_t::distance(double*, double*)
 	 */
-	virtual double distance(double* point1, double* point2);
-
-	/**
-	 * @copydoc system_t::random_state(double*)
-	 */
-	virtual void random_state(double* state);
-
-	/**
-	 * @copydoc system_t::random_control(double*)
-	 */
-	virtual void random_control(double* control);
+	static double distance(const double* point1, const double* point2);
 
 	/**
 	 * @copydoc system_t::propagate(double*, double*, int, int, double*, double& )
 	 */
-	virtual bool propagate( double* start_state, double* control, int min_step, int max_step, double* result_state, double& duration );
+	virtual bool propagate( double* start_state, double* control, int num_steps, double* result_state, double integration_step);
 
 	/**
 	 * @copydoc system_t::enforce_bounds()
@@ -62,11 +52,16 @@ public:
 	/**
 	 * @copydoc system_t::visualize_point(double*, svg::Dimensions)
 	 */
-	svg::Point visualize_point(double* state, svg::Dimensions dims);
+	svg::Point visualize_point(const double* state, svg::Dimensions dims);
+
+	std::vector<std::pair<double, double>> get_state_bounds() override;
+	std::vector<std::pair<double, double>> get_control_bounds() override;
+	std::vector<bool> is_circular_topology() override;
 	
 protected:
 	double* deriv;
 	void update_derivative(double* control);
+
 };
 
 

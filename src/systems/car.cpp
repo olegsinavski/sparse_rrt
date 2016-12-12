@@ -18,48 +18,26 @@
 
 #include <cmath>
 
-double car_t::distance(double* point1,double* point2)
-{
-	double val = fabs(point1[2]-point2[2]);
-	if(val > M_PI)
-		val = 2*M_PI-val;
-	return std::sqrt( val * val + (point1[1]-point2[1]) * (point1[1]-point2[1])+(point1[0]-point2[0]) * (point1[0]-point2[0]) );
-}
 
-void car_t::random_state(double* state)
-{
-	state[0] = uniform_random(-10,10);
-	state[1] = uniform_random(-10,10);
-	state[2] = uniform_random(-M_PI,M_PI);
-}
-
-void car_t::random_control(double* control)
-{
-	control[0] = uniform_random(0,1);
-	control[1] = uniform_random(-.5,.5);
-}
-
-bool car_t::propagate( double* start_state, double* control, int min_step, int max_step, double* result_state, double& duration )
+bool car_t::propagate( double* start_state, double* control, int num_steps, double* result_state, double integration_step)
 {
 	temp_state[0] = start_state[0]; temp_state[1] = start_state[1];temp_state[2] = start_state[2];
 
-	int num_steps = uniform_int_random(min_step,max_step);
 	bool validity = true;
 	for(int i=0;i<num_steps;i++)
 	{
 		double temp0 = temp_state[0];
 		double temp1 = temp_state[1];
 		double temp2 = temp_state[2];
-		temp_state[0] += params::integration_step*cos(temp2)*control[0];
-		temp_state[1] += params::integration_step*sin(temp2)*control[0];
-		temp_state[2] += params::integration_step*control[1];
+		temp_state[0] += integration_step*cos(temp2)*control[0];
+		temp_state[1] += integration_step*sin(temp2)*control[0];
+		temp_state[2] += integration_step*control[1];
 		enforce_bounds();
 		validity = validity && valid_state();
 	}
 	result_state[0] = temp_state[0];
 	result_state[1] = temp_state[1];
 	result_state[2] = temp_state[2];
-	duration = num_steps*params::integration_step;
 	return validity;
 }
 
@@ -90,9 +68,33 @@ bool car_t::valid_state()
 			(temp_state[1]!=10);
 }
 
-svg::Point car_t::visualize_point(double* state, svg::Dimensions dims)
+svg::Point car_t::visualize_point(const double* state, svg::Dimensions dims)
 {
 	double x = (state[0]+10)/(20) * dims.width; 
 	double y = (state[1]+10)/(20) * dims.height; 
 	return svg::Point(x,y);
+}
+
+std::vector<std::pair<double, double> > car_t::get_state_bounds() {
+	return {
+        {-10,10},
+        {-10,10},
+        {-M_PI,M_PI},
+	};
+}
+
+
+std::vector<std::pair<double, double> > car_t::get_control_bounds() {
+    return {
+            {0, 1},
+            {-.5,.5},
+    };
+}
+
+std::vector<bool> car_t::is_circular_topology() {
+	return {
+			false,
+			false,
+			true
+	};
 }

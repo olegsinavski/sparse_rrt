@@ -26,7 +26,11 @@ public:
 	/**
 	 * @copydoc planner_t::planner_t(system_t*)
 	 */
-	rrt_t(system_t* in_system) : planner_t(in_system)
+	rrt_t(const std::vector<std::pair<double, double> >& a_state_bounds,
+		  const std::vector<std::pair<double, double> >& a_control_bounds,
+		  std::function<double(const double*, const double*)> distance_function,
+          unsigned int random_seed)
+			: planner_t(a_state_bounds, a_control_bounds, distance_function, random_seed)
 	{
 
 	}
@@ -40,14 +44,19 @@ public:
 	/**
 	 * @copydoc planner_t::get_solution(std::vector<std::pair<double*,double> >&)
 	 */
-	virtual void get_solution(std::vector<std::pair<double*,double> >& controls);
+	virtual void get_solution(std::vector<std::vector<double>>& solution_path, std::vector<std::vector<double>>& controls, std::vector<double>& costs);
 
 	/**
 	 * @copydoc planner_t::step()
 	 */
-	virtual void step();
+	virtual void step(system_t* system, int min_time_steps, int max_time_steps, double integration_step);
 
 protected:
+
+    /**
+     * @brief The nearest neighbor data structure.
+     */
+    graph_nearest_neighbors_t* metric;
 	
 	/**
 	 * @brief A randomly sampled state.
@@ -66,42 +75,15 @@ protected:
 	double duration;
 
 	/**
-	 * @brief Storage used to query the nearest neighbor structure.
-	 */
-	tree_node_t* metric_query;
-
-	/**
 	 * @brief The result of a query in the nearest neighbor structure.
 	 */
 	tree_node_t* nearest;
-	
-	/**
-	 * @brief A set of nodes used to get solutions.
-	 */
-	proximity_node_t** close_nodes;
-	/**
-	 * @brief A set of distances used to get solutions.
-	 */
-	double* distances;
-
-	/**
-	 * @brief Perform the random sampling step of RRT.
-	 * @details Perform the random sampling step of RRT.
-	 */
-	void random_sample();
 
 	/**
 	 * @brief Find the nearest node to the randomly sampled state.
 	 * @details Find the nearest node to the randomly sampled state.
 	 */
 	void nearest_vertex();
-
-	/**
-	 * @brief Perform a local propagation from the nearest state.
-	 * @details Perform a local propagation from the nearest state.
-	 * @return If the trajectory is collision free or not.
-	 */
-	bool propagate();
 
 	/**
 	 * @brief If propagation was successful, add the new state to the tree.

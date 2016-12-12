@@ -57,35 +57,72 @@ int main(int ac, char* av[])
 		system = new two_link_acrobot_t();
 	}
 
-	planner_t* planner;
-	if(params::planner=="rrt")
-	{
-		planner = new rrt_t(system);
-	}
-	else if(params::planner=="sst")
-	{
-		planner = new sst_t(system);
-	}
-	planner->set_start_state(params::start_state);
-	planner->set_goal_state(params::goal_state,params::goal_radius);
-	planner->setup_planning();
+// parameters
+//	std::string planner_name = "sst";
+//	std::string system_name = "point";
+//
+//	std::string stopping_type = "iterations";
+//	double stopping_check = 410000;
+//
+//	std::string stats_type = "time";
+//	double stats_check_value = 0;
+//
+//	int random_seed = 0;
+//	double start_state[] = {0., 0.};
+//	double goal_state[] = {9., 9.};
+//	double goal_radius = 0.5;
+//
+//	// The radius for BestNear (delta_n in the WAFR paper)
+//	double sst_delta_near=.4;
+//	// The radius for sparsification (delta_s in the WAFR paper)
+//	double sst_delta_drain=.2;
+//
+//	bool intermediate_visualization = false;
+//
+//	int min_time_steps = 20;
+//	int max_time_steps = 200;
+//	double integration_step = 0.002;
 
-	condition_check_t checker(params::stopping_type,params::stopping_check);
+
+    planner_t* planner;
+    if(params::planner=="rrt")
+    {
+        planner = new rrt_t(system);
+    }
+    else if(params::planner=="sst")
+    {
+        planner = new sst_t(
+                system->get_state_bounds(), system->get_control_bounds(),
+                euclidian_distance(system->is_circular_topology()),
+                random_seed,
+                sst_delta_near, sst_delta_drain);
+    }
+
+	condition_check_t checker(stopping_type, stopping_check);
 	condition_check_t* stats_check=NULL;
-	if(params::stats_check!=0)
+	if(stats_check_value!=0)
 	{
-		stats_check = new condition_check_t(params::stats_type,params::stats_check);
+		stats_check = new condition_check_t(stats_type, stats_check_value);
 	}
 
 	checker.reset();
-	std::cout<<"Starting the planner: "<<params::planner<<" for the system: "<<params::system<<std::endl;
-	if(stats_check==NULL)
+	std::cout<<"Starting the planner: "<<planner_name<<" for the system: "<<system_name<<std::endl;
+
+	int count = 0;
+	bool execution_done = false;
+	bool stats_print = false;
+	while(true)
 	{
 		do
 		{
-			planner->step();
+			planner->step(system, min_time_steps, max_time_steps, integration_step);
+			execution_done = checker.check();
+			if (stats_check != NULL) {
+				stats_print = stats_check->check();
+			}
 		}
-		while(!checker.check());
+		while(!execution_done && !stats_print);
+
 		std::vector<std::pair<double*,double> > controls;
 		planner->get_solution(controls);
 		double solution_cost = 0;
@@ -94,56 +131,19 @@ int main(int ac, char* av[])
 			solution_cost+=controls[i].second;
 		}
 		std::cout<<"Time: "<<checker.time()<<" Iterations: "<<checker.iterations()<<" Nodes: "<<planner->number_of_nodes<<" Solution Quality: " <<solution_cost<<std::endl ;
-		planner->visualize_tree(0);
-		planner->visualize_nodes(0);
-	}
-	else
-	{
-		int count = 0;
-		bool execution_done = false;
-		bool stats_print = false;
-		while(true)
+		stats_print = false;
+		if(intermediate_visualization || execution_done)
 		{
-			do
-			{
-				planner->step();
-				execution_done = checker.check();
-				stats_print = stats_check->check();
-			}
-			while(!execution_done && !stats_print);
-			if(stats_print)
-			{
-				std::vector<std::pair<double*,double> > controls;
-				planner->get_solution(controls);
-				double solution_cost = 0;
-				for(unsigned i=0;i<controls.size();i++)
-				{
-					solution_cost+=controls[i].second;
-				}
-				std::cout<<"Time: "<<checker.time()<<" Iterations: "<<checker.iterations()<<" Nodes: "<<planner->number_of_nodes<<" Solution Quality: " <<solution_cost<<std::endl ;
-				stats_print = false;
-				if(params::intermediate_visualization)
-				{
-					planner->visualize_tree(count);
-					planner->visualize_nodes(count);
-					count++;
-				}				
-				stats_check->reset();
-			}
-			if (execution_done)
-			{
-				std::vector<std::pair<double*,double> > controls;
-				planner->get_solution(controls);
-				double solution_cost = 0;
-				for(unsigned i=0;i<controls.size();i++)
-				{
-					solution_cost+=controls[i].second;
-				}
-				std::cout<<"Time: "<<checker.time()<<" Iterations: "<<checker.iterations()<<" Nodes: "<<planner->number_of_nodes<<" Solution Quality: " <<solution_cost<<std::endl ;
-				planner->visualize_tree(count);
-				planner->visualize_nodes(count);
-				break;
-			}
+			//this->visualize(count, system);
+			count++;
+		}
+		if (stats_check != NULL) {
+			stats_check->reset();
+		}
+
+		if (execution_done)
+		{
+			break;
 		}
 	}
 	std::cout<<"Done planning."<<std::endl;

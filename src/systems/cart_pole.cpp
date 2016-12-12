@@ -40,42 +40,21 @@
 #define MIN_W -2
 #define MAX_W 2
 
-double cart_pole_t::distance(double* point1,double* point2)
-{
-        double val = fabs(point1[STATE_THETA]-point2[STATE_THETA]);
-        if(val > M_PI)
-                val = 2*M_PI-val;
-        return std::sqrt( val * val + pow(point1[0]-point2[0],2.0) + pow(point1[1]-point2[1],2.0)+ pow(point1[3]-point2[3],2.0) );
-}
 
-void cart_pole_t::random_state(double* state)
-{
-        state[0] = uniform_random(MIN_X,MAX_X);
-        state[1] = uniform_random(MIN_V,MAX_V);
-        state[2] = uniform_random(-M_PI,M_PI);
-        state[3] = uniform_random(MIN_W,MAX_W);
-}
-
-void cart_pole_t::random_control(double* control)
-{
-        control[0] = uniform_random(-300,300);
-}
-
-bool cart_pole_t::propagate( double* start_state, double* control, int min_step, int max_step, double* result_state, double& duration )
+bool cart_pole_t::propagate( double* start_state, double* control, int num_steps, double* result_state, double integration_step)
 {
         temp_state[0] = start_state[0]; 
         temp_state[1] = start_state[1];
         temp_state[2] = start_state[2];
         temp_state[3] = start_state[3];
-        int num_steps = uniform_int_random(min_step,max_step);
         bool validity = true;
         for(int i=0;i<num_steps;i++)
         {
                 update_derivative(control);
-                temp_state[0] += params::integration_step*deriv[0];
-                temp_state[1] += params::integration_step*deriv[1];
-                temp_state[2] += params::integration_step*deriv[2];
-                temp_state[3] += params::integration_step*deriv[3];
+                temp_state[0] += integration_step*deriv[0];
+                temp_state[1] += integration_step*deriv[1];
+                temp_state[2] += integration_step*deriv[2];
+                temp_state[3] += integration_step*deriv[3];
                 enforce_bounds();
                 validity = validity && valid_state();
         }
@@ -83,7 +62,6 @@ bool cart_pole_t::propagate( double* start_state, double* control, int min_step,
         result_state[1] = temp_state[1];
         result_state[2] = temp_state[2];
         result_state[3] = temp_state[3];
-        duration = num_steps*params::integration_step;
         return validity;
 }
 
@@ -116,7 +94,7 @@ bool cart_pole_t::valid_state()
     return true;
 }
 
-svg::Point cart_pole_t::visualize_point(double* state, svg::Dimensions dims)
+svg::Point cart_pole_t::visualize_point(const double* state, svg::Dimensions dims)
 {
         double x = state[STATE_X] + (L / 2.0) * sin(state[STATE_THETA]);
         double y = -(L / 2.0) * cos(state[STATE_THETA]);
@@ -143,3 +121,28 @@ void cart_pole_t::update_derivative(double* control)
 }
 
 
+std::vector<std::pair<double, double> > cart_pole_t::get_state_bounds() {
+    return {
+            {MIN_X,MAX_X},
+            {MIN_V,MAX_V},
+            {-M_PI,M_PI},
+            {MIN_W,MAX_W},
+    };
+}
+
+
+std::vector<std::pair<double, double> > cart_pole_t::get_control_bounds() {
+    return {
+            {-300,300},
+    };
+}
+
+
+std::vector<bool> cart_pole_t::is_circular_topology() {
+    return {
+            false,
+            false,
+            true,
+            false
+    };
+}

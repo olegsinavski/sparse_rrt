@@ -27,3 +27,14 @@
 *.exe
 *.out
 *.app
+
+# Build directories
+build
+bin
+
+# IDE
+.idea
+cmake-build-debug
+
+# python
+*.pyc
