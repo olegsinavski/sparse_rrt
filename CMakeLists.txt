@@ -1,10 +1,11 @@
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 2.8)
 project(SparseRRT)
 
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 set(INCLUDE_DIRECTORIES include)
 
@@ -43,8 +44,8 @@ COMMAND "python2.7" -c
 OUTPUT_VARIABLE Numpy_VERSION)
 set( REQUIRED_NUMPY_VERSION "1.11.2" )
 if( NOT (${Numpy_VERSION} STREQUAL ${REQUIRED_NUMPY_VERSION}) )
-  message( FATAL_ERROR "Bad numpy version ${Numpy_VERSION}. Please run 'sudo pip install numpy==${REQUIRED_NUMPY_VERSION}'" )
-endif()
+   message( FATAL_ERROR "Bad numpy version ${Numpy_VERSION}. Please run 'sudo pip install numpy==${REQUIRED_NUMPY_VERSION}'" )
+ endif()
 execute_process(
 COMMAND "python2.7" -c
         "from __future__ import print_function\ntry: import numpy; print(numpy.get_include(), end='')\nexcept:pass\n"
