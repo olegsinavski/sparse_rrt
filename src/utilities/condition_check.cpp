@@ -13,6 +13,7 @@
 #include "utilities/condition_check.hpp"
 #include <iostream>
 #include <stdlib.h>
+#include <stdexcept>
 
 condition_check_t::condition_check_t(std::string type, double check )
 {
