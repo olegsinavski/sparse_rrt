@@ -35,21 +35,21 @@ execute_process(
 )
 
 # Find actual numpy in use (as opposed to system numpy)
-execute_process(
-COMMAND "python2.7" -c
-        "from __future__ import print_function\ntry: import numpy; print(numpy.__version__, end='')\nexcept:pass\n"
-OUTPUT_VARIABLE Numpy_VERSION)
-set( REQUIRED_NUMPY_VERSION "1.11.2" )
-if( NOT (${Numpy_VERSION} STREQUAL ${REQUIRED_NUMPY_VERSION}) )
-   message( FATAL_ERROR "Bad numpy version ${Numpy_VERSION}. Please run 'sudo pip install numpy==${REQUIRED_NUMPY_VERSION}'" )
- endif()
-execute_process(
-COMMAND "python2.7" -c
-        "from __future__ import print_function\ntry: import numpy; print(numpy.get_include(), end='')\nexcept:pass\n"
-        OUTPUT_VARIABLE Numpy_INCLUDE_DIRS)
+# execute_process(
+# COMMAND "python2.7" -c
+#         "from __future__ import print_function\ntry: import numpy; print(numpy.__version__, end='')\nexcept:pass\n"
+# OUTPUT_VARIABLE Numpy_VERSION)
+# set( REQUIRED_NUMPY_VERSION "1.11.2" )
+# if( NOT (${Numpy_VERSION} STREQUAL ${REQUIRED_NUMPY_VERSION}) )
+#    message( FATAL_ERROR "Bad numpy version ${Numpy_VERSION}. Please run 'sudo pip install numpy==${REQUIRED_NUMPY_VERSION}'" )
+#  endif()
+# execute_process(
+# COMMAND "python2.7" -c
+#         "from __future__ import print_function\ntry: import numpy; print(numpy.get_include(), end='')\nexcept:pass\n"
+#         OUTPUT_VARIABLE Numpy_INCLUDE_DIRS)
 
 include_directories(
-        ${Numpy_INCLUDE_DIRS}  # this should come before PYTHON includes because it also contains system numpy
+        # ${Numpy_INCLUDE_DIRS}  # this should come before PYTHON includes because it also contains system numpy
         ${PYTHON_INCLUDE_DIRS}
         "${PROJECT_SOURCE_DIR}/include"
         "${PROJECT_SOURCE_DIR}/deps/pybind11/include"

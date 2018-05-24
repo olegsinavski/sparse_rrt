@@ -40,13 +40,13 @@ public:
               std::function<double(const double*, const double*)> distance_function,
               unsigned int random_seed
     )
-        : state_dimension(a_state_bounds.size()), state_bounds(a_state_bounds)
-        , control_dimension(a_control_bounds.size()), control_bounds(a_control_bounds)
-        , distance(distance_function)
-        , start_state(this->alloc_state_point())
-        , goal_state(this->alloc_state_point())
-        , number_of_nodes(0)
-        , random_generator(random_seed)
+        //: state_dimension(a_state_bounds.size()), state_bounds(a_state_bounds)
+        //, control_dimension(a_control_bounds.size()), control_bounds(a_control_bounds)
+        //, distance(distance_function)
+        //, start_state(this->alloc_state_point())
+        //, goal_state(this->alloc_state_point())
+        //, number_of_nodes(0)
+        //, random_generator(random_seed)
     {
 	}
 	virtual ~planner_t()
