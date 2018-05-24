@@ -75,7 +75,6 @@ def run_point_sst(config_path):
     for iteration in range(number_of_iterations):
         planner.step(system, min_time_steps, max_time_steps, integration_step)
         if iteration % 1000 == 0:
-            print('b')
             solution = planner.get_solution()
 
             if solution is None:
@@ -103,4 +102,4 @@ def run_point_sst(config_path):
 
 if __name__ == '__main__':
     configs_path = os.path.join(os.path.dirname(__file__), "../input")
-    run_point_sst(os.path.join(configs_path, 'sst_cart_pole.cfg'))
+    run_point_sst(os.path.join(configs_path, 'sst_pendulum.cfg'))

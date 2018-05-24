@@ -30,11 +30,12 @@ def test_point_sst():
     start_time = time.time()
 
     expected_results = {
-        0: (2, None),
-        100000: (5037, 2.53),
-        200000: (5260, 2.152),
-        300000: (5510, 2.076),
-        400000: (5694, 2.062),
+        0: (1, None),
+        100000: (4900, 2.486),
+        200000: (5291, 2.072),
+        300000: (5436, 1.996),
+        400000: (5611, 1.988),
+        'final': (5629, 1.988)
     }
 
     for iteration in range(number_of_iterations):
@@ -61,8 +62,9 @@ def test_point_sst():
     print("Time: %.2fs, Iterations: %d, Nodes: %d, Solution Quality: %f" %
           (time.time() - start_time, number_of_iterations, planner.get_number_of_nodes(), solution_cost))
 
-    assert(planner.get_number_of_nodes() == 5716)
-    assert(abs(solution_cost - 2.062) < 1e-9)
+    expected_number_of_nodes, expected_solution_cost = expected_results['final']
+    assert(planner.get_number_of_nodes() == expected_number_of_nodes)
+    assert(abs(solution_cost - expected_solution_cost) < 1e-9)
 
 
 def test_car_pose_sst():

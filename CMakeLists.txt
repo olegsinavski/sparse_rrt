@@ -3,8 +3,7 @@ project(SparseRRT)
 
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_FLAGS "-std=c++0x ${CMAKE_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS "-std=c++1y ${CMAKE_CXX_FLAGS}")
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 set(INCLUDE_DIRECTORIES include)
@@ -56,6 +55,7 @@ include_directories(
         ${Numpy_INCLUDE_DIRS}  # this should come before PYTHON includes because it also contains system numpy
         ${PYTHON_INCLUDE_DIRS}
         "${PROJECT_SOURCE_DIR}/include"
+        "${PROJECT_SOURCE_DIR}/deps/pybind11/include"
         )
 
 
@@ -75,7 +75,7 @@ set(SOURCE_FILES
         src/utilities/timer.cpp
         src/image_creation/svg_image.cpp
         src/image_creation/planner_visualization.cpp
-        src/systems/distance_functions.cpp include/systems/distance_functions.h)
+        src/systems/distance_functions.cpp)
 
 add_library(${PROJECT_NAME} STATIC
     ${SOURCE_FILES})
@@ -89,8 +89,12 @@ file(GLOB files ${PROJECT_SOURCE_DIR}/tests/*.cpp)
 #target_link_libraries(${fname} ${PROJECT_NAME} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES})
 #endforeach()
 
+# add_library(sst_module SHARED
+#     ${PROJECT_SOURCE_DIR}/src/motion_planners/sst_wrapper.cpp)
+# target_link_libraries(sst_module ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} ${PROJECT_NAME})
+
 add_library(sst_module SHARED
-    ${PROJECT_SOURCE_DIR}/src/motion_planners/sst_wrapper.cpp)
+    ${PROJECT_SOURCE_DIR}/src/python_wrapper.cpp)
 target_link_libraries(sst_module ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} ${PROJECT_NAME})
 
 # Don't prepend wrapper library name with lib and add to Python libs.
