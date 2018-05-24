@@ -25,17 +25,28 @@ class sample_node_t;
 class sst_node_t : public tree_node_t
 {
 public:
-	sst_node_t() : tree_node_t()
+	sst_node_t()
+	    : tree_node_t()
+	    , active(true)
+	    , witness(NULL)
 	{
-		inactive = false;
-		witness = NULL;
 	}
+
+	bool is_active() const {
+	    return active;
+	}
+
+	void make_inactive() {
+	    this->active = false;
+	}
+
+private:
 	/**
 	 * A flag for inclusion in the metric.
 	 */
-	bool inactive;
+	bool active;
 
-	sample_node_t* witness;
+    sample_node_t* witness;
 
 };
 
@@ -47,15 +58,23 @@ public:
 class sample_node_t : public tree_node_t
 {
 public:
-	sample_node_t() : tree_node_t()
-	{
-		rep = NULL;
-	}
-	/**
+	sample_node_t(sst_node_t* const representative)
+	    : tree_node_t()
+	    , rep(representative)
+	{ }
+
+    void set_representative(sst_node_t* const representative) {
+        this->rep = representative;
+    }
+
+    sst_node_t* get_representative() const {
+        return this->rep;
+    }
+private:
+    /**
 	 * The node that represents this sample.
 	 */
 	sst_node_t* rep;
-
 };
 
 

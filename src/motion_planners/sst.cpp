@@ -26,16 +26,15 @@ void sst_t::setup_planning()
 	//create the root of the tree
 	root = new sst_node_t();
 	root->point = this->alloc_state_point();
-	this->copy_state_point(root->point,start_state);
+	this->copy_state_point(root->point, start_state);
 	add_point_to_metric(root);
 	number_of_nodes++;
 
 	samples.set_distance(this->distance);
 
-    sample_node_t* first_witness_sample = new sample_node_t();
+    sample_node_t* first_witness_sample = new sample_node_t(static_cast<sst_node_t*>(root));
     first_witness_sample->point = this->alloc_state_point();
 	this->copy_state_point(first_witness_sample->point, start_state);
-    first_witness_sample->rep = (sst_node_t*)root;
 
 	add_point_to_samples(first_witness_sample);
 }
@@ -141,7 +140,8 @@ void sst_t::add_to_tree(const double* sample_state, const double* sample_control
 	//check to see if a sample exists within the vicinity of the new node
     sample_node_t* witness_sample = find_witness(sample_state);
 
-	if(witness_sample->rep==NULL || witness_sample->rep->cost > nearest->cost + duration)
+    sst_node_t* representative = witness_sample->get_representative();
+	if(representative==NULL || representative->cost > nearest->cost + duration)
 	{
 		if(best_goal==NULL || nearest->cost + duration <= best_goal->cost)
 		{
@@ -172,18 +172,19 @@ void sst_t::add_to_tree(const double* sample_state, const double* sample_control
 	        	branch_and_bound((sst_node_t*)root);
 	        }
 
-
-			if(witness_sample->rep!=NULL)
+            // Acquire representative again - it can be different
+            representative = witness_sample->get_representative();
+			if(representative!=NULL)
 			{
 				//optimization for sparsity
-				if(!(witness_sample->rep->inactive))
+				if(representative->is_active())
 				{
-					remove_point_from_metric(witness_sample->rep);
-					witness_sample->rep->inactive = true;
+					remove_point_from_metric(representative);
+					representative->make_inactive();
 				}
 
-	            sst_node_t* iter = witness_sample->rep;
-	            while( is_leaf(iter) && iter->inactive && !is_best_goal(iter))
+	            sst_node_t* iter = representative;
+	            while( is_leaf(iter) && !iter->is_active() && !is_best_goal(iter))
 	            {
 	                sst_node_t* next = (sst_node_t*)iter->parent;
 	                remove_leaf(iter);
@@ -191,7 +192,7 @@ void sst_t::add_to_tree(const double* sample_state, const double* sample_control
 	            } 
 
 			}
-			witness_sample->rep = new_node;
+			witness_sample->set_representative(new_node);
 			new_node->witness = witness_sample;
 			add_point_to_metric(new_node);
 		}
@@ -206,7 +207,7 @@ sample_node_t* sst_t::find_witness(const double* sample_state)
 	if(distance > this->sst_delta_drain)
 	{
 		//create a new sample
-		witness_sample = new sample_node_t();
+		witness_sample = new sample_node_t(NULL);
 		witness_sample->point = this->alloc_state_point();
 		this->copy_state_point(witness_sample->point, sample_state);
 		add_point_to_samples(witness_sample);
@@ -223,9 +224,9 @@ void sst_t::branch_and_bound(sst_node_t* node)
     }
     if(is_leaf(node) && node->cost > best_goal->cost)
     {
-    	if(!node->inactive)
+    	if(node->is_active())
     	{
-	    	node->witness->rep = NULL;
+	    	node->witness->set_representative(NULL);
 	    	remove_point_from_metric(node);
 	    }
     	remove_leaf(node);
