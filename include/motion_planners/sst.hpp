@@ -40,14 +40,20 @@ public:
 	    this->active = false;
 	}
 
+	void set_witness(sample_node_t* a_witness) {
+	    this->witness = a_witness;
+	}
+
+    void clear_witness_representative() {
+	    this->witness->set_representative(NULL);
+	}
+
 private:
 	/**
 	 * A flag for inclusion in the metric.
 	 */
 	bool active;
-
     sample_node_t* witness;
-
 };
 
 /**

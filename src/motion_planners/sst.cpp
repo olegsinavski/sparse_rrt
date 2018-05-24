@@ -193,7 +193,7 @@ void sst_t::add_to_tree(const double* sample_state, const double* sample_control
 
 			}
 			witness_sample->set_representative(new_node);
-			new_node->witness = witness_sample;
+			new_node->set_witness(witness_sample);
 			add_point_to_metric(new_node);
 		}
 	}	
@@ -226,7 +226,7 @@ void sst_t::branch_and_bound(sst_node_t* node)
     {
     	if(node->is_active())
     	{
-	    	node->witness->set_representative(NULL);
+	    	node->clear_witness_representative();
 	    	remove_point_from_metric(node);
 	    }
     	remove_leaf(node);
