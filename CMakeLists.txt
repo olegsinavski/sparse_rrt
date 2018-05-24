@@ -14,8 +14,6 @@ IF(APPLE)
    set(CMAKE_MACOSX_RPATH 1)
 ENDIF(APPLE)
 
-find_package(Boost COMPONENTS program_options python REQUIRED)
-
 # Instead of find_package(PythonLibs REQUIRED), we manually search for python to make sure we link to the active version
 # (as opposed to system python if brew python is installed)
 execute_process(
@@ -51,7 +49,6 @@ COMMAND "python2.7" -c
         OUTPUT_VARIABLE Numpy_INCLUDE_DIRS)
 
 include_directories(
-        ${Boost_INCLUDE_DIRS}
         ${Numpy_INCLUDE_DIRS}  # this should come before PYTHON includes because it also contains system numpy
         ${PYTHON_INCLUDE_DIRS}
         "${PROJECT_SOURCE_DIR}/include"
@@ -79,23 +76,22 @@ set(SOURCE_FILES
 
 add_library(${PROJECT_NAME} STATIC
     ${SOURCE_FILES})
-target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
 
 file(GLOB files ${PROJECT_SOURCE_DIR}/tests/*.cpp)
 
 #foreach(f ${files})
 #GET_FILENAME_COMPONENT(fname ${f} NAME_WE )
 #add_executable(${fname} ${f} )
-#target_link_libraries(${fname} ${PROJECT_NAME} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES})
+#target_link_libraries(${fname} ${PROJECT_NAME} ${PYTHON_LIBRARIES})
 #endforeach()
 
 # add_library(sst_module SHARED
 #     ${PROJECT_SOURCE_DIR}/src/motion_planners/sst_wrapper.cpp)
-# target_link_libraries(sst_module ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} ${PROJECT_NAME})
+# target_link_libraries(sst_module ${PYTHON_LIBRARIES} ${PROJECT_NAME})
 
 add_library(sst_module SHARED
     ${PROJECT_SOURCE_DIR}/src/python_wrapper.cpp)
-target_link_libraries(sst_module ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} ${PROJECT_NAME})
+target_link_libraries(sst_module ${PYTHON_LIBRARIES} ${PROJECT_NAME})
 
 # Don't prepend wrapper library name with lib and add to Python libs.
 set_target_properties(sst_module PROPERTIES
