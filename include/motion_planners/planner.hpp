@@ -40,8 +40,10 @@ public:
               std::function<double(const double*, const double*)> distance_function,
               unsigned int random_seed
     )
-        : state_dimension(a_state_bounds.size()), state_bounds(a_state_bounds)
-        , control_dimension(a_control_bounds.size()), control_bounds(a_control_bounds)
+        : state_dimension(a_state_bounds.size())
+        , state_bounds(a_state_bounds)
+        , control_dimension(a_control_bounds.size())
+        , control_bounds(a_control_bounds)
         , distance(distance_function)
         , start_state(this->alloc_state_point())
         , goal_state(this->alloc_state_point())
@@ -51,7 +53,8 @@ public:
 	}
 	virtual ~planner_t()
 	{
-
+        dealloc_state_point(&start_state);
+        dealloc_state_point(&goal_state);
 	}
 
 	/**
@@ -114,7 +117,18 @@ public:
 	 */
 	double* alloc_state_point()
 	{
-		return new double[this->state_dimension];
+	    try {
+		    return new double[this->state_dimension];
+		} catch (const std::bad_alloc& e) {
+		    std::cout << "alloc_state_point (dims=" << this->state_dimension << ") failed: " << e.what() << '\n';
+		    return NULL;
+		}
+	}
+	void dealloc_state_point(double** state_point)
+	{
+	    assert( *state_point != NULL );
+		delete[] *state_point;
+		*state_point = NULL;
 	}
 
 	/**
@@ -171,6 +185,9 @@ public:
 
 protected:
 
+    unsigned int state_dimension;
+	unsigned int control_dimension;
+
     /**
      * @brief The tree of the motion planner starts here.
      */
@@ -190,9 +207,6 @@ protected:
 	 * @brief The size of the spherical goal region around the goal state.
 	 */
 	double goal_radius;
-
-	unsigned int state_dimension;
-	unsigned int control_dimension;
 
     std::vector<std::pair<double, double> > state_bounds;
     std::vector<std::pair<double, double> > control_bounds;

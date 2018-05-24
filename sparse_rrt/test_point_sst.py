@@ -90,7 +90,10 @@ def test_car_pose_sst():
         planner.step(system, min_time_steps, max_time_steps, integration_step)
 
 
-def test_create_twice():
+def test_create_multiple_times():
+    '''
+    There used to be a crash during construction
+    '''
     system = _sst_module.CartPole()
     planners = []
     for i in range(100):
@@ -109,7 +112,7 @@ def test_create_twice():
 
 
 if __name__ == '__main__':
-    # test_point_sst()
-    # test_car_pose_sst()
-    test_create_twice()
+    test_point_sst()
+    test_car_pose_sst()
+    test_create_multiple_times()
     print('Passed all tests!')

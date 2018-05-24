@@ -192,20 +192,17 @@ public:
             control_bounds_v.push_back(bounds_t(control_bounds(i, 0), control_bounds(i, 1)));
         }
 
-
-        pp.reset(
+        planner.reset(
                 new sst_t(
                         state_bounds_v, control_bounds_v,
                         euclidian_distance(is_circular_topology_v),
                         random_seed,
                         sst_delta_near, sst_delta_drain)
         );
-//
-//        planner->set_start_goal_state(&start_state(0), &goal_state(0), goal_radius);
-//        planner->setup_planning();
+
+        planner->set_start_goal_state(&start_state(0), &goal_state(0), goal_radius);
+        planner->setup_planning();
     }
-private:
-    std::unique_ptr<sst_t> pp;
 };
 
 
