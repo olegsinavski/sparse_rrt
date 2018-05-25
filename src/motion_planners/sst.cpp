@@ -27,7 +27,7 @@ void sst_t::setup_planning()
     double* point = this->alloc_state_point();
 	this->copy_state_point(point, start_state);
 
-	root = new sst_node_t(point, NULL);
+	root = new sst_node_t(point, NULL, NULL);
 
 	add_point_to_metric(root);
 	number_of_nodes++;
@@ -72,10 +72,10 @@ void sst_t::get_solution(std::vector<std::vector<double>>& solution_path, std::v
 
         std::vector<double> current_control;
         for (unsigned c=0; c<this->control_dimension; c++) {
-            current_control.push_back(path[i]->parent_edge->control[c]);
+            current_control.push_back(path[i]->get_parent_edge()->control[c]);
         }
         controls.push_back(current_control);
-        costs.push_back(path[i]->parent_edge->duration);
+        costs.push_back(path[i]->get_parent_edge()->duration);
 	}
 }
 void sst_t::step(system_t* system, int min_time_steps, int max_time_steps, double integration_step)
@@ -106,14 +106,14 @@ void sst_t::step(system_t* system, int min_time_steps, int max_time_steps, doubl
 void sst_t::add_point_to_metric(tree_node_t* state)
 {
 	proximity_node_t* new_node = new proximity_node_t(state);
-	state->prox_node = new_node;
+	state->set_proximity_node(new_node);
 	metric.add_node(new_node);
 }
 
 void sst_t::add_point_to_samples(tree_node_t* state)
 {
 	proximity_node_t* new_node = new proximity_node_t(state);
-	state->prox_node = new_node;
+	state->set_proximity_node(new_node);
 	samples.add_node(new_node);
 }
 
@@ -152,13 +152,14 @@ void sst_t::add_to_tree(const double* sample_state, const double* sample_control
 			double* point = this->alloc_state_point();
 			this->copy_state_point(point,sample_state);
 
-			sst_node_t* new_node = new sst_node_t(point, nearest);
-
 			//create the link to the parent node
-			new_node->parent_edge = new tree_edge_t();
-			new_node->parent_edge->control = this->alloc_control_point();
-			this->copy_control_point(new_node->parent_edge->control, sample_control);
-			new_node->parent_edge->duration = duration;
+			auto parent_edge = new tree_edge_t();
+			parent_edge->control = this->alloc_control_point();
+			this->copy_control_point(parent_edge->control, sample_control);
+			parent_edge->duration = duration;
+
+			sst_node_t* new_node = new sst_node_t(point, nearest, parent_edge);
+
 			new_node->cost = nearest->cost + duration;
 			//set parent's child
 			nearest->add_child(new_node);
@@ -240,8 +241,8 @@ void sst_t::branch_and_bound(sst_node_t* node)
 
 void sst_t::remove_point_from_metric(tree_node_t* node)
 {
-	proximity_node_t* old_node = node->prox_node;
-    node->prox_node = nullptr;
+	const proximity_node_t* old_node = node->get_proximity_node();
+    node->set_proximity_node(nullptr);
 	metric.remove_node(old_node);
 	delete old_node;
 }
@@ -255,7 +256,7 @@ void sst_t::remove_leaf(sst_node_t* node)
 {
 	if(node->get_parent() != NULL)
 	{
-		tree_edge_t* edge = node->parent_edge;
+		tree_edge_t* edge = node->get_parent_edge();
 		node->get_parent()->remove_child(node);
 		number_of_nodes--;
 		delete edge->control;

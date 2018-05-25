@@ -56,7 +56,7 @@ class proximity_node_t
          * @brief Gets the position of the node in the data structure.
          * @return The index value.
          */
-        int get_index();
+        int get_index() const;
         
         /**
          * Sets the position of the node in the data structure. Used for fast deletion.
@@ -71,7 +71,7 @@ class proximity_node_t
          * @param nr_neigh Storage for the number of neighbors returned.
          * @return The neighbor indices.
          */
-        unsigned int* get_neighbors( int* nr_neigh );
+        unsigned int* get_neighbors( int* nr_neigh ) const;
 
         /**
          * Adds a node index into this node's neighbor list.
@@ -169,7 +169,7 @@ class graph_nearest_neighbors_t
          * @brief Removes a node from the structure.
          * @param node
          */
-        void remove_node( proximity_node_t* node );
+        void remove_node( const proximity_node_t* node );
 
         /**
          * Prints the average degree of all vertices in the data structure.

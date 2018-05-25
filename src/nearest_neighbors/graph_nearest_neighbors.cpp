@@ -37,7 +37,7 @@ const tree_node_t* proximity_node_t::get_state( )
     return state;
 }
 
-int proximity_node_t::get_index()
+int proximity_node_t::get_index() const
 {
     return index;
 }
@@ -47,7 +47,7 @@ void proximity_node_t::set_index( int indx )
     index = indx;
 }
 
-unsigned int* proximity_node_t::get_neighbors( int* nr_neigh )
+unsigned int* proximity_node_t::get_neighbors( int* nr_neigh ) const
 {
     *nr_neigh = nr_neighbors;
     return neighbors;
@@ -208,7 +208,7 @@ void graph_nearest_neighbors_t::add_node( proximity_node_t* graph_node )
 
 }
  
-void graph_nearest_neighbors_t::remove_node( proximity_node_t* graph_node )
+void graph_nearest_neighbors_t::remove_node( const proximity_node_t* graph_node )
 {
     int nr_neighbors;
     unsigned int* neighbors = graph_node->get_neighbors( &nr_neighbors );

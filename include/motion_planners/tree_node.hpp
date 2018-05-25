@@ -42,24 +42,14 @@ public:
 class tree_node_t
 {
 public:
-	tree_node_t(double* a_point)
+	tree_node_t(double* a_point, tree_edge_t* a_parent_edge)
 	    : point(a_point)
+	    , prox_node(NULL)
+	    , parent_edge(a_parent_edge)
 	{
-		prox_node = NULL;
-		parent_edge = NULL;
 		children.clear();
 		cost = 0;
 	}
-
-    /**
-     * @brief A pointer to the node in the nearest neighbor structure for easy removal.
-     */
-    proximity_node_t* prox_node;
-
-    /**
-    * @brief Parent edge
-    */
-    tree_edge_t* parent_edge;
 
     /**
      * @brief The path cost to this node.
@@ -91,6 +81,18 @@ public:
         return this->children.size()==0;
     }
 
+    void set_proximity_node(proximity_node_t* proximity_node) {
+        this->prox_node = proximity_node;
+    }
+
+    const proximity_node_t* get_proximity_node() const {
+        return this->prox_node;
+    }
+
+    tree_edge_t* get_parent_edge() const {
+        return this->parent_edge;
+    }
+
 private:
      /**
      * @brief The state represented by this node.
@@ -100,6 +102,14 @@ private:
      * @brief Children vertices
      */
     std::list<tree_node_t*> children;
+    /**
+     * @brief A pointer to the node in the nearest neighbor structure for easy removal.
+     */
+    proximity_node_t* prox_node;
+    /**
+    * @brief Parent edge
+    */
+    tree_edge_t* parent_edge;
 };
 
 #endif

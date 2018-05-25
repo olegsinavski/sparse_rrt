@@ -20,8 +20,8 @@
 class rrt_node_t : public tree_node_t
 {
 public:
-	rrt_node_t(double* point, rrt_node_t* a_parent)
-	    : tree_node_t(point)
+	rrt_node_t(double* point, rrt_node_t* a_parent, tree_edge_t* a_parent_edge)
+	    : tree_node_t(point, a_parent_edge)
 	    , parent(a_parent)
 	{
 	}

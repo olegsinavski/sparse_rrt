@@ -25,8 +25,8 @@ class sample_node_t;
 class sst_node_t : public tree_node_t
 {
 public:
-	sst_node_t(double* point, sst_node_t* a_parent)
-	    : tree_node_t(point)
+	sst_node_t(double* point, sst_node_t* a_parent, tree_edge_t* a_parent_edge)
+	    : tree_node_t(point, a_parent_edge)
 	    , parent(a_parent)
 	    , active(true)
 	    , witness(NULL)
@@ -76,7 +76,7 @@ class sample_node_t : public tree_node_t
 public:
 	sample_node_t(sst_node_t* const representative,
 	              double* a_point)
-	    : tree_node_t(a_point)
+	    : tree_node_t(a_point, NULL)
 	    , rep(representative)
 	{ }
 
