@@ -13,7 +13,7 @@
  */
 void visualize_edge(tree_node_t* node, system_t* system, svg::Document& doc, svg::Dimensions& dim, double tree_line_width)
 {
-	for (std::list<tree_node_t*>::const_iterator i = node->children.begin(); i != node->children.end(); ++i)
+	for (std::list<tree_node_t*>::const_iterator i = node->get_children().begin(); i != node->get_children().end(); ++i)
 	{
 		svg::Polyline traj_line(svg::Stroke(tree_line_width, svg::Color::Blue));
 
@@ -58,7 +58,7 @@ void get_max_cost(tree_node_t* node, double& max_cost, std::vector<tree_node_t*>
 	nodes.push_back(node);
 	if(node->cost > max_cost)
 		max_cost = node->cost;
-	for (std::list<tree_node_t*>::const_iterator i = node->children.begin(); i != node->children.end(); ++i)
+	for (std::list<tree_node_t*>::const_iterator i = node->get_children().begin(); i != node->get_children().end(); ++i)
 	{
 		get_max_cost(*i, max_cost, nodes);
 	}

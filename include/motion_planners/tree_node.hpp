@@ -75,9 +75,9 @@ public:
         point = NULL;
     }
 
-//    const std::list<tree_node_t*>& get_children() const {
-//        return this->children;
-//    }
+    const std::list<tree_node_t*>& get_children() const {
+        return this->children;
+    }
 
     void add_child(tree_node_t* node) {
         this->children.insert(this->children.begin(), node);
@@ -86,17 +86,20 @@ public:
     void remove_child(tree_node_t* node) {
         this->children.remove(node);
     }
-    /**
-     * @brief Children vertices
-     */
-    std::list<tree_node_t*> children;
+
+    bool is_leaf() const {
+        return this->children.size()==0;
+    }
 
 private:
      /**
      * @brief The state represented by this node.
      */
     double* point;
-
+     /**
+     * @brief Children vertices
+     */
+    std::list<tree_node_t*> children;
 };
 
 #endif

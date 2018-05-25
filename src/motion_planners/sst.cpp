@@ -221,8 +221,9 @@ sample_node_t* sst_t::find_witness(const double* sample_state)
 
 void sst_t::branch_and_bound(sst_node_t* node)
 {
-    std::list<tree_node_t*> children = node->children;
-    for (std::list<tree_node_t*>::iterator iter = children.begin(); iter != children.end(); ++iter)
+    // Copy children becuase apparently, they are going to be modified
+    std::list<tree_node_t*> children = node->get_children();
+    for (std::list<tree_node_t*>::const_iterator iter = children.begin(); iter != children.end(); ++iter)
     {
     	branch_and_bound((sst_node_t*)(*iter));
     }
@@ -247,7 +248,7 @@ void sst_t::remove_point_from_metric(tree_node_t* node)
 
 bool sst_t::is_leaf(tree_node_t* node)
 {
-	return node->children.size()==0;
+	return node->is_leaf();
 }
 
 void sst_t::remove_leaf(sst_node_t* node)
@@ -255,7 +256,7 @@ void sst_t::remove_leaf(sst_node_t* node)
 	if(node->get_parent() != NULL)
 	{
 		tree_edge_t* edge = node->parent_edge;
-		node->get_parent()->children.remove(node);
+		node->get_parent()->remove_child(node);
 		number_of_nodes--;
 		delete edge->control;
 		node->dealloc_point();
