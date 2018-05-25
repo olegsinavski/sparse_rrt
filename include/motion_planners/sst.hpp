@@ -44,8 +44,8 @@ public:
 	    this->witness = a_witness;
 	}
 
-    void clear_witness_representative() {
-	    this->witness->set_representative(NULL);
+    sample_node_t* get_witness() const {
+	    return this->witness;
 	}
 
 private:

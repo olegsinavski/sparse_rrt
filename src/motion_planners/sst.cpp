@@ -226,7 +226,7 @@ void sst_t::branch_and_bound(sst_node_t* node)
     {
     	if(node->is_active())
     	{
-	    	node->clear_witness_representative();
+	    	node->get_witness()->set_representative(NULL);
 	    	remove_point_from_metric(node);
 	    }
     	remove_leaf(node);
