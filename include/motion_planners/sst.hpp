@@ -172,7 +172,7 @@ protected:
 	 * 
 	 * @param node The sample to add.
 	 */
-	void add_point_to_samples(tree_node_t* node);
+	void add_point_to_samples(sample_node_t* node);
 
 	/**
 	 * @brief Check if the currently created state is close to a witness.

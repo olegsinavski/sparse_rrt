@@ -110,7 +110,7 @@ void sst_t::add_point_to_metric(tree_node_t* state)
 	metric.add_node(new_node);
 }
 
-void sst_t::add_point_to_samples(tree_node_t* state)
+void sst_t::add_point_to_samples(sample_node_t* state)
 {
 	proximity_node_t* new_node = new proximity_node_t(state);
 	state->set_proximity_node(new_node);

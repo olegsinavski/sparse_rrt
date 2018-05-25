@@ -48,7 +48,6 @@ public:
 	    , parent_edge(a_parent_edge)
 	    , cost(a_cost)
 	{
-		children.clear();
 	}
 
     double* get_point() const {
