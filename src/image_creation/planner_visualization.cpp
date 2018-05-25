@@ -13,18 +13,16 @@
  */
 void visualize_edge(tree_node_t* node, system_t* system, svg::Document& doc, svg::Dimensions& dim, double tree_line_width)
 {
-	for (std::list<tree_node_t*>::iterator i = node->children.begin(); i != node->children.end(); ++i)
+	for (std::list<tree_node_t*>::const_iterator i = node->children.begin(); i != node->children.end(); ++i)
 	{
 		svg::Polyline traj_line(svg::Stroke(tree_line_width, svg::Color::Blue));
 
-		traj_line<<system->visualize_point(node->point,dim);
-		traj_line<<system->visualize_point((*i)->point,dim);
+		traj_line<<system->visualize_point(node->get_point(),dim);
+		traj_line<<system->visualize_point((*i)->get_point(),dim);
 		doc<<traj_line;
 
 		visualize_edge(*i, system, doc, dim, tree_line_width);
-
 	}
-
 }
 
 /**
@@ -60,7 +58,7 @@ void get_max_cost(tree_node_t* node, double& max_cost, std::vector<tree_node_t*>
 	nodes.push_back(node);
 	if(node->cost > max_cost)
 		max_cost = node->cost;
-	for (std::list<tree_node_t*>::iterator i = node->children.begin(); i != node->children.end(); ++i)
+	for (std::list<tree_node_t*>::const_iterator i = node->children.begin(); i != node->children.end(); ++i)
 	{
 		get_max_cost(*i, max_cost, nodes);
 	}
@@ -97,7 +95,7 @@ void visualize_node(
     svg::Document& doc, svg::Dimensions& dim, double node_diameter, double max_cost)
 {
 
-	svg::Circle circle(system->visualize_point(node->point,dim), node_diameter, svg::Fill( svg::Color((node->cost/max_cost)*255,(node->cost/max_cost)*255,(node->cost/max_cost)*255) ) );
+	svg::Circle circle(system->visualize_point(node->get_point(), dim), node_diameter, svg::Fill( svg::Color((node->cost/max_cost)*255,(node->cost/max_cost)*255,(node->cost/max_cost)*255) ) );
 	doc<<circle;
 	// for (std::list<tree_node_t*>::iterator i = node->children.begin(); i != node->children.end(); ++i)
 	// {

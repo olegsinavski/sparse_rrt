@@ -16,6 +16,27 @@
 #include "systems/system.hpp"
 #include "motion_planners/planner.hpp"
 
+
+class rrt_node_t : public tree_node_t
+{
+public:
+	rrt_node_t(double* point, rrt_node_t* a_parent)
+	    : tree_node_t(point)
+	    , parent(a_parent)
+	{
+	}
+
+    rrt_node_t* get_parent() const {
+        return this->parent;
+    }
+
+private:
+    /**
+     * @brief Parent node.
+     */
+    rrt_node_t* parent;
+};
+
 /**
  * @brief The motion planning algorithm RRT (Rapidly-exploring Random Tree)
  * @details The motion planning algorithm RRT (Rapidly-exploring Random Tree)
@@ -77,7 +98,7 @@ protected:
 	/**
 	 * @brief The result of a query in the nearest neighbor structure.
 	 */
-	tree_node_t* nearest;
+	rrt_node_t* nearest;
 
 	/**
 	 * @brief Find the nearest node to the randomly sampled state.

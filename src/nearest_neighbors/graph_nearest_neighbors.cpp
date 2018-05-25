@@ -29,7 +29,7 @@ proximity_node_t::~proximity_node_t()
 
 double proximity_node_t::distance ( const double* st )
 {
-    return this->distance_function(state->point, st);
+    return this->distance_function(state->get_point(), st);
 }
 
 const tree_node_t* proximity_node_t::get_state( )
@@ -187,7 +187,7 @@ void graph_nearest_neighbors_t::add_node( proximity_node_t* graph_node )
 	graph_node->distance_function = this->distance_function;
     int k = percolation_threshold();
 
-    int new_k = find_k_close(graph_node->get_state()->point, second_nodes, second_distances, k );
+    int new_k = find_k_close(graph_node->get_state()->get_point(), second_nodes, second_distances, k );
 
     if( nr_nodes >= cap_nodes-1 )
     {

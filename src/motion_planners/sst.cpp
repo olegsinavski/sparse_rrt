@@ -24,17 +24,20 @@ void sst_t::setup_planning()
 	//initialize the metrics
 	metric.set_distance(this->distance);
 	//create the root of the tree
-	root = new sst_node_t();
-	root->point = this->alloc_state_point();
-	this->copy_state_point(root->point, start_state);
+    double* point = this->alloc_state_point();
+	this->copy_state_point(point, start_state);
+
+	root = new sst_node_t(point, NULL);
+
 	add_point_to_metric(root);
 	number_of_nodes++;
 
 	samples.set_distance(this->distance);
 
-    sample_node_t* first_witness_sample = new sample_node_t(static_cast<sst_node_t*>(root));
-    first_witness_sample->point = this->alloc_state_point();
-	this->copy_state_point(first_witness_sample->point, start_state);
+    double* witness_point = this->alloc_state_point();
+    this->copy_state_point(witness_point, start_state);
+
+    sample_node_t* first_witness_sample = new sample_node_t(static_cast<sst_node_t*>(root), witness_point);
 
 	add_point_to_samples(first_witness_sample);
 }
@@ -43,19 +46,19 @@ void sst_t::get_solution(std::vector<std::vector<double>>& solution_path, std::v
 {
 	if(best_goal==NULL)
 		return;
-	tree_node_t* nearest_path_node = best_goal;
+	sst_node_t* nearest_path_node = best_goal;
 	
 	//now nearest_path_node should be the closest node to the goal state
-	std::deque<tree_node_t*> path;
-	while(nearest_path_node->parent!=NULL)
+	std::deque<sst_node_t*> path;
+	while(nearest_path_node->get_parent()!=NULL)
 	{
 		path.push_front(nearest_path_node);
-        nearest_path_node = nearest_path_node->parent;
+        nearest_path_node = nearest_path_node->get_parent();
 	}
 
     std::vector<double> root_state;
     for (unsigned c=0; c<this->state_dimension; c++) {
-        root_state.push_back(root->point[c]);
+        root_state.push_back(root->get_point()[c]);
     }
     solution_path.push_back(root_state);
 
@@ -63,7 +66,7 @@ void sst_t::get_solution(std::vector<std::vector<double>>& solution_path, std::v
 	{
         std::vector<double> current_state;
         for (unsigned c=0; c<this->state_dimension; c++) {
-            current_state.push_back(path[i]->point[c]);
+            current_state.push_back(path[i]->get_point()[c]);
         }
         solution_path.push_back(current_state);
 
@@ -92,7 +95,7 @@ void sst_t::step(system_t* system, int min_time_steps, int max_time_steps, doubl
     sst_node_t* nearest = nearest_vertex(sample_state);
 	int num_steps = this->random_generator.uniform_int_random(min_time_steps, max_time_steps);
     double duration = num_steps*integration_step;
-	if(system->propagate(nearest->point, sample_control, num_steps, sample_state, integration_step))
+	if(system->propagate(nearest->get_point(), sample_control, num_steps, sample_state, integration_step))
 	{
 		add_to_tree(sample_state, sample_control, nearest, duration);
 	}
@@ -146,27 +149,27 @@ void sst_t::add_to_tree(const double* sample_state, const double* sample_control
 		if(best_goal==NULL || nearest->cost + duration <= best_goal->cost)
 		{
 			//create a new tree node
-			sst_node_t* new_node = new sst_node_t();
-			new_node->point = this->alloc_state_point();
-			this->copy_state_point(new_node->point,sample_state);
+			double* point = this->alloc_state_point();
+			this->copy_state_point(point,sample_state);
+
+			sst_node_t* new_node = new sst_node_t(point, nearest);
+
 			//create the link to the parent node
 			new_node->parent_edge = new tree_edge_t();
 			new_node->parent_edge->control = this->alloc_control_point();
 			this->copy_control_point(new_node->parent_edge->control, sample_control);
 			new_node->parent_edge->duration = duration;
-			//set this node's parent
-			new_node->parent = nearest;
 			new_node->cost = nearest->cost + duration;
 			//set parent's child
-			nearest->children.insert(nearest->children.begin(),new_node);
+			nearest->add_child(new_node);
 			number_of_nodes++;
 
-	        if(best_goal==NULL && this->distance(new_node->point,goal_state)<goal_radius)
+	        if(best_goal==NULL && this->distance(new_node->get_point(), goal_state)<goal_radius)
 	        {
 	        	best_goal = new_node;
 	        	branch_and_bound((sst_node_t*)root);
 	        }
-	        else if(best_goal!=NULL && best_goal->cost > new_node->cost && this->distance(new_node->point,goal_state)<goal_radius)
+	        else if(best_goal!=NULL && best_goal->cost > new_node->cost && this->distance(new_node->get_point(), goal_state)<goal_radius)
 	        {
 	        	best_goal = new_node;
 	        	branch_and_bound((sst_node_t*)root);
@@ -186,7 +189,7 @@ void sst_t::add_to_tree(const double* sample_state, const double* sample_control
 	            sst_node_t* iter = representative;
 	            while( is_leaf(iter) && !iter->is_active() && !is_best_goal(iter))
 	            {
-	                sst_node_t* next = (sst_node_t*)iter->parent;
+	                sst_node_t* next = (sst_node_t*)iter->get_parent();
 	                remove_leaf(iter);
 	                iter = next;
 	            } 
@@ -207,9 +210,10 @@ sample_node_t* sst_t::find_witness(const double* sample_state)
 	if(distance > this->sst_delta_drain)
 	{
 		//create a new sample
-		witness_sample = new sample_node_t(NULL);
-		witness_sample->point = this->alloc_state_point();
-		this->copy_state_point(witness_sample->point, sample_state);
+		double* witness_point = this->alloc_state_point();
+		this->copy_state_point(witness_point, sample_state);
+
+		witness_sample = new sample_node_t(NULL, witness_point);
 		add_point_to_samples(witness_sample);
 	}
     return witness_sample;
@@ -246,15 +250,15 @@ bool sst_t::is_leaf(tree_node_t* node)
 	return node->children.size()==0;
 }
 
-void sst_t::remove_leaf(tree_node_t* node)
+void sst_t::remove_leaf(sst_node_t* node)
 {
-	if(node->parent != NULL)
+	if(node->get_parent() != NULL)
 	{
 		tree_edge_t* edge = node->parent_edge;
-		node->parent->children.remove(node);
+		node->get_parent()->children.remove(node);
 		number_of_nodes--;
 		delete edge->control;
-		delete node->point;
+		node->dealloc_point();
 		delete node;
 	}
 }
@@ -263,14 +267,14 @@ bool sst_t::is_best_goal(tree_node_t* v)
 {
 	if(best_goal==NULL)
 		return false;
-    tree_node_t* new_v = best_goal;
+    sst_node_t* new_v = best_goal;
 
-    while(new_v->parent!=NULL)
+    while(new_v->get_parent()!=NULL)
     {
         if(new_v == v)
             return true;
 
-        new_v = new_v->parent;
+        new_v = new_v->get_parent();
     }
     return false;
 

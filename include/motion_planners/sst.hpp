@@ -25,8 +25,9 @@ class sample_node_t;
 class sst_node_t : public tree_node_t
 {
 public:
-	sst_node_t()
-	    : tree_node_t()
+	sst_node_t(double* point, sst_node_t* a_parent)
+	    : tree_node_t(point)
+	    , parent(a_parent)
 	    , active(true)
 	    , witness(NULL)
 	{
@@ -48,7 +49,16 @@ public:
 	    return this->witness;
 	}
 
+    sst_node_t* get_parent() const {
+        return this->parent;
+    }
+
 private:
+    /**
+     * @brief Parent node.
+     */
+    sst_node_t* parent;
+
 	/**
 	 * A flag for inclusion in the metric.
 	 */
@@ -64,8 +74,9 @@ private:
 class sample_node_t : public tree_node_t
 {
 public:
-	sample_node_t(sst_node_t* const representative)
-	    : tree_node_t()
+	sample_node_t(sst_node_t* const representative,
+	              double* a_point)
+	    : tree_node_t(a_point)
 	    , rep(representative)
 	{ }
 
@@ -201,7 +212,7 @@ protected:
 	 * 
 	 * @param node The node to remove.
 	 */
-	void remove_leaf(tree_node_t* node);
+	void remove_leaf(sst_node_t* node);
 
 	void branch_and_bound(sst_node_t* node);
 
