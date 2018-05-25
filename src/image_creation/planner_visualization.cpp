@@ -56,8 +56,8 @@ void visualize_solution_path(const std::vector<std::vector<double>>& last_soluti
 void get_max_cost(tree_node_t* node, double& max_cost, std::vector<tree_node_t*>& nodes)
 {
 	nodes.push_back(node);
-	if(node->cost > max_cost)
-		max_cost = node->cost;
+	if(node->get_cost() > max_cost)
+		max_cost = node->get_cost();
 	for (std::list<tree_node_t*>::const_iterator i = node->get_children().begin(); i != node->get_children().end(); ++i)
 	{
 		get_max_cost(*i, max_cost, nodes);
@@ -71,7 +71,7 @@ void sort(std::vector<tree_node_t*>& nodes)
 	{
 		tree_node_t* x = nodes[i];
 		unsigned j = i;
-		while(j>0 && nodes[j-1]->cost > x->cost)
+		while(j>0 && nodes[j-1]->get_cost() > x->get_cost())
 		{
 			nodes[j] = nodes[j-1];
 			j--;
@@ -95,7 +95,10 @@ void visualize_node(
     svg::Document& doc, svg::Dimensions& dim, double node_diameter, double max_cost)
 {
 
-	svg::Circle circle(system->visualize_point(node->get_point(), dim), node_diameter, svg::Fill( svg::Color((node->cost/max_cost)*255,(node->cost/max_cost)*255,(node->cost/max_cost)*255) ) );
+	svg::Circle circle(
+	    system->visualize_point(node->get_point(), dim),
+	    node_diameter,
+	    svg::Fill( svg::Color((node->get_cost()/max_cost)*255,(node->get_cost()/max_cost)*255,(node->get_cost()/max_cost)*255) ) );
 	doc<<circle;
 	// for (std::list<tree_node_t*>::iterator i = node->children.begin(); i != node->children.end(); ++i)
 	// {

@@ -27,7 +27,7 @@ void sst_t::setup_planning()
     double* point = this->alloc_state_point();
 	this->copy_state_point(point, start_state);
 
-	root = new sst_node_t(point, NULL, NULL);
+	root = new sst_node_t(point, NULL, NULL, 0.);
 
 	add_point_to_metric(root);
 	number_of_nodes++;
@@ -127,7 +127,7 @@ sst_node_t* sst_t::nearest_vertex(const double* sample_state)
     for(unsigned i=0;i<close_nodes.size();i++)
     {
         tree_node_t* v = (tree_node_t*)(close_nodes[i]->get_state());
-        double temp = v->cost ;
+        double temp = v->get_cost() ;
         if( temp < length)
         {
             length = temp;
@@ -144,9 +144,9 @@ void sst_t::add_to_tree(const double* sample_state, const double* sample_control
     sample_node_t* witness_sample = find_witness(sample_state);
 
     sst_node_t* representative = witness_sample->get_representative();
-	if(representative==NULL || representative->cost > nearest->cost + duration)
+	if(representative==NULL || representative->get_cost() > nearest->get_cost() + duration)
 	{
-		if(best_goal==NULL || nearest->cost + duration <= best_goal->cost)
+		if(best_goal==NULL || nearest->get_cost() + duration <= best_goal->get_cost())
 		{
 			//create a new tree node
 			double* point = this->alloc_state_point();
@@ -158,9 +158,8 @@ void sst_t::add_to_tree(const double* sample_state, const double* sample_control
 			this->copy_control_point(parent_edge->control, sample_control);
 			parent_edge->duration = duration;
 
-			sst_node_t* new_node = new sst_node_t(point, nearest, parent_edge);
+			sst_node_t* new_node = new sst_node_t(point, nearest, parent_edge, nearest->get_cost() + duration);
 
-			new_node->cost = nearest->cost + duration;
 			//set parent's child
 			nearest->add_child(new_node);
 			number_of_nodes++;
@@ -170,7 +169,7 @@ void sst_t::add_to_tree(const double* sample_state, const double* sample_control
 	        	best_goal = new_node;
 	        	branch_and_bound((sst_node_t*)root);
 	        }
-	        else if(best_goal!=NULL && best_goal->cost > new_node->cost && this->distance(new_node->get_point(), goal_state)<goal_radius)
+	        else if(best_goal!=NULL && best_goal->get_cost() > new_node->get_cost() && this->distance(new_node->get_point(), goal_state)<goal_radius)
 	        {
 	        	best_goal = new_node;
 	        	branch_and_bound((sst_node_t*)root);
@@ -228,7 +227,7 @@ void sst_t::branch_and_bound(sst_node_t* node)
     {
     	branch_and_bound((sst_node_t*)(*iter));
     }
-    if(is_leaf(node) && node->cost > best_goal->cost)
+    if(is_leaf(node) && node->get_cost() > best_goal->get_cost())
     {
     	if(node->is_active())
     	{

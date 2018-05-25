@@ -28,7 +28,7 @@ void rrt_t::setup_planning()
     //create the root of the tree
     double* point = this->alloc_state_point();
     this->copy_state_point(point, start_state);
-    root = new rrt_node_t(point, NULL, NULL);
+    root = new rrt_node_t(point, NULL, NULL, 0.);
     number_of_nodes++;
 
     //add root to nearest neighbor structure
@@ -44,7 +44,7 @@ void rrt_t::get_solution(std::vector<std::vector<double>>& solution_path, std::v
     for(unsigned i=0;i<close_nodes.size();i++)
     {
         rrt_node_t* v = (rrt_node_t*)(close_nodes[i]->get_state());
-        double temp = v->cost ;
+        double temp = v->get_cost() ;
         if( temp < length)
         {
             length = temp;
@@ -122,9 +122,8 @@ void rrt_t::add_to_tree()
     this->copy_control_point(parent_edge->control,sample_control);
     parent_edge->duration = duration;
 
-    rrt_node_t* new_node = new rrt_node_t(point, nearest, parent_edge);
+    rrt_node_t* new_node = new rrt_node_t(point, nearest, parent_edge, nearest->get_cost() + duration);
 
-    new_node->cost = nearest->cost + duration;
     //set parent's child
     nearest->add_child(new_node);
     add_point_to_metric(new_node);

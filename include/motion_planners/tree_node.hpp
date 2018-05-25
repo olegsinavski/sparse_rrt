@@ -42,19 +42,14 @@ public:
 class tree_node_t
 {
 public:
-	tree_node_t(double* a_point, tree_edge_t* a_parent_edge)
+	tree_node_t(double* a_point, tree_edge_t* a_parent_edge, double a_cost)
 	    : point(a_point)
 	    , prox_node(NULL)
 	    , parent_edge(a_parent_edge)
+	    , cost(a_cost)
 	{
 		children.clear();
-		cost = 0;
 	}
-
-    /**
-     * @brief The path cost to this node.
-     */
-    double cost;
 
     double* get_point() const {
         return this->point;
@@ -93,6 +88,10 @@ public:
         return this->parent_edge;
     }
 
+    double get_cost() const {
+        return this->cost;
+    }
+
 private:
      /**
      * @brief The state represented by this node.
@@ -110,6 +109,11 @@ private:
     * @brief Parent edge
     */
     tree_edge_t* parent_edge;
+
+     /**
+     * @brief The path cost to this node.
+     */
+    double cost;
 };
 
 #endif
