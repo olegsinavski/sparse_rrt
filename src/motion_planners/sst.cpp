@@ -257,6 +257,7 @@ void sst_t::remove_leaf(sst_node_t* node)
 		node->get_parent()->remove_child(node);
 		number_of_nodes--;
 		edge->dealloc_control();
+		delete edge;
 		node->dealloc_point();
 		delete node;
 	}
