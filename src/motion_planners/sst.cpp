@@ -72,10 +72,10 @@ void sst_t::get_solution(std::vector<std::vector<double>>& solution_path, std::v
 
         std::vector<double> current_control;
         for (unsigned c=0; c<this->control_dimension; c++) {
-            current_control.push_back(path[i]->get_parent_edge()->control[c]);
+            current_control.push_back(path[i]->get_parent_edge()->get_control()[c]);
         }
         controls.push_back(current_control);
-        costs.push_back(path[i]->get_parent_edge()->duration);
+        costs.push_back(path[i]->get_parent_edge()->get_duration());
 	}
 }
 void sst_t::step(system_t* system, int min_time_steps, int max_time_steps, double integration_step)
@@ -256,7 +256,7 @@ void sst_t::remove_leaf(sst_node_t* node)
 		tree_edge_t* edge = node->get_parent_edge();
 		node->get_parent()->remove_child(node);
 		number_of_nodes--;
-		delete edge->control;
+		edge->dealloc_control();
 		node->dealloc_point();
 		delete node;
 	}

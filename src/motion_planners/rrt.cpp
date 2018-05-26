@@ -77,10 +77,10 @@ void rrt_t::get_solution(std::vector<std::vector<double>>& solution_path, std::v
 
             std::vector<double> current_control;
             for (unsigned c=0; c<this->control_dimension; c++) {
-                current_control.push_back(path[i]->get_parent_edge()->control[c]);
+                current_control.push_back(path[i]->get_parent_edge()->get_control()[c]);
             }
             controls.push_back(current_control);
-            costs.push_back(path[i]->get_parent_edge()->duration);
+            costs.push_back(path[i]->get_parent_edge()->get_duration());
         }
     }
 }

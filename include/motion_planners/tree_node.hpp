@@ -25,19 +25,34 @@ class proximity_node_t;
 class tree_edge_t
 {
 public:
-    tree_edge_t(double* const a_control, double a_duration)
+    tree_edge_t(const double* const a_control, double a_duration)
         : control(a_control)
         , duration(a_duration)
     { }
 
-    /**
-     * @brief The control for this edge.
-     */
-	double* control;
+	double get_duration() const {
+	    return duration;
+	}
+
+	const double* get_control() const {
+	    return control;
+	}
+
+	void dealloc_control() {
+        delete[] control;
+        control = NULL;
+    }
+
+private:
+
     /**
      * @brief The duration to execute control.
      */
 	double duration;
+	 /**
+     * @brief The control for this edge.
+     */
+	const double* control;
 };
 
 /**
