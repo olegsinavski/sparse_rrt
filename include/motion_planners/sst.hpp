@@ -71,12 +71,12 @@ private:
  * @details A special storage node for witness nodes in SST.
  * 
  */
-class sample_node_t : public tree_node_t
+class sample_node_t : public state_point_t
 {
 public:
 	sample_node_t(sst_node_t* const representative,
 	              double* a_point)
-	    : tree_node_t(a_point, NULL, 0.)
+	    : state_point_t(a_point)
 	    , rep(representative)
 	{ }
 

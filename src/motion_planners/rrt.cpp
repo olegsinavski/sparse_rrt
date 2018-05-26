@@ -117,10 +117,9 @@ void rrt_t::add_to_tree()
     double* point = this->alloc_state_point();
     this->copy_state_point(point, sample_state);
     //create the link to the parent node
-    tree_edge_t* parent_edge = new tree_edge_t();
-    parent_edge->control = this->alloc_control_point();
-    this->copy_control_point(parent_edge->control,sample_control);
-    parent_edge->duration = duration;
+    auto control = this->alloc_control_point();
+    this->copy_control_point(control,sample_control);
+    auto parent_edge = new tree_edge_t(control, duration);
 
     rrt_node_t* new_node = new rrt_node_t(point, nearest, parent_edge, nearest->get_cost() + duration);
 

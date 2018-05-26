@@ -13,7 +13,7 @@
 #include "nearest_neighbors/graph_nearest_neighbors.hpp"
 #include "motion_planners/tree_node.hpp"
 
-proximity_node_t::proximity_node_t( const tree_node_t* st )
+proximity_node_t::proximity_node_t( const state_point_t* st )
 {
     state = st;
 
@@ -32,7 +32,7 @@ double proximity_node_t::distance ( const double* st )
     return this->distance_function(state->get_point(), st);
 }
 
-const tree_node_t* proximity_node_t::get_state( )
+const state_point_t* proximity_node_t::get_state( )
 {
     return state;
 }

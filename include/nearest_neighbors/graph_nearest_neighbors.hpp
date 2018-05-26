@@ -15,7 +15,7 @@
 
 #include <boost/unordered_map.hpp>
 
-class tree_node_t;
+class state_point_t;
 
 #define INIT_NODE_SIZE    1000
 #define INIT_CAP_NEIGHBORS 200
@@ -33,7 +33,7 @@ class proximity_node_t
          * @brief Constructor
          * @param st The node to store.
          */
-        proximity_node_t( const tree_node_t* st );
+        proximity_node_t( const state_point_t* st );
         virtual ~proximity_node_t();
 
         /**
@@ -49,7 +49,7 @@ class proximity_node_t
          * @brief Gets the internal node that is represented.
          * @return The internal node.
          */
-        const tree_node_t* get_state( );
+        const state_point_t* get_state( );
 
         /**
          * Gets the position of the node in the data structure. Used for fast deletion.
@@ -100,7 +100,7 @@ class proximity_node_t
         /**
          * @brief The node represented.
          */
-        const tree_node_t* state; 
+        const state_point_t* state;
 
         /**
          * @brief Index in the data structure. Serves as an identifier to other nodes.

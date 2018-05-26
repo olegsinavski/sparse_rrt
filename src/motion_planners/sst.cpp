@@ -153,11 +153,9 @@ void sst_t::add_to_tree(const double* sample_state, const double* sample_control
 			this->copy_state_point(point,sample_state);
 
 			//create the link to the parent node
-			auto parent_edge = new tree_edge_t();
-			parent_edge->control = this->alloc_control_point();
-			this->copy_control_point(parent_edge->control, sample_control);
-			parent_edge->duration = duration;
-
+			auto control = this->alloc_control_point();
+			this->copy_control_point(control, sample_control);
+			auto parent_edge = new tree_edge_t(control, duration);
 			sst_node_t* new_node = new sst_node_t(point, nearest, parent_edge, nearest->get_cost() + duration);
 
 			//set parent's child

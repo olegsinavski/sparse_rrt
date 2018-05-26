@@ -25,6 +25,11 @@ class proximity_node_t;
 class tree_edge_t
 {
 public:
+    tree_edge_t(double* const a_control, double a_duration)
+        : control(a_control)
+        , duration(a_duration)
+    { }
+
     /**
      * @brief The control for this edge.
      */
@@ -36,17 +41,15 @@ public:
 };
 
 /**
- * @brief A node of the tree.
- * @details A node of the tree.
+ * @brief A point in the state space
+ * @details A point in the state space that has attributes to be in the nearest neighbour structure
  */
-class tree_node_t
+class state_point_t
 {
 public:
-	tree_node_t(double* a_point, tree_edge_t* a_parent_edge, double a_cost)
+	state_point_t(double* a_point)
 	    : point(a_point)
 	    , prox_node(NULL)
-	    , parent_edge(a_parent_edge)
-	    , cost(a_cost)
 	{
 	}
 
@@ -58,6 +61,39 @@ public:
         delete[] point;
         point = NULL;
     }
+
+    void set_proximity_node(proximity_node_t* proximity_node) {
+        this->prox_node = proximity_node;
+    }
+
+    const proximity_node_t* get_proximity_node() const {
+        return this->prox_node;
+    }
+private:
+     /**
+     * @brief The state represented by this node.
+     */
+    double* point;
+    /**
+     * @brief A pointer to the node in the nearest neighbor structure for easy removal.
+     */
+    proximity_node_t* prox_node;
+};
+
+
+/**
+ * @brief A node of the tree.
+ * @details A node of the tree.
+ */
+class tree_node_t: public state_point_t
+{
+public:
+	tree_node_t(double* a_point, tree_edge_t* a_parent_edge, double a_cost)
+	    : state_point_t(a_point)
+	    , parent_edge(a_parent_edge)
+	    , cost(a_cost)
+	{
+	}
 
     const std::list<tree_node_t*>& get_children() const {
         return this->children;
@@ -75,14 +111,6 @@ public:
         return this->children.size()==0;
     }
 
-    void set_proximity_node(proximity_node_t* proximity_node) {
-        this->prox_node = proximity_node;
-    }
-
-    const proximity_node_t* get_proximity_node() const {
-        return this->prox_node;
-    }
-
     tree_edge_t* get_parent_edge() const {
         return this->parent_edge;
     }
@@ -93,17 +121,9 @@ public:
 
 private:
      /**
-     * @brief The state represented by this node.
-     */
-    double* point;
-     /**
      * @brief Children vertices
      */
     std::list<tree_node_t*> children;
-    /**
-     * @brief A pointer to the node in the nearest neighbor structure for easy removal.
-     */
-    proximity_node_t* prox_node;
     /**
     * @brief Parent edge
     */
