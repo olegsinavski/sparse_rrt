@@ -16,7 +16,7 @@
 #include <iostream>
 #include <deque>
 
-int counter = 0;
+//int counter = 0;
 
 
 sst_node_t::sst_node_t(const double* point, unsigned int state_dimension, sst_node_t* a_parent, tree_edge_t&& a_parent_edge, double a_cost)
@@ -25,15 +25,11 @@ sst_node_t::sst_node_t(const double* point, unsigned int state_dimension, sst_no
     , active(true)
     , witness(NULL)
 {
-    counter ++;
-    std::cout << "Create "<< counter << std::endl;
 
 }
 
 sst_node_t::~sst_node_t() {
 
-    counter --;
-    std::cout << "Destroy " << counter << std::endl;
 }
 
 sst_t::sst_t(

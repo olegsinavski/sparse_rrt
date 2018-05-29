@@ -20,12 +20,9 @@
 class rrt_node_t : public tree_node_t
 {
 public:
-	rrt_node_t(double* point, unsigned int state_dimension, rrt_node_t* a_parent, tree_edge_t&& a_parent_edge, double a_cost)
-	    : tree_node_t(point, state_dimension, std::move(a_parent_edge), a_cost)
-	    , parent(a_parent)
-	{
+	rrt_node_t(double* point, unsigned int state_dimension, rrt_node_t* a_parent, tree_edge_t&& a_parent_edge, double a_cost);
 
-	}
+	~rrt_node_t();
 
     rrt_node_t* get_parent() const {
         return this->parent;
@@ -57,9 +54,19 @@ public:
 			: planner_t(in_start, in_goal, in_radius,
 			            a_state_bounds, a_control_bounds, distance_function, random_seed)
 	{
-        setup_rrt_planning();
+        //initialize the metric
+        metric.set_distance(this->distance);
+
+        this->root = new rrt_node_t(start_state, this->state_dimension, NULL, tree_edge_t(NULL, 0, -1.), 0.);
+        number_of_nodes++;
+
+        //add root to nearest neighbor structure
+        metric.add_node(root);
 	}
-	virtual ~rrt_t(){}
+	virtual ~rrt_t(){
+        delete this->root;
+        this->root = nullptr;
+	}
 
 	/**
 	 * @copydoc planner_t::get_solution(std::vector<std::pair<double*,double> >&)
@@ -76,23 +83,7 @@ protected:
     /**
      * @brief The nearest neighbor data structure.
      */
-    graph_nearest_neighbors_t* metric;
-	
-	/**
-	 * @brief A randomly sampled state.
-	 */
-	double* sample_state;
-
-	/**
-	 * @brief A randomly sampled control.
-	 */
-	double* sample_control;
-
-
-	/**
-	 * @brief A resulting duration of a propagation step.
-	 */
-	double duration;
+    graph_nearest_neighbors_t metric;
 
 	/**
 	 * @brief The result of a query in the nearest neighbor structure.
@@ -103,18 +94,7 @@ protected:
 	 * @brief Find the nearest node to the randomly sampled state.
 	 * @details Find the nearest node to the randomly sampled state.
 	 */
-	void nearest_vertex();
-
-	/**
-	 * @brief If propagation was successful, add the new state to the tree.
-	 * @details If propagation was successful, add the new state to the tree.
-	 */
-	void add_to_tree();
-
-    /**
-	 * @copydoc planner_t::setup_rrt_planning()
-	 */
-	void setup_rrt_planning();
+	rrt_node_t* nearest_vertex(const double* state) const;
 
 };
 

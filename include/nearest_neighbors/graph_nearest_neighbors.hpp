@@ -164,7 +164,7 @@ class graph_nearest_neighbors_t
          * @param distance The resulting distance between the closest point and the query point.
          * @return The closest point.
          */
-        proximity_node_t* find_closest( const double* state, double* distance );
+        proximity_node_t* find_closest( const double* state, double* distance ) const;
         
         /**
          * Find the k closest nodes to the query point. This is performed using a graph search starting from sqrt(nr_points) random points.
@@ -222,7 +222,7 @@ class graph_nearest_neighbors_t
          * @brief Determine the number of nodes to sample for initial populations in queries.
          * @return The number of random nodes to initially select.
          */
-        int sampling_function();
+        int sampling_function() const;
         
         /**
          * Given the number of nodes, get the number of neighbors required for connectivity (in the limit).

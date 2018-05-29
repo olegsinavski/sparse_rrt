@@ -16,27 +16,26 @@
 #include <iostream>
 #include <deque>
 
-void rrt_t::setup_rrt_planning()
+int counter = 0;
+
+rrt_node_t::rrt_node_t(double* point, unsigned int state_dimension, rrt_node_t* a_parent, tree_edge_t&& a_parent_edge, double a_cost)
+	    : tree_node_t(point, state_dimension, std::move(a_parent_edge), a_cost)
+	    , parent(a_parent)
 {
-    //init internal variables
-    sample_state = new double[this->state_dimension];
-    sample_control = new double[this->control_dimension];
-
-    //initialize the metric
-    metric = new graph_nearest_neighbors_t();
-    metric->set_distance(this->distance);
-
-    this->root = new rrt_node_t(start_state, this->state_dimension, NULL, tree_edge_t(NULL, 0, -1.), 0.);
-    number_of_nodes++;
-
-    //add root to nearest neighbor structure
-    metric->add_node(root);
-
+    counter ++;
+    std::cout << "Create rrt"<< counter << std::endl;
 }
+
+rrt_node_t::~rrt_node_t() {
+
+    counter --;
+    std::cout << "Destroy rrt" << counter << std::endl;
+}
+
+
 void rrt_t::get_solution(std::vector<std::vector<double>>& solution_path, std::vector<std::vector<double>>& controls, std::vector<double>& costs)
 {
-    std::copy(goal_state, goal_state + this->state_dimension, sample_state);
-    std::vector<proximity_node_t*> close_nodes = metric->find_delta_close_and_closest(sample_state, goal_radius);
+    std::vector<proximity_node_t*> close_nodes = metric.find_delta_close_and_closest(goal_state, goal_radius);
 
     double length = std::numeric_limits<double>::max();;
     for(unsigned i=0;i<close_nodes.size();i++)
@@ -84,33 +83,33 @@ void rrt_t::get_solution(std::vector<std::vector<double>>& solution_path, std::v
 }
 void rrt_t::step(system_t* system, int min_time_steps, int max_time_steps, double integration_step)
 {
+    double* sample_state = new double[this->state_dimension];
+    double* sample_control = new double[this->control_dimension];
+
     this->random_state(sample_state);
     this->random_control(sample_control);
 
-    nearest_vertex();
+    nearest = nearest_vertex(sample_state);
     int num_steps = this->random_generator.uniform_int_random(min_time_steps, max_time_steps);
-    this->duration = num_steps*integration_step;
+    double duration = num_steps*integration_step;
     if(system->propagate(nearest->get_point(), sample_control, num_steps, sample_state, integration_step))
     {
-        add_to_tree();
+        //create a new tree node
+        rrt_node_t* new_node = static_cast<rrt_node_t*>(nearest->add_child(new rrt_node_t(
+            sample_state, this->state_dimension, nearest,
+            tree_edge_t(sample_control, this->control_dimension, duration),
+            nearest->get_cost() + duration)
+        ));
+        metric.add_node(new_node);
+        number_of_nodes++;
     }
+    delete sample_state;
+    delete sample_control;
 }
 
-void rrt_t::nearest_vertex()
+rrt_node_t* rrt_t::nearest_vertex(const double* state) const
 {
     double distance;
-    nearest = (rrt_node_t*)(metric->find_closest(sample_state, &distance)->get_state());
-}
-
-void rrt_t::add_to_tree()
-{
-    //create a new tree node
-    rrt_node_t* new_node = static_cast<rrt_node_t*>(nearest->add_child(new rrt_node_t(
-        sample_state, this->state_dimension, nearest,
-        tree_edge_t(sample_control, this->control_dimension, duration),
-        nearest->get_cost() + duration)
-    ));
-    metric->add_node(new_node);
-    number_of_nodes++;
+    return (rrt_node_t*)(metric.find_closest(state, &distance)->get_state());
 }
 

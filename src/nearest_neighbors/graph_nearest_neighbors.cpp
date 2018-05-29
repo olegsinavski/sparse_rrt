@@ -203,7 +203,7 @@ void graph_nearest_neighbors_t::remove_node( state_point_t* state )
     delete graph_node;
 }
 
-proximity_node_t* graph_nearest_neighbors_t::find_closest( const double* state, double* the_distance )
+proximity_node_t* graph_nearest_neighbors_t::find_closest( const double* state, double* the_distance ) const
 {
     if( nodes.size() == 0 )
         return NULL;
@@ -487,7 +487,7 @@ bool graph_nearest_neighbors_t::does_node_exist(boost::unordered_map<proximity_n
     return added_nodes.find(query_node)!=added_nodes.end();
 }
 
-int graph_nearest_neighbors_t::sampling_function()
+int graph_nearest_neighbors_t::sampling_function() const
 {
     if( nodes.size() < 1000 )
 	    return nodes.size()/5 + 1;

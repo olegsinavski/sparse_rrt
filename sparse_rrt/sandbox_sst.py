@@ -102,4 +102,4 @@ def run_point_sst(config_path):
 
 if __name__ == '__main__':
     configs_path = os.path.join(os.path.dirname(__file__), "../input")
-    run_point_sst(os.path.join(configs_path, 'sst_pendulum.cfg'))
+    run_point_sst(os.path.join(configs_path, 'rrt_pendulum.cfg'))
