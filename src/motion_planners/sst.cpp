@@ -24,20 +24,14 @@ void sst_t::setup_planning()
 	//initialize the metrics
 	metric.set_distance(this->distance);
 	//create the root of the tree
-    double* point = this->alloc_state_point();
-	this->copy_state_point(point, start_state);
-
-	root = new sst_node_t(point, NULL, NULL, 0.);
+	root = new sst_node_t(start_state, this->state_dimension, NULL, tree_edge_t(NULL, 0, -1.), 0.);
 
 	add_point_to_metric(root);
 	number_of_nodes++;
 
 	samples.set_distance(this->distance);
 
-    double* witness_point = this->alloc_state_point();
-    this->copy_state_point(witness_point, start_state);
-
-    sample_node_t* first_witness_sample = new sample_node_t(static_cast<sst_node_t*>(root), witness_point);
+    sample_node_t* first_witness_sample = new sample_node_t(static_cast<sst_node_t*>(root), start_state, this->state_dimension);
 
 	add_point_to_samples(first_witness_sample);
 }
@@ -72,10 +66,10 @@ void sst_t::get_solution(std::vector<std::vector<double>>& solution_path, std::v
 
         std::vector<double> current_control;
         for (unsigned c=0; c<this->control_dimension; c++) {
-            current_control.push_back(path[i]->get_parent_edge()->get_control()[c]);
+            current_control.push_back(path[i]->get_parent_edge().get_control()[c]);
         }
         controls.push_back(current_control);
-        costs.push_back(path[i]->get_parent_edge()->get_duration());
+        costs.push_back(path[i]->get_parent_edge().get_duration());
 	}
 }
 void sst_t::step(system_t* system, int min_time_steps, int max_time_steps, double integration_step)
@@ -88,8 +82,8 @@ void sst_t::step(system_t* system, int min_time_steps, int max_time_steps, doubl
      * If resulting state is valid, add a resulting state into the tree and perform sst-specific graph manipulations
      */
 
-    double* sample_state = this->alloc_state_point();
-    double* sample_control = this->alloc_control_point();
+    double* sample_state = new double[this->state_dimension];
+    double* sample_control = new double[this->control_dimension];
 	this->random_state(sample_state);
 	this->random_control(sample_control);
     sst_node_t* nearest = nearest_vertex(sample_state);
@@ -149,14 +143,11 @@ void sst_t::add_to_tree(const double* sample_state, const double* sample_control
 		if(best_goal==NULL || nearest->get_cost() + duration <= best_goal->get_cost())
 		{
 			//create a new tree node
-			double* point = this->alloc_state_point();
-			this->copy_state_point(point,sample_state);
-
-			//create the link to the parent node
-			auto control = this->alloc_control_point();
-			this->copy_control_point(control, sample_control);
-			auto parent_edge = new tree_edge_t(control, duration);
-			sst_node_t* new_node = new sst_node_t(point, nearest, parent_edge, nearest->get_cost() + duration);
+			sst_node_t* new_node = new sst_node_t(
+			    sample_state, this->state_dimension,
+			    nearest,
+			    tree_edge_t(sample_control, this->control_dimension, duration),
+			    nearest->get_cost() + duration);
 
 			//set parent's child
 			nearest->add_child(new_node);
@@ -208,10 +199,7 @@ sample_node_t* sst_t::find_witness(const double* sample_state)
 	if(distance > this->sst_delta_drain)
 	{
 		//create a new sample
-		double* witness_point = this->alloc_state_point();
-		this->copy_state_point(witness_point, sample_state);
-
-		witness_sample = new sample_node_t(NULL, witness_point);
+		witness_sample = new sample_node_t(NULL, sample_state, this->state_dimension);
 		add_point_to_samples(witness_sample);
 	}
     return witness_sample;
@@ -253,12 +241,9 @@ void sst_t::remove_leaf(sst_node_t* node)
 {
 	if(node->get_parent() != NULL)
 	{
-		tree_edge_t* edge = node->get_parent_edge();
+		node->get_parent_edge();
 		node->get_parent()->remove_child(node);
 		number_of_nodes--;
-		edge->dealloc_control();
-		delete edge;
-		node->dealloc_point();
 		delete node;
 	}
 }

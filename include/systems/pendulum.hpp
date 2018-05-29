@@ -29,7 +29,7 @@ public:
 	/**
 	 * @copydoc system_t::propagate(double*, double*, int, int, double*, double& )
 	 */
-	virtual bool propagate( double* start_state, double* control, int num_steps, double* result_state, double integration_step);
+	virtual bool propagate(const double* start_state, const double* control, int num_steps, double* result_state, double integration_step);
 
 	/**
 	 * @copydoc system_t::enforce_bounds()

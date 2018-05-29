@@ -19,16 +19,14 @@
 void rrt_t::setup_planning()
 {
     //init internal variables
-    sample_state = this->alloc_state_point();
-    sample_control = this->alloc_control_point();
+    sample_state = new double[this->state_dimension];
+    sample_control = new double[this->control_dimension];
 
     //initialize the metric
     metric = new graph_nearest_neighbors_t();
     metric->set_distance(this->distance);
-    //create the root of the tree
-    double* point = this->alloc_state_point();
-    this->copy_state_point(point, start_state);
-    root = new rrt_node_t(point, NULL, NULL, 0.);
+
+    this->root = new rrt_node_t(start_state, this->state_dimension, NULL, tree_edge_t(NULL, 0, -1.), 0.);
     number_of_nodes++;
 
     //add root to nearest neighbor structure
@@ -37,7 +35,7 @@ void rrt_t::setup_planning()
 }
 void rrt_t::get_solution(std::vector<std::vector<double>>& solution_path, std::vector<std::vector<double>>& controls, std::vector<double>& costs)
 {
-    this->copy_state_point(sample_state,goal_state);
+    std::copy(goal_state, goal_state + this->state_dimension, sample_state);
     std::vector<proximity_node_t*> close_nodes = metric->find_delta_close_and_closest(sample_state, goal_radius);
 
     double length = 999999999;
@@ -77,10 +75,10 @@ void rrt_t::get_solution(std::vector<std::vector<double>>& solution_path, std::v
 
             std::vector<double> current_control;
             for (unsigned c=0; c<this->control_dimension; c++) {
-                current_control.push_back(path[i]->get_parent_edge()->get_control()[c]);
+                current_control.push_back(path[i]->get_parent_edge().get_control()[c]);
             }
             controls.push_back(current_control);
-            costs.push_back(path[i]->get_parent_edge()->get_duration());
+            costs.push_back(path[i]->get_parent_edge().get_duration());
         }
     }
 }
@@ -114,14 +112,10 @@ void rrt_t::nearest_vertex()
 void rrt_t::add_to_tree()
 {
     //create a new tree node
-    double* point = this->alloc_state_point();
-    this->copy_state_point(point, sample_state);
-    //create the link to the parent node
-    auto control = this->alloc_control_point();
-    this->copy_control_point(control,sample_control);
-    auto parent_edge = new tree_edge_t(control, duration);
-
-    rrt_node_t* new_node = new rrt_node_t(point, nearest, parent_edge, nearest->get_cost() + duration);
+    rrt_node_t* new_node = new rrt_node_t(
+        sample_state, this->state_dimension, nearest,
+        tree_edge_t(sample_control, this->control_dimension, duration),
+        nearest->get_cost() + duration);
 
     //set parent's child
     nearest->add_child(new_node);

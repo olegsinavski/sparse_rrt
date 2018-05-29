@@ -29,9 +29,9 @@ public:
 	virtual ~cart_pole_t(){}
 
 	/**
-	 * @copydoc system_t::propagate(double*, double*, int, int, double*, double& )
+	 * @copydoc system_t::propagate(const double*, const double*, int, int, double*, double& )
 	 */
-	virtual bool propagate( double* start_state, double* control, int num_steps, double* result_state, double integration_step);
+	virtual bool propagate(const double* start_state, const double* control, int num_steps, double* result_state, double integration_step);
 
 	/**
 	 * @copydoc system_t::enforce_bounds()
@@ -54,7 +54,7 @@ public:
 
 protected:
 	double* deriv;
-	void update_derivative(double* control);
+	void update_derivative(const double* control);
 };
 
 

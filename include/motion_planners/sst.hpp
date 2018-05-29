@@ -25,8 +25,8 @@ class sample_node_t;
 class sst_node_t : public tree_node_t
 {
 public:
-	sst_node_t(double* point, sst_node_t* a_parent, tree_edge_t* a_parent_edge, double a_cost)
-	    : tree_node_t(point, a_parent_edge, a_cost)
+	sst_node_t(const double* point, unsigned int state_dimension, sst_node_t* a_parent, tree_edge_t&& a_parent_edge, double a_cost)
+	    : tree_node_t(point, state_dimension, std::move(a_parent_edge), a_cost)
 	    , parent(a_parent)
 	    , active(true)
 	    , witness(NULL)
@@ -75,8 +75,8 @@ class sample_node_t : public state_point_t
 {
 public:
 	sample_node_t(sst_node_t* const representative,
-	              double* a_point)
-	    : state_point_t(a_point)
+	              const double* a_point, unsigned int state_dimension)
+	    : state_point_t(a_point, state_dimension)
 	    , rep(representative)
 	{ }
 

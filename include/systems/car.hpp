@@ -26,7 +26,7 @@ public:
 	}
 	virtual ~car_t(){}
 
-	virtual bool propagate( double* start_state, double* control, int num_steps, double* result_state, double integration_step);
+	virtual bool propagate(const double* start_state, const double* control, int num_steps, double* result_state, double integration_step);
 
 	virtual void enforce_bounds();
 	

@@ -20,8 +20,8 @@
 class rrt_node_t : public tree_node_t
 {
 public:
-	rrt_node_t(double* point, rrt_node_t* a_parent, tree_edge_t* a_parent_edge, double a_cost)
-	    : tree_node_t(point, a_parent_edge, a_cost)
+	rrt_node_t(double* point, unsigned int state_dimension, rrt_node_t* a_parent, tree_edge_t&& a_parent_edge, double a_cost)
+	    : tree_node_t(point, state_dimension, std::move(a_parent_edge), a_cost)
 	    , parent(a_parent)
 	{
 	}

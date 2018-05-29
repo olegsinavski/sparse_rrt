@@ -27,12 +27,12 @@ proximity_node_t::~proximity_node_t()
     free( neighbors );
 }
 
-double proximity_node_t::distance ( const double* st )
-{
-    return this->distance_function(state->get_point(), st);
-}
+//double proximity_node_t::distance ( const double* st )
+//{
+//    return this->distance_function(state->get_point(), st);
+//}
 
-const state_point_t* proximity_node_t::get_state( )
+const state_point_t* proximity_node_t::get_state( ) const
 {
     return state;
 }
@@ -191,8 +191,8 @@ void graph_nearest_neighbors_t::add_node( proximity_node_t* graph_node )
 
     if( nr_nodes >= cap_nodes-1 )
     {
-	cap_nodes = 2 * cap_nodes;
-	nodes = (proximity_node_t**)realloc(nodes, cap_nodes*sizeof(proximity_node_t*));
+	    cap_nodes = 2 * cap_nodes;
+	    nodes = (proximity_node_t**)realloc(nodes, cap_nodes*sizeof(proximity_node_t*));
     }
     nodes[nr_nodes] = graph_node;
     
@@ -202,8 +202,8 @@ void graph_nearest_neighbors_t::add_node( proximity_node_t* graph_node )
 
     for( int i=0; i<new_k; i++ )
     {
-	graph_node->add_neighbor( second_nodes[i]->get_index() );
-	second_nodes[i]->add_neighbor( graph_node->get_index() );
+	    graph_node->add_neighbor( second_nodes[i]->get_index() );
+	    second_nodes[i]->add_neighbor( graph_node->get_index() );
     }
 
 }
@@ -245,7 +245,7 @@ proximity_node_t* graph_nearest_neighbors_t::find_closest( const double* state, 
     for( int i=0; i<nr_samples; i++ )
     {
 	int index = rand() % nr_nodes;
-	double distance = nodes[index]->distance( state );
+	double distance = this->compute_distance(nodes[index], state);
 	if( distance < min_distance )
 	{
 	    min_distance = distance;
@@ -261,7 +261,7 @@ proximity_node_t* graph_nearest_neighbors_t::find_closest( const double* state, 
 	unsigned int* neighbors = nodes[min_index]->get_neighbors( &nr_neighbors );
 	for( int j=0; j<nr_neighbors; j++ )
 	{
-	    double distance = nodes[ neighbors[j] ]->distance( state );
+	    double distance = this->compute_distance(nodes[neighbors[j]], state);
 	    if( distance < min_distance )
 	    {
 		min_distance = distance;
@@ -302,7 +302,7 @@ int graph_nearest_neighbors_t::find_k_close( const double* state, proximity_node
 	    }
 	    close_nodes[i] = nodes[index];
 	    added_nodes[nodes[index]] = true;
-	    distances[i] = nodes[index]->distance( state );
+	    distances[i] = this->compute_distance(nodes[index], state);
 	}
 	sort( close_nodes, distances, 0, k-1 );
         
@@ -315,7 +315,7 @@ int graph_nearest_neighbors_t::find_k_close( const double* state, proximity_node
 	    int index = rand() % nr_nodes;
 	    if( does_node_exist(added_nodes, nodes[index] ) == false )
 	    {
-		double distance = nodes[index]->distance( state );
+		double distance = this->compute_distance(nodes[index], state);
 		if( distance < min_distance )
 		{
 		    min_distance = distance;
@@ -349,7 +349,7 @@ int graph_nearest_neighbors_t::find_k_close( const double* state, proximity_node
             {
                 if( does_node_exist(added_nodes, nodes[ neighbors[j] ] ) == false )
                 {
-                    double distance = nodes[ neighbors[j] ]->distance( state );
+                    double distance = this->compute_distance(nodes[ neighbors[j] ], state );
                     if( distance < distances[k-1] )
                     {
                     	added_nodes.erase(close_nodes[k-1]);
@@ -376,7 +376,7 @@ int graph_nearest_neighbors_t::find_k_close( const double* state, proximity_node
 	for( int i=0; i<nr_nodes; i++ )
 	{
 	    close_nodes[i] = nodes[i];
-	    distances[i] = nodes[i]->distance( state );
+	    distances[i] = this->compute_distance(nodes[i], state );
 	}
         
 	sort( close_nodes, distances, 0, nr_nodes-1 );
@@ -398,7 +398,7 @@ std::vector<proximity_node_t*> graph_nearest_neighbors_t::find_delta_close_and_c
     for( int i=0; i<nr_samples; i++ )
     {
 		int index = rand() % nr_nodes;
-		double distance = nodes[index]->distance( state );
+		double distance = this->compute_distance(nodes[index], state );
 		if( distance < min_distance )
 		{
 		    min_distance = distance;
@@ -414,7 +414,7 @@ std::vector<proximity_node_t*> graph_nearest_neighbors_t::find_delta_close_and_c
 		unsigned int* neighbors = nodes[min_index]->get_neighbors( &nr_neighbors );
 		for( int j=0; j<nr_neighbors; j++ )
 		{
-		    double distance = nodes[ neighbors[j] ]->distance( state );
+		    double distance = this->compute_distance(nodes[ neighbors[j] ], state );
 		    if( distance < min_distance )
 		    {
 				min_distance = distance;
@@ -438,7 +438,7 @@ std::vector<proximity_node_t*> graph_nearest_neighbors_t::find_delta_close_and_c
 		    {
 				if( does_node_exist(added_nodes, nodes[ neighbors[j] ]) == false )
 				{
-				    double distance = nodes[ neighbors[j] ]->distance( state );
+				    double distance = this->compute_distance(nodes[ neighbors[j] ], state );
 				    if( distance < delta && nr_points < MAX_KK)
 				    {
                         close_nodes.push_back(nodes[ neighbors[j] ]);
@@ -464,7 +464,7 @@ int graph_nearest_neighbors_t::find_delta_close( const double* state, proximity_
     for( int i=0; i<nr_samples; i++ )
     {
 		int index = rand() % nr_nodes;
-		double distance = nodes[index]->distance( state );
+		double distance = this->compute_distance(nodes[index], state );
 		if( distance < min_distance )
 		{
 		    min_distance = distance;
@@ -480,7 +480,7 @@ int graph_nearest_neighbors_t::find_delta_close( const double* state, proximity_
 	unsigned int* neighbors = nodes[min_index]->get_neighbors( &nr_neighbors );
 	for( int j=0; j<nr_neighbors; j++ )
 	{
-	    double distance = nodes[ neighbors[j] ]->distance( state );
+	    double distance = this->compute_distance(nodes[ neighbors[j] ], state );
 	    if( distance < min_distance )
 	    {
 			min_distance = distance;
@@ -506,7 +506,7 @@ int graph_nearest_neighbors_t::find_delta_close( const double* state, proximity_
 		    {
 				if( does_node_exist(added_nodes, nodes[ neighbors[j] ]) == false )
 				{
-				    double distance = nodes[ neighbors[j] ]->distance( state );
+				    double distance = this->compute_distance(nodes[ neighbors[j] ], state );
 				    if( distance < delta && nr_points < MAX_KK)
 				    {
 						close_nodes[ nr_points ] = nodes[ neighbors[j] ];
@@ -543,4 +543,8 @@ int graph_nearest_neighbors_t::percolation_threshold()
     else 
 	k = nr_nodes;
     return k;
+}
+
+double graph_nearest_neighbors_t::compute_distance(const proximity_node_t* node, const double* state) const {
+    return this->distance_function(node->get_state()->get_point(), state);
 }

@@ -42,14 +42,14 @@ class proximity_node_t
          * @param st The node to determine distance with.
          * @return The distance value.
          */
-        double distance ( const double* st );
+        //double distance ( const double* st );
 
         /**
          * Gets the internal node that is represented.
          * @brief Gets the internal node that is represented.
          * @return The internal node.
          */
-        const state_point_t* get_state( );
+        const state_point_t* get_state( ) const;
 
         /**
          * Gets the position of the node in the data structure. Used for fast deletion.
@@ -275,7 +275,8 @@ class graph_nearest_neighbors_t
          * @brief Temporary storage for query functions.
          */
         double* second_distances;
-
+    private:
+        double compute_distance(const proximity_node_t* node, const double* state) const;
 };
 
 #endif 

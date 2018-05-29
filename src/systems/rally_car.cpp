@@ -76,7 +76,7 @@
 //}
 
 
-bool rally_car_t::propagate( double* start_state, double* control, int num_steps, double* result_state, double integration_step)
+bool rally_car_t::propagate( const double* start_state, const double* control, int num_steps, double* result_state, double integration_step)
 {
         temp_state[0] = start_state[0]; 
         temp_state[1] = start_state[1];
@@ -184,7 +184,7 @@ svg::Point rally_car_t::visualize_point(const double* state, svg::Dimensions dim
         return svg::Point(x,y);
 }
 
-void rally_car_t::update_derivative(double* control)
+void rally_car_t::update_derivative(const double* control)
 {
         double _x = temp_state[0];
         double _y = temp_state[1];

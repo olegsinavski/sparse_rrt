@@ -45,16 +45,16 @@ public:
         , control_dimension(a_control_bounds.size())
         , control_bounds(a_control_bounds)
         , distance(distance_function)
-        , start_state(this->alloc_state_point())
-        , goal_state(this->alloc_state_point())
+        , start_state(new double[this->state_dimension])
+        , goal_state(new double[this->state_dimension])
         , number_of_nodes(0)
         , random_generator(random_seed)
     {
 	}
 	virtual ~planner_t()
 	{
-        dealloc_state_point(&start_state);
-        dealloc_state_point(&goal_state);
+	    delete[] start_state;
+	    delete[] goal_state;
 	}
 
 	/**
@@ -86,8 +86,8 @@ public:
 	 * @param in_radius The radial size of the goal region centered at in_goal.
 	 */
 	void set_start_goal_state(const double* in_start, const double* in_goal,double in_radius) {
-        this->copy_state_point(start_state, in_start);
-        this->copy_state_point(goal_state,in_goal);
+	    std::copy(in_start, in_start + this->state_dimension, start_state);
+	    std::copy(in_goal, in_goal + this->state_dimension, goal_state);
         goal_radius = in_radius;
     }
 
@@ -96,63 +96,6 @@ public:
 	unsigned number_of_nodes;
 
 	tree_node_t* get_root() { return this->root; }
-
-    /**
-	 * @brief Copies one state into another.
-	 * @details Copies one state into another.
-	 *
-	 * @param destination The destination memory.
-	 * @param source The point to copy.
-	 */
-	void copy_state_point(double* destination, const double* source) const
-	{
-		for(unsigned i=0;i<this->state_dimension;i++)
-			destination[i] = source[i];
-	}
-
-	/**
-	 * @brief Allocates a double array representing a state of this system.
-	 * @details Allocates a double array representing a state of this system.
-	 * @return Allocated memory for a state.
-	 */
-	double* alloc_state_point()
-	{
-	    try {
-		    return new double[this->state_dimension];
-		} catch (const std::bad_alloc& e) {
-		    std::cout << "alloc_state_point (dims=" << this->state_dimension << ") failed: " << e.what() << '\n';
-		    return NULL;
-		}
-	}
-	void dealloc_state_point(double** state_point)
-	{
-	    assert( *state_point != NULL );
-		delete[] *state_point;
-		*state_point = NULL;
-	}
-
-	/**
-	 * @brief Allocates a double array representing a control of this system.
-	 * @details Allocates a double array representing a control of this system.
-	 * @return Allocated memory for a control.
-	 */
-	double* alloc_control_point()
-	{
-		return new double[this->control_dimension];
-	}
-
-	/**
-	 * @brief Copies one control into another.
-	 * @details Copies one control into another.
-	 *
-	 * @param destination The destination memory.
-	 * @param source The control to copy.
-	 */
-	void copy_control_point(double* destination, const double* source)
-	{
-		for(unsigned i=0;i<this->control_dimension;i++)
-			destination[i] = source[i];
-	}
 
 	/**
 	 * @brief Performs a random sampling for a new state.

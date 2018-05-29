@@ -41,7 +41,7 @@
 #define MAX_W 2
 
 
-bool cart_pole_t::propagate( double* start_state, double* control, int num_steps, double* result_state, double integration_step)
+bool cart_pole_t::propagate( const double* start_state, const double* control, int num_steps, double* result_state, double integration_step)
 {
         temp_state[0] = start_state[0]; 
         temp_state[1] = start_state[1];
@@ -105,7 +105,7 @@ svg::Point cart_pole_t::visualize_point(const double* state, svg::Dimensions dim
         return svg::Point(x,y);
 }
 
-void cart_pole_t::update_derivative(double* control)
+void cart_pole_t::update_derivative(const double* control)
 {
     double _v = temp_state[STATE_V];
     double _w = temp_state[STATE_W];

@@ -54,7 +54,7 @@ double two_link_acrobot_t::distance(const double* point1, const double* point2)
         return std::sqrt(pow(x-x2,2.0)+pow(y-y2,2.0));
 }
 
-bool two_link_acrobot_t::propagate( double* start_state, double* control, int num_steps, double* result_state, double integration_step)
+bool two_link_acrobot_t::propagate( const double* start_state, const double* control, int num_steps, double* result_state, double integration_step)
 {
         temp_state[0] = start_state[0]; 
         temp_state[1] = start_state[1];
@@ -114,7 +114,7 @@ svg::Point two_link_acrobot_t::visualize_point(const double* state, svg::Dimensi
         return svg::Point(x,y);
 }
 
-void two_link_acrobot_t::update_derivative(double* control)
+void two_link_acrobot_t::update_derivative(const double* control)
 {
     double theta2 = temp_state[STATE_THETA_2];
     double theta1 = temp_state[STATE_THETA_1] - M_PI / 2;
