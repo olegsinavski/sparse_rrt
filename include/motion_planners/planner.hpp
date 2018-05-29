@@ -33,14 +33,20 @@ public:
 	 * @brief Planner Constructor
 	 * @details Planner Constructor
 	 * 
-	 * @param in_system The system this planner will plan for.
+	 * @param in_start The start state.
+	 * @param in_goal The goal state
+	 * @param in_radius The radial size of the goal region centered at in_goal.
 	 */
-	planner_t(const std::vector<std::pair<double, double> >& a_state_bounds,
-              const std::vector<std::pair<double, double> >& a_control_bounds,
-              std::function<double(const double*, const double*)> distance_function,
-              unsigned int random_seed
+	planner_t(
+	    const double* in_start, const double* in_goal,
+	    double in_radius,
+	    const std::vector<std::pair<double, double> >& a_state_bounds,
+        const std::vector<std::pair<double, double> >& a_control_bounds,
+        std::function<double(const double*, const double*)> distance_function,
+        unsigned int random_seed
     )
-        : state_dimension(a_state_bounds.size())
+        : goal_radius(in_radius)
+        , state_dimension(a_state_bounds.size())
         , state_bounds(a_state_bounds)
         , control_dimension(a_control_bounds.size())
         , control_bounds(a_control_bounds)
@@ -50,18 +56,15 @@ public:
         , number_of_nodes(0)
         , random_generator(random_seed)
     {
+        std::copy(in_start, in_start + this->state_dimension, start_state);
+	    std::copy(in_goal, in_goal + this->state_dimension, goal_state);
 	}
+
 	virtual ~planner_t()
 	{
 	    delete[] start_state;
 	    delete[] goal_state;
 	}
-
-	/**
-	 * @brief Perform any initialization tasks required before calling step().
-	 * @details Perform any initialization tasks required before calling step().
-	 */
-	virtual void setup_planning() = 0;
 
 	/**
 	 * @brief Get the solution path.
@@ -76,21 +79,6 @@ public:
 	 * @details Perform an iteration of a motion planning algorithm.
 	 */
 	virtual void step(system_t* system, int min_time_steps, int max_time_steps, double integration_step) = 0;
-
-	/**
-	 * @brief Set the start and goal state for the planner.
-	 * @details Set the start and goal state for the planner.
-	 *
-	 * @param in_start The start state.
-	 * @param in_goal The goal state
-	 * @param in_radius The radial size of the goal region centered at in_goal.
-	 */
-	void set_start_goal_state(const double* in_start, const double* in_goal,double in_radius) {
-	    std::copy(in_start, in_start + this->state_dimension, start_state);
-	    std::copy(in_goal, in_goal + this->state_dimension, goal_state);
-        goal_radius = in_radius;
-    }
-
 
 	/** @brief The number of nodes in the tree. */
 	unsigned number_of_nodes;

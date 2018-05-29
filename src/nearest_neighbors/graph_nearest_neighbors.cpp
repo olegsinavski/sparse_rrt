@@ -141,6 +141,10 @@ graph_nearest_neighbors_t::graph_nearest_neighbors_t()
 
 graph_nearest_neighbors_t::~graph_nearest_neighbors_t()
 {
+    for (auto n: nodes) {
+        delete n;
+    }
+    nodes.clear();
 }
 
 void graph_nearest_neighbors_t::average_valence()
@@ -154,8 +158,11 @@ void graph_nearest_neighbors_t::average_valence()
     all_neighs /= (double)nodes.size();
 }
 
-void graph_nearest_neighbors_t::add_node( proximity_node_t* graph_node )
+void graph_nearest_neighbors_t::add_node( state_point_t* state )
 {
+    proximity_node_t* graph_node = new proximity_node_t(state);
+	state->set_proximity_node(graph_node);
+
     int k = percolation_threshold();
 
     int new_k = find_k_close(graph_node->get_state()->get_point(), &second_nodes[0], &second_distances[0], k );
@@ -171,8 +178,11 @@ void graph_nearest_neighbors_t::add_node( proximity_node_t* graph_node )
 
 }
  
-void graph_nearest_neighbors_t::remove_node( const proximity_node_t* graph_node )
+void graph_nearest_neighbors_t::remove_node( state_point_t* state )
 {
+    const proximity_node_t* graph_node = state->get_proximity_node();
+    state->set_proximity_node(nullptr);
+
     auto neighbors = graph_node->get_neighbors();
     for( int i=0; i<neighbors.size(); i++ ) {
         nodes[ neighbors[i] ]->delete_neighbor( graph_node->get_index() );
@@ -189,6 +199,8 @@ void graph_nearest_neighbors_t::remove_node( const proximity_node_t* graph_node 
             nodes[ neighbors[i] ]->replace_neighbor( nodes.size()-1, index );
     }
     nodes.pop_back();
+
+    delete graph_node;
 }
 
 proximity_node_t* graph_nearest_neighbors_t::find_closest( const double* state, double* the_distance )
@@ -346,7 +358,7 @@ std::vector<proximity_node_t*> graph_nearest_neighbors_t::find_delta_close_and_c
     boost::unordered_map<proximity_node_t*,bool> added_nodes;
 
     int nr_samples = sampling_function();
-    double min_distance = 99999999;
+    double min_distance = std::numeric_limits<double>::max();;
     int min_index = -1;
     for( int i=0; i<nr_samples; i++ )
     {
@@ -410,7 +422,7 @@ int graph_nearest_neighbors_t::find_delta_close( const double* state, proximity_
 
     boost::unordered_map<proximity_node_t*,bool> added_nodes;
     int nr_samples = sampling_function();
-    double min_distance = 99999999;
+    double min_distance = std::numeric_limits<double>::max();;
     int min_index = -1;
     for( int i=0; i<nr_samples; i++ )
     {

@@ -17,25 +17,6 @@
 #include <deque>
 
 
-void sst_t::setup_planning()
-{
-	best_goal = NULL;
-
-	//initialize the metrics
-	metric.set_distance(this->distance);
-	//create the root of the tree
-	root = new sst_node_t(start_state, this->state_dimension, NULL, tree_edge_t(NULL, 0, -1.), 0.);
-
-	add_point_to_metric(root);
-	number_of_nodes++;
-
-	samples.set_distance(this->distance);
-
-    sample_node_t* first_witness_sample = new sample_node_t(static_cast<sst_node_t*>(root), start_state, this->state_dimension);
-
-	add_point_to_samples(first_witness_sample);
-}
-
 void sst_t::get_solution(std::vector<std::vector<double>>& solution_path, std::vector<std::vector<double>>& controls, std::vector<double>& costs)
 {
 	if(best_goal==NULL)
@@ -97,18 +78,19 @@ void sst_t::step(system_t* system, int min_time_steps, int max_time_steps, doubl
     delete sample_control;
 }
 
-void sst_t::add_point_to_metric(tree_node_t* state)
+void sst_t::add_point_to_metric(tree_node_t* node)
 {
-	proximity_node_t* new_node = new proximity_node_t(state);
-	state->set_proximity_node(new_node);
-	metric.add_node(new_node);
+	metric.add_node(node);
+}
+
+void sst_t::remove_point_from_metric(tree_node_t* node)
+{
+	metric.remove_node(node);
 }
 
 void sst_t::add_point_to_samples(sample_node_t* state)
 {
-	proximity_node_t* new_node = new proximity_node_t(state);
-	state->set_proximity_node(new_node);
-	samples.add_node(new_node);
+	samples.add_node(state);
 }
 
 sst_node_t* sst_t::nearest_vertex(const double* sample_state)
@@ -116,7 +98,7 @@ sst_node_t* sst_t::nearest_vertex(const double* sample_state)
 	//performs the best near query
     std::vector<proximity_node_t*> close_nodes = metric.find_delta_close_and_closest(sample_state, this->sst_delta_near);
 
-    double length = 999999999;
+    double length = std::numeric_limits<double>::max();;
     sst_node_t* nearest = nullptr;
     for(unsigned i=0;i<close_nodes.size();i++)
     {
@@ -222,14 +204,6 @@ void sst_t::branch_and_bound(sst_node_t* node)
 	    }
     	remove_leaf(node);
     }
-}
-
-void sst_t::remove_point_from_metric(tree_node_t* node)
-{
-	const proximity_node_t* old_node = node->get_proximity_node();
-    node->set_proximity_node(nullptr);
-	metric.remove_node(old_node);
-	delete old_node;
 }
 
 bool sst_t::is_leaf(tree_node_t* node)

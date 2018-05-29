@@ -105,23 +105,35 @@ public:
 	/**
 	 * @copydoc planner_t::planner_t()
 	 */
-	sst_t(const std::vector<std::pair<double, double> >& a_state_bounds,
+	sst_t(const double* in_start, const double* in_goal,
+	      double in_radius,
+	      const std::vector<std::pair<double, double> >& a_state_bounds,
 		  const std::vector<std::pair<double, double> >& a_control_bounds,
 		  std::function<double(const double*, const double*)> distance_function,
 		  unsigned int random_seed,
 		  double delta_near, double delta_drain)
-		: planner_t(a_state_bounds, a_control_bounds, distance_function, random_seed)
+		: planner_t(in_start, in_goal, in_radius,
+		            a_state_bounds, a_control_bounds, distance_function, random_seed)
 	    , sst_delta_near(delta_near)
 	    , sst_delta_drain(delta_drain)
+	    , best_goal(nullptr)
 	{
+        //initialize the metrics
+        metric.set_distance(this->distance);
+
+        root = new sst_node_t(in_start, a_state_bounds.size(), nullptr, tree_edge_t(nullptr, 0, -1.), 0.);
+        add_point_to_metric(root);
+        number_of_nodes++;
+
+        samples.set_distance(this->distance);
+
+        sample_node_t* first_witness_sample = new sample_node_t(static_cast<sst_node_t*>(root), start_state, this->state_dimension);
+
+        add_point_to_samples(first_witness_sample);
+	}
+	virtual ~sst_t(){
 
 	}
-	virtual ~sst_t(){}
-
-	/**
-	 * @copydoc planner_t::setup_planning()
-	 */
-	virtual void setup_planning();
 
 	/**
 	 * @copydoc planner_t::get_solution(std::vector<std::pair<double*,double> >&)
@@ -223,7 +235,6 @@ protected:
 
 	double sst_delta_near;
 	double sst_delta_drain;
-
 
 };
 

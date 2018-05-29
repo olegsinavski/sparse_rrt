@@ -194,14 +194,12 @@ public:
 
         planner.reset(
                 new sst_t(
+                        &start_state(0), &goal_state(0), goal_radius,
                         state_bounds_v, control_bounds_v,
                         euclidian_distance(is_circular_topology_v),
                         random_seed,
                         sst_delta_near, sst_delta_drain)
         );
-
-        planner->set_start_goal_state(&start_state(0), &goal_state(0), goal_radius);
-        planner->setup_planning();
     }
 };
 
@@ -250,14 +248,11 @@ public:
 
         planner.reset(
                 new rrt_t(
+                        &start_state(0), &goal_state(0), goal_radius,
                         state_bounds_v, control_bounds_v,
                         euclidian_distance(is_circular_topology_v),
                         random_seed)
         );
-
-        planner->set_start_goal_state(&start_state(0), &goal_state(0), goal_radius);
-        planner->setup_planning();
-
     }
 };
 

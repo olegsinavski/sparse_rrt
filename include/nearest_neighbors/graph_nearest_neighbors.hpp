@@ -143,13 +143,13 @@ class graph_nearest_neighbors_t
          * @brief Adds a node to the proximity structure
          * @param node The node to insert.
          */
-        void add_node( proximity_node_t* node );
+        void add_node( state_point_t* node );
         
         /**
          * @brief Removes a node from the structure.
          * @param node
          */
-        void remove_node( const proximity_node_t* node );
+        void remove_node( state_point_t* node );
 
         /**
          * Prints the average degree of all vertices in the data structure.

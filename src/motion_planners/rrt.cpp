@@ -16,7 +16,7 @@
 #include <iostream>
 #include <deque>
 
-void rrt_t::setup_planning()
+void rrt_t::setup_rrt_planning()
 {
     //init internal variables
     sample_state = new double[this->state_dimension];
@@ -38,7 +38,7 @@ void rrt_t::get_solution(std::vector<std::vector<double>>& solution_path, std::v
     std::copy(goal_state, goal_state + this->state_dimension, sample_state);
     std::vector<proximity_node_t*> close_nodes = metric->find_delta_close_and_closest(sample_state, goal_radius);
 
-    double length = 999999999;
+    double length = std::numeric_limits<double>::max();;
     for(unsigned i=0;i<close_nodes.size();i++)
     {
         rrt_node_t* v = (rrt_node_t*)(close_nodes[i]->get_state());
@@ -98,9 +98,7 @@ void rrt_t::step(system_t* system, int min_time_steps, int max_time_steps, doubl
 
 void rrt_t::add_point_to_metric(tree_node_t* state)
 {
-    proximity_node_t* new_node = new proximity_node_t(state);
-    state->set_proximity_node(new_node);
-    metric->add_node(new_node);
+    metric->add_node(state);
 }
 
 void rrt_t::nearest_vertex()

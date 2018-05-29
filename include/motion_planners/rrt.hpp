@@ -24,6 +24,7 @@ public:
 	    : tree_node_t(point, state_dimension, std::move(a_parent_edge), a_cost)
 	    , parent(a_parent)
 	{
+
 	}
 
     rrt_node_t* get_parent() const {
@@ -47,20 +48,18 @@ public:
 	/**
 	 * @copydoc planner_t::planner_t(system_t*)
 	 */
-	rrt_t(const std::vector<std::pair<double, double> >& a_state_bounds,
+	rrt_t(const double* in_start, const double* in_goal,
+	      double in_radius,
+	      const std::vector<std::pair<double, double> >& a_state_bounds,
 		  const std::vector<std::pair<double, double> >& a_control_bounds,
 		  std::function<double(const double*, const double*)> distance_function,
           unsigned int random_seed)
-			: planner_t(a_state_bounds, a_control_bounds, distance_function, random_seed)
+			: planner_t(in_start, in_goal, in_radius,
+			            a_state_bounds, a_control_bounds, distance_function, random_seed)
 	{
-
+        setup_rrt_planning();
 	}
 	virtual ~rrt_t(){}
-
-	/**
-	 * @copydoc planner_t::setup_planning()
-	 */
-	virtual void setup_planning();
 
 	/**
 	 * @copydoc planner_t::get_solution(std::vector<std::pair<double*,double> >&)
@@ -120,6 +119,10 @@ protected:
 	 */
 	void add_point_to_metric(tree_node_t* node);
 
+    /**
+	 * @copydoc planner_t::setup_rrt_planning()
+	 */
+	void setup_rrt_planning();
 
 };
 

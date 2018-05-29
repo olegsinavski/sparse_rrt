@@ -90,6 +90,27 @@ def test_car_pose_sst():
         planner.step(system, min_time_steps, max_time_steps, integration_step)
 
 
+def test_car_pose_rrt():
+    system = _sst_module.CartPole()
+
+    planner = _sst_module.RRTWrapper(
+        state_bounds=system.get_state_bounds(),
+        control_bounds=system.get_control_bounds(),
+        is_circular_topology=system.is_circular_topology(),
+        start_state=np.array([-20, 0, 3.14, 0]),
+        goal_state=np.array([20, 0, 3.14, 0]),
+        goal_radius=1.5,
+        random_seed=0
+    )
+
+    min_time_steps = 10
+    max_time_steps = 50
+    integration_step = 0.02
+
+    for iteration in range(10000):
+        planner.step(system, min_time_steps, max_time_steps, integration_step)
+
+
 def test_create_multiple_times():
     '''
     There used to be a crash during construction
@@ -113,9 +134,10 @@ def test_create_multiple_times():
 
 if __name__ == '__main__':
     st = time.time()
-    test_point_sst()
-    print(time.time() - st, 21.4076721668)
-
-    test_car_pose_sst()
-    # test_create_multiple_times()
+    # test_point_sst()
+    # print(time.time() - st, 21.4076721668)
+    #
+    # test_car_pose_sst()
+    # test_car_pose_rrt()
+    test_create_multiple_times()
     print('Passed all tests!')
