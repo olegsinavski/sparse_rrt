@@ -111,14 +111,6 @@ protected:
 	 */
 	void add_to_tree();
 
-	/**
-	 * @brief Add a state into the nearest neighbor structure for retrieval in later iterations.
-	 * @details Add a state into the nearest neighbor structure for retrieval in later iterations.
-	 * 
-	 * @param node The node to add.
-	 */
-	void add_point_to_metric(tree_node_t* node);
-
     /**
 	 * @copydoc planner_t::setup_rrt_planning()
 	 */

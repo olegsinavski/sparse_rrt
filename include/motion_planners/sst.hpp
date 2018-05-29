@@ -25,13 +25,8 @@ class sample_node_t;
 class sst_node_t : public tree_node_t
 {
 public:
-	sst_node_t(const double* point, unsigned int state_dimension, sst_node_t* a_parent, tree_edge_t&& a_parent_edge, double a_cost)
-	    : tree_node_t(point, state_dimension, std::move(a_parent_edge), a_cost)
-	    , parent(a_parent)
-	    , active(true)
-	    , witness(NULL)
-	{
-	}
+	sst_node_t(const double* point, unsigned int state_dimension, sst_node_t* a_parent, tree_edge_t&& a_parent_edge, double a_cost);
+	~sst_node_t();
 
 	bool is_active() const {
 	    return active;
@@ -111,29 +106,8 @@ public:
 		  const std::vector<std::pair<double, double> >& a_control_bounds,
 		  std::function<double(const double*, const double*)> distance_function,
 		  unsigned int random_seed,
-		  double delta_near, double delta_drain)
-		: planner_t(in_start, in_goal, in_radius,
-		            a_state_bounds, a_control_bounds, distance_function, random_seed)
-	    , sst_delta_near(delta_near)
-	    , sst_delta_drain(delta_drain)
-	    , best_goal(nullptr)
-	{
-        //initialize the metrics
-        metric.set_distance(this->distance);
-
-        root = new sst_node_t(in_start, a_state_bounds.size(), nullptr, tree_edge_t(nullptr, 0, -1.), 0.);
-        add_point_to_metric(root);
-        number_of_nodes++;
-
-        samples.set_distance(this->distance);
-
-        sample_node_t* first_witness_sample = new sample_node_t(static_cast<sst_node_t*>(root), start_state, this->state_dimension);
-
-        add_point_to_samples(first_witness_sample);
-	}
-	virtual ~sst_t(){
-
-	}
+		  double delta_near, double delta_drain);
+	virtual ~sst_t();
 
 	/**
 	 * @copydoc planner_t::get_solution(std::vector<std::pair<double*,double> >&)
@@ -171,34 +145,10 @@ protected:
 	void add_to_tree(const double* sample_state, const double* sample_control, sst_node_t* nearest, double duration);
 
 	/**
-	 * @brief Add a state into the nearest neighbor structure for retrieval in later iterations.
-	 * @details Add a state into the nearest neighbor structure for retrieval in later iterations.
-	 * 
-	 * @param node The node to add.
-	 */
-	void add_point_to_metric(tree_node_t* node);
-
-	/**
-	 * @brief Add a sample into the nearest neighbor structure for retrieval in later iterations.
-	 * @details Add a sample into the nearest neighbor structure for retrieval in later iterations.
-	 * 
-	 * @param node The sample to add.
-	 */
-	void add_point_to_samples(sample_node_t* node);
-
-	/**
 	 * @brief Check if the currently created state is close to a witness.
 	 * @details Check if the currently created state is close to a witness.
 	 */
 	sample_node_t* find_witness(const double* sample_state);
-
-	/**
-	 * @brief Removes a node from the nearest neighbor structure.
-	 * @details Removes a node from the nearest neighbor structure.
-	 * 
-	 * @param node The node to remove.
-	 */
-	void remove_point_from_metric(tree_node_t* node);
 
 	/**
 	 * @brief Checks if this node has any children.

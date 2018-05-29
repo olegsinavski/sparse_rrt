@@ -16,6 +16,57 @@
 #include <iostream>
 #include <deque>
 
+int counter = 0;
+
+
+sst_node_t::sst_node_t(const double* point, unsigned int state_dimension, sst_node_t* a_parent, tree_edge_t&& a_parent_edge, double a_cost)
+    : tree_node_t(point, state_dimension, std::move(a_parent_edge), a_cost)
+    , parent(a_parent)
+    , active(true)
+    , witness(NULL)
+{
+    counter ++;
+    std::cout << "Create "<< counter << std::endl;
+
+}
+
+sst_node_t::~sst_node_t() {
+
+    counter --;
+    std::cout << "Destroy " << counter << std::endl;
+}
+
+sst_t::sst_t(
+    const double* in_start, const double* in_goal,
+    double in_radius,
+    const std::vector<std::pair<double, double> >& a_state_bounds,
+    const std::vector<std::pair<double, double> >& a_control_bounds,
+    std::function<double(const double*, const double*)> distance_function,
+    unsigned int random_seed,
+    double delta_near, double delta_drain)
+    : planner_t(in_start, in_goal, in_radius,
+                a_state_bounds, a_control_bounds, distance_function, random_seed)
+    , sst_delta_near(delta_near)
+    , sst_delta_drain(delta_drain)
+    , best_goal(nullptr)
+{
+    //initialize the metrics
+    metric.set_distance(this->distance);
+
+    root = new sst_node_t(in_start, a_state_bounds.size(), nullptr, tree_edge_t(nullptr, 0, -1.), 0.);
+    metric.add_node(root);
+    number_of_nodes++;
+
+    samples.set_distance(this->distance);
+
+    sample_node_t* first_witness_sample = new sample_node_t(static_cast<sst_node_t*>(root), start_state, this->state_dimension);
+    samples.add_node(first_witness_sample);
+}
+
+sst_t::~sst_t(){
+    delete root;
+}
+
 
 void sst_t::get_solution(std::vector<std::vector<double>>& solution_path, std::vector<std::vector<double>>& controls, std::vector<double>& costs)
 {
@@ -53,6 +104,7 @@ void sst_t::get_solution(std::vector<std::vector<double>>& solution_path, std::v
         costs.push_back(path[i]->get_parent_edge().get_duration());
 	}
 }
+
 void sst_t::step(system_t* system, int min_time_steps, int max_time_steps, double integration_step)
 {
     /*
@@ -62,7 +114,6 @@ void sst_t::step(system_t* system, int min_time_steps, int max_time_steps, doubl
      * Propagate for random time with constant random control from the closest node
      * If resulting state is valid, add a resulting state into the tree and perform sst-specific graph manipulations
      */
-
     double* sample_state = new double[this->state_dimension];
     double* sample_control = new double[this->control_dimension];
 	this->random_state(sample_state);
@@ -76,21 +127,6 @@ void sst_t::step(system_t* system, int min_time_steps, int max_time_steps, doubl
 	}
     delete sample_state;
     delete sample_control;
-}
-
-void sst_t::add_point_to_metric(tree_node_t* node)
-{
-	metric.add_node(node);
-}
-
-void sst_t::remove_point_from_metric(tree_node_t* node)
-{
-	metric.remove_node(node);
-}
-
-void sst_t::add_point_to_samples(sample_node_t* state)
-{
-	samples.add_node(state);
 }
 
 sst_node_t* sst_t::nearest_vertex(const double* sample_state)
@@ -125,14 +161,14 @@ void sst_t::add_to_tree(const double* sample_state, const double* sample_control
 		if(best_goal==NULL || nearest->get_cost() + duration <= best_goal->get_cost())
 		{
 			//create a new tree node
-			sst_node_t* new_node = new sst_node_t(
-			    sample_state, this->state_dimension,
-			    nearest,
-			    tree_edge_t(sample_control, this->control_dimension, duration),
-			    nearest->get_cost() + duration);
-
 			//set parent's child
-			nearest->add_child(new_node);
+			sst_node_t* new_node = static_cast<sst_node_t*>(nearest->add_child(
+			    new sst_node_t(
+                    sample_state, this->state_dimension,
+                    nearest,
+                    tree_edge_t(sample_control, this->control_dimension, duration),
+                    nearest->get_cost() + duration)
+            ));
 			number_of_nodes++;
 
 	        if(best_goal==NULL && this->distance(new_node->get_point(), goal_state)<goal_radius)
@@ -153,7 +189,7 @@ void sst_t::add_to_tree(const double* sample_state, const double* sample_control
 				//optimization for sparsity
 				if(representative->is_active())
 				{
-					remove_point_from_metric(representative);
+					metric.remove_node(representative);
 					representative->make_inactive();
 				}
 
@@ -168,7 +204,7 @@ void sst_t::add_to_tree(const double* sample_state, const double* sample_control
 			}
 			witness_sample->set_representative(new_node);
 			new_node->set_witness(witness_sample);
-			add_point_to_metric(new_node);
+			metric.add_node(new_node);
 		}
 	}	
 
@@ -182,7 +218,7 @@ sample_node_t* sst_t::find_witness(const double* sample_state)
 	{
 		//create a new sample
 		witness_sample = new sample_node_t(NULL, sample_state, this->state_dimension);
-		add_point_to_samples(witness_sample);
+		samples.add_node(witness_sample);
 	}
     return witness_sample;
 }
@@ -200,7 +236,7 @@ void sst_t::branch_and_bound(sst_node_t* node)
     	if(node->is_active())
     	{
 	    	node->get_witness()->set_representative(NULL);
-	    	remove_point_from_metric(node);
+	    	metric.remove_node(node);
 	    }
     	remove_leaf(node);
     }

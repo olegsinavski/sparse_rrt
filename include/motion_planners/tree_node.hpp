@@ -132,15 +132,18 @@ public:
 	}
 
     virtual ~tree_node_t() {
-
+        for (auto child: this->children) {
+            delete child;
+        }
 	}
 
     const std::list<tree_node_t*>& get_children() const {
         return this->children;
     }
 
-    void add_child(tree_node_t* node) {
+    tree_node_t* add_child(tree_node_t* node) {
         this->children.insert(this->children.begin(), node);
+        return node;
     }
 
     void remove_child(tree_node_t* node) {

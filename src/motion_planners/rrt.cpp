@@ -30,7 +30,7 @@ void rrt_t::setup_rrt_planning()
     number_of_nodes++;
 
     //add root to nearest neighbor structure
-    add_point_to_metric(root);
+    metric->add_node(root);
 
 }
 void rrt_t::get_solution(std::vector<std::vector<double>>& solution_path, std::vector<std::vector<double>>& controls, std::vector<double>& costs)
@@ -96,11 +96,6 @@ void rrt_t::step(system_t* system, int min_time_steps, int max_time_steps, doubl
     }
 }
 
-void rrt_t::add_point_to_metric(tree_node_t* state)
-{
-    metric->add_node(state);
-}
-
 void rrt_t::nearest_vertex()
 {
     double distance;
@@ -110,14 +105,12 @@ void rrt_t::nearest_vertex()
 void rrt_t::add_to_tree()
 {
     //create a new tree node
-    rrt_node_t* new_node = new rrt_node_t(
+    rrt_node_t* new_node = static_cast<rrt_node_t*>(nearest->add_child(new rrt_node_t(
         sample_state, this->state_dimension, nearest,
         tree_edge_t(sample_control, this->control_dimension, duration),
-        nearest->get_cost() + duration);
-
-    //set parent's child
-    nearest->add_child(new_node);
-    add_point_to_metric(new_node);
+        nearest->get_cost() + duration)
+    ));
+    metric->add_node(new_node);
     number_of_nodes++;
 }
 

@@ -129,15 +129,21 @@ def test_create_multiple_times():
             sst_delta_near=2.,
             sst_delta_drain=1.2
         )
+        min_time_steps = 10
+        max_time_steps = 50
+        integration_step = 0.02
+
+        for iteration in range(100):
+            planner.step(system, min_time_steps, max_time_steps, integration_step)
         planners.append(planner)
 
 
 if __name__ == '__main__':
     st = time.time()
-    # test_point_sst()
+    test_point_sst()
     # print(time.time() - st, 21.4076721668)
     #
     # test_car_pose_sst()
     # test_car_pose_rrt()
-    test_create_multiple_times()
+    # test_create_multiple_times()
     print('Passed all tests!')
