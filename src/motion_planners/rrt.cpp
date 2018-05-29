@@ -16,20 +16,15 @@
 #include <iostream>
 #include <deque>
 
-int counter = 0;
 
 rrt_node_t::rrt_node_t(double* point, unsigned int state_dimension, rrt_node_t* a_parent, tree_edge_t&& a_parent_edge, double a_cost)
 	    : tree_node_t(point, state_dimension, std::move(a_parent_edge), a_cost)
 	    , parent(a_parent)
 {
-    counter ++;
-    std::cout << "Create rrt"<< counter << std::endl;
 }
 
 rrt_node_t::~rrt_node_t() {
 
-    counter --;
-    std::cout << "Destroy rrt" << counter << std::endl;
 }
 
 

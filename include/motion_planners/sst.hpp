@@ -70,10 +70,8 @@ class sample_node_t : public state_point_t
 {
 public:
 	sample_node_t(sst_node_t* const representative,
-	              const double* a_point, unsigned int state_dimension)
-	    : state_point_t(a_point, state_dimension)
-	    , rep(representative)
-	{ }
+	              const double* a_point, unsigned int state_dimension);
+	~sample_node_t();
 
     void set_representative(sst_node_t* const representative) {
         this->rep = representative;
@@ -186,6 +184,7 @@ protected:
 	double sst_delta_near;
 	double sst_delta_drain;
 
+    std::vector<sample_node_t*> witness_nodes;
 };
 
 #endif

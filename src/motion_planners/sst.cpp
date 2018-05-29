@@ -16,8 +16,6 @@
 #include <iostream>
 #include <deque>
 
-//int counter = 0;
-
 
 sst_node_t::sst_node_t(const double* point, unsigned int state_dimension, sst_node_t* a_parent, tree_edge_t&& a_parent_edge, double a_cost)
     : tree_node_t(point, state_dimension, std::move(a_parent_edge), a_cost)
@@ -29,6 +27,21 @@ sst_node_t::sst_node_t(const double* point, unsigned int state_dimension, sst_no
 }
 
 sst_node_t::~sst_node_t() {
+
+}
+
+
+sample_node_t::sample_node_t(
+    sst_node_t* const representative,
+    const double* a_point, unsigned int state_dimension)
+    : state_point_t(a_point, state_dimension)
+    , rep(representative)
+{
+
+}
+
+sample_node_t::~sample_node_t()
+{
 
 }
 
@@ -57,10 +70,14 @@ sst_t::sst_t(
 
     sample_node_t* first_witness_sample = new sample_node_t(static_cast<sst_node_t*>(root), start_state, this->state_dimension);
     samples.add_node(first_witness_sample);
+    witness_nodes.push_back(first_witness_sample);
 }
 
-sst_t::~sst_t(){
+sst_t::~sst_t() {
     delete root;
+    for (auto w: this->witness_nodes) {
+        delete w;
+    }
 }
 
 
@@ -215,6 +232,7 @@ sample_node_t* sst_t::find_witness(const double* sample_state)
 		//create a new sample
 		witness_sample = new sample_node_t(NULL, sample_state, this->state_dimension);
 		samples.add_node(witness_sample);
+		witness_nodes.push_back(witness_sample);
 	}
     return witness_sample;
 }

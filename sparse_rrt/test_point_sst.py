@@ -143,7 +143,7 @@ if __name__ == '__main__':
     # test_point_sst()
     # print(time.time() - st, 21.4076721668)
     #
-    # test_car_pose_sst()
-    test_car_pose_rrt()
+    test_car_pose_sst()
+    # test_car_pose_rrt()
     # test_create_multiple_times()
     print('Passed all tests!')
