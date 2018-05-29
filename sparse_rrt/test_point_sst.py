@@ -112,7 +112,10 @@ def test_create_multiple_times():
 
 
 if __name__ == '__main__':
+    st = time.time()
     test_point_sst()
+    print(time.time() - st, 21.4076721668)
+
     test_car_pose_sst()
-    test_create_multiple_times()
+    # test_create_multiple_times()
     print('Passed all tests!')
