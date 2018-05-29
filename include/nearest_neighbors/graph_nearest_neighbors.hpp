@@ -34,7 +34,6 @@ class proximity_node_t
          * @param st The node to store.
          */
         proximity_node_t( const state_point_t* st );
-        virtual ~proximity_node_t();
 
         /**
          * Gets the internal node that is represented.
@@ -63,7 +62,7 @@ class proximity_node_t
          * @param nr_neigh Storage for the number of neighbors returned.
          * @return The neighbor indices.
          */
-        unsigned int* get_neighbors( int* nr_neigh ) const;
+        const std::vector<unsigned int>& get_neighbors() const;
 
         /**
          * Adds a node index into this node's neighbor list.
@@ -99,19 +98,9 @@ class proximity_node_t
         int index;
 
         /**
-         * @brief The max number of neighbors.
+         * @brief The neighbor container for this node.
          */
-        int cap_neighbors;
-        
-        /**
-         * @brief The current number of neighbors.
-         */
-        int nr_neighbors;
-        
-        /**
-         * @brief The neighbor list for this node.
-         */
-        unsigned int* neighbors;
+        std::vector<unsigned int> neighbors;
 };
 
 
@@ -245,27 +234,17 @@ class graph_nearest_neighbors_t
         /**
          * @brief The nodes being stored.
          */
-        proximity_node_t** nodes;
-        
-        /**
-         * @brief The current number of nodes being stored.
-         */
-        int nr_nodes;
-        
-        /**
-         * @brief The maximum number of nodes that can be stored. 
-         */
-        int cap_nodes;
+        std::vector<proximity_node_t*> nodes;
 
         /**
          * @brief Temporary storage for query functions.
          */
-        proximity_node_t** second_nodes;
+        std::vector<proximity_node_t*> second_nodes;
         
         /**
          * @brief Temporary storage for query functions.
          */
-        double* second_distances;
+        std::vector<double> second_distances;
     private:
         double compute_distance(const proximity_node_t* node, const double* state) const;
 };
