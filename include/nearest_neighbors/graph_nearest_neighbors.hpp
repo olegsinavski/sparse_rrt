@@ -37,14 +37,6 @@ class proximity_node_t
         virtual ~proximity_node_t();
 
         /**
-         * Determines distance with another node.
-         * @brief Determines distance with another node.
-         * @param st The node to determine distance with.
-         * @return The distance value.
-         */
-        //double distance ( const double* st );
-
-        /**
          * Gets the internal node that is represented.
          * @brief Gets the internal node that is represented.
          * @return The internal node.
@@ -95,7 +87,6 @@ class proximity_node_t
          */
         void replace_neighbor( unsigned prev, int new_index );
 
-        std::function<double(const double*, const double*)> distance_function;
     protected:
         /**
          * @brief The node represented.

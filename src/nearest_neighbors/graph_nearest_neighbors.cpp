@@ -27,10 +27,6 @@ proximity_node_t::~proximity_node_t()
     free( neighbors );
 }
 
-//double proximity_node_t::distance ( const double* st )
-//{
-//    return this->distance_function(state->get_point(), st);
-//}
 
 const state_point_t* proximity_node_t::get_state( ) const
 {
@@ -138,17 +134,16 @@ int resort( proximity_node_t** close_nodes, double* distances, int index )
 {
     while( index > 0 && distances[ index ] < distances[ index-1 ] )
     {
-	double temp = distances[index];
-	distances[index] = distances[index-1];
-	distances[index-1] = temp;
-	proximity_node_t* temp_node = close_nodes[index];
-	close_nodes[index] = close_nodes[index-1];
-	close_nodes[index-1] = temp_node;
-	index--;
+        double temp = distances[index];
+        distances[index] = distances[index-1];
+        distances[index-1] = temp;
+        proximity_node_t* temp_node = close_nodes[index];
+        close_nodes[index] = close_nodes[index-1];
+        close_nodes[index-1] = temp_node;
+        index--;
     }
     return index;
 }
-
 
 
 graph_nearest_neighbors_t::graph_nearest_neighbors_t()
@@ -183,8 +178,7 @@ void graph_nearest_neighbors_t::average_valence()
 }
 
 void graph_nearest_neighbors_t::add_node( proximity_node_t* graph_node )
-{    
-	graph_node->distance_function = this->distance_function;
+{
     int k = percolation_threshold();
 
     int new_k = find_k_close(graph_node->get_state()->get_point(), second_nodes, second_distances, k );
@@ -218,19 +212,19 @@ void graph_nearest_neighbors_t::remove_node( const proximity_node_t* graph_node 
     int index = graph_node->get_index();
     if( index < nr_nodes-1 )
     {
-	nodes[index] = nodes[nr_nodes-1];
-	nodes[index]->set_index( index );
-	
-	neighbors = nodes[index]->get_neighbors( &nr_neighbors );
-	for( int i=0; i<nr_neighbors; i++ )
-	    nodes[ neighbors[i] ]->replace_neighbor( nr_nodes-1, index ); 
+        nodes[index] = nodes[nr_nodes-1];
+        nodes[index]->set_index( index );
+
+        neighbors = nodes[index]->get_neighbors( &nr_neighbors );
+        for( int i=0; i<nr_neighbors; i++ )
+            nodes[ neighbors[i] ]->replace_neighbor( nr_nodes-1, index );
     }
     nr_nodes--;
 
     if( nr_nodes < (cap_nodes-1)/2 )
     {
-	cap_nodes *= 0.5;
-	nodes = (proximity_node_t**)realloc(nodes,cap_nodes*sizeof(proximity_node_t*));
+        cap_nodes *= 0.5;
+        nodes = (proximity_node_t**)realloc(nodes,cap_nodes*sizeof(proximity_node_t*));
     }
 }
 
@@ -244,30 +238,29 @@ proximity_node_t* graph_nearest_neighbors_t::find_closest( const double* state, 
     int min_index = -1;
     for( int i=0; i<nr_samples; i++ )
     {
-	int index = rand() % nr_nodes;
-	double distance = this->compute_distance(nodes[index], state);
-	if( distance < min_distance )
-	{
-	    min_distance = distance;
-	    min_index = index;
-	}
+        int index = rand() % nr_nodes;
+        double distance = this->compute_distance(nodes[index], state);
+        if( distance < min_distance )
+        {
+            min_distance = distance;
+            min_index = index;
+        }
     }
 
     int old_min_index = min_index;
-    do
-    {
-	old_min_index = min_index;
-	int nr_neighbors;
-	unsigned int* neighbors = nodes[min_index]->get_neighbors( &nr_neighbors );
-	for( int j=0; j<nr_neighbors; j++ )
-	{
-	    double distance = this->compute_distance(nodes[neighbors[j]], state);
-	    if( distance < min_distance )
-	    {
-		min_distance = distance;
-		min_index = neighbors[j];			
-	    }
-	}
+    do {
+        old_min_index = min_index;
+        int nr_neighbors;
+        unsigned int* neighbors = nodes[min_index]->get_neighbors( &nr_neighbors );
+        for( int j=0; j<nr_neighbors; j++ )
+        {
+            double distance = this->compute_distance(nodes[neighbors[j]], state);
+            if( distance < min_distance )
+            {
+            min_distance = distance;
+            min_index = neighbors[j];
+            }
+        }
     }
     while( old_min_index != min_index );
 
@@ -291,96 +284,96 @@ int graph_nearest_neighbors_t::find_k_close( const double* state, proximity_node
 
     if( k < nr_nodes )
     {
-	for( int i=0; i<k; i++ )
-	{
-	    bool exists = true;
-	    int index;
-	    while( exists == true )
-	    {
-		index = rand() % nr_nodes;
-		exists = does_node_exist(added_nodes, nodes[index]);
-	    }
-	    close_nodes[i] = nodes[index];
-	    added_nodes[nodes[index]] = true;
-	    distances[i] = this->compute_distance(nodes[index], state);
-	}
-	sort( close_nodes, distances, 0, k-1 );
-        
-	int nr_samples = sampling_function();
-
-	double min_distance = distances[0];
-	int min_index = close_nodes[0]->get_index();
-	for( int i=0; i<nr_samples; i++ )
-	{
-	    int index = rand() % nr_nodes;
-	    if( does_node_exist(added_nodes, nodes[index] ) == false )
-	    {
-		double distance = this->compute_distance(nodes[index], state);
-		if( distance < min_distance )
-		{
-		    min_distance = distance;
-		    min_index = index;
-		}
-	    }
-	}
-        if(min_distance!=distances[0])
+        for( int i=0; i<k; i++ )
         {
-        	added_nodes.erase(close_nodes[k-1]);
-            close_nodes[ k - 1 ] = nodes[min_index];
-            added_nodes[nodes[min_index]];
-            distances[ k - 1 ] = min_distance;
-            resort( close_nodes, distances, k-1 );        
-            
-        }
-        
-        min_index = 0;
-	int last_index = close_nodes[k-1]->get_index();
-        
-	int old_last_index;
-        
-        
-	do
-	{
-	    old_last_index = last_index;
-            int nr_neighbors;
-            unsigned int* neighbors = nodes[ close_nodes[min_index]->get_index() ]->get_neighbors( &nr_neighbors );
-            int lowest_replacement = k;
-            for( int j=0; j<nr_neighbors; j++ )
+            bool exists = true;
+            int index;
+            while( exists == true )
             {
-                if( does_node_exist(added_nodes, nodes[ neighbors[j] ] ) == false )
+                index = rand() % nr_nodes;
+                exists = does_node_exist(added_nodes, nodes[index]);
+            }
+            close_nodes[i] = nodes[index];
+            added_nodes[nodes[index]] = true;
+            distances[i] = this->compute_distance(nodes[index], state);
+        }
+        sort( close_nodes, distances, 0, k-1 );
+
+        int nr_samples = sampling_function();
+
+        double min_distance = distances[0];
+        int min_index = close_nodes[0]->get_index();
+        for( int i=0; i<nr_samples; i++ )
+        {
+            int index = rand() % nr_nodes;
+            if( does_node_exist(added_nodes, nodes[index] ) == false )
+            {
+            double distance = this->compute_distance(nodes[index], state);
+            if( distance < min_distance )
+            {
+                min_distance = distance;
+                min_index = index;
+            }
+            }
+        }
+            if(min_distance!=distances[0])
+            {
+                added_nodes.erase(close_nodes[k-1]);
+                close_nodes[ k - 1 ] = nodes[min_index];
+                added_nodes[nodes[min_index]];
+                distances[ k - 1 ] = min_distance;
+                resort( close_nodes, distances, k-1 );
+
+            }
+
+            min_index = 0;
+        int last_index = close_nodes[k-1]->get_index();
+
+        int old_last_index;
+
+
+        do
+        {
+            old_last_index = last_index;
+                int nr_neighbors;
+                unsigned int* neighbors = nodes[ close_nodes[min_index]->get_index() ]->get_neighbors( &nr_neighbors );
+                int lowest_replacement = k;
+                for( int j=0; j<nr_neighbors; j++ )
                 {
-                    double distance = this->compute_distance(nodes[ neighbors[j] ], state );
-                    if( distance < distances[k-1] )
+                    if( does_node_exist(added_nodes, nodes[ neighbors[j] ] ) == false )
                     {
-                    	added_nodes.erase(close_nodes[k-1]);
-                        close_nodes[k-1] = nodes[ neighbors[j] ];
-                        added_nodes[nodes[neighbors[j]]];
-                        distances[k-1] = distance;
-                        int test = resort( close_nodes, distances, k-1 );
-                        lowest_replacement = (test<lowest_replacement?test:lowest_replacement);
-                        last_index = close_nodes[k-1]->get_index();
+                        double distance = this->compute_distance(nodes[ neighbors[j] ], state );
+                        if( distance < distances[k-1] )
+                        {
+                            added_nodes.erase(close_nodes[k-1]);
+                            close_nodes[k-1] = nodes[ neighbors[j] ];
+                            added_nodes[nodes[neighbors[j]]];
+                            distances[k-1] = distance;
+                            int test = resort( close_nodes, distances, k-1 );
+                            lowest_replacement = (test<lowest_replacement?test:lowest_replacement);
+                            last_index = close_nodes[k-1]->get_index();
+                        }
                     }
                 }
-            }   
-            if(min_index < lowest_replacement)
-            	min_index++;
-            else
-            	min_index = lowest_replacement;
-	}
-	while( min_index < k );
-        
-	return k;
+                if(min_index < lowest_replacement)
+                    min_index++;
+                else
+                    min_index = lowest_replacement;
+        }
+        while( min_index < k );
+
+        return k;
     }
     else
     {
-	for( int i=0; i<nr_nodes; i++ )
-	{
-	    close_nodes[i] = nodes[i];
-	    distances[i] = this->compute_distance(nodes[i], state );
-	}
-        
-	sort( close_nodes, distances, 0, nr_nodes-1 );
-	return nr_nodes;
+        for( int i=0; i<nr_nodes; i++ )
+        {
+            close_nodes[i] = nodes[i];
+            distances[i] = this->compute_distance(nodes[i], state );
+        }
+
+        sort( close_nodes, distances, 0, nr_nodes-1 );
+        return nr_nodes;
     }
 }
 
@@ -529,9 +522,9 @@ bool graph_nearest_neighbors_t::does_node_exist(boost::unordered_map<proximity_n
 int graph_nearest_neighbors_t::sampling_function()
 {
     if( nr_nodes < 1000 )
-	return nr_nodes/5 + 1;
+	    return nr_nodes/5 + 1;
     else
-	return 200 + nr_nodes/500;
+	    return 200 + nr_nodes/500;
 }
 
 int graph_nearest_neighbors_t::percolation_threshold()
