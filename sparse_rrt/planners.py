@@ -42,7 +42,13 @@ class SST(_sst_module.SSTWrapper):
     def visualize_tree(self, system):
         return visualize_to_numpy(lambda name: _sst_module.SSTWrapper.visualize_tree(self, name, system))
 
+    def visualize_nodes(self, system):
+        return visualize_to_numpy(lambda name: _sst_module.SSTWrapper.visualize_nodes(self, name, system))
+
 
 class RRT(_sst_module.RRTWrapper):
     def visualize_tree(self, system):
         return visualize_to_numpy(lambda name: _sst_module.RRTWrapper.visualize_tree(self, name, system))
+
+    def visualize_nodes(self, system):
+        return visualize_to_numpy(lambda name: _sst_module.RRTWrapper.visualize_nodes(self, name, system))

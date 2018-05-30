@@ -85,7 +85,7 @@ def run_point_sst(config_path):
             print("Time: %.2fs, Iterations: %d, Nodes: %d, Solution Quality: %s" %
                   (time.time() - start_time, iteration, planner.get_number_of_nodes(), solution_cost))
 
-            im = planner.visualize_tree(system)
+            im = planner.visualize_nodes(system)
             cv2.imshow('tree', im)
             cv2.waitKey(1)
 
@@ -102,4 +102,4 @@ def run_point_sst(config_path):
 
 if __name__ == '__main__':
     configs_path = os.path.join(os.path.dirname(__file__), "../input")
-    run_point_sst(os.path.join(configs_path, 'rrt_pendulum.cfg'))
+    run_point_sst(os.path.join(configs_path, 'sst_point.cfg'))

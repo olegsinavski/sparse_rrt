@@ -142,11 +142,11 @@ def test_custom_system_sst():
 
     class CustomSystem(_sst_module.ISystem):
         def propagate(self, start_state, control, num_steps, integration_step):
-            return start_state + control[0]
+            return start_state + control*integration_step*num_steps
 
     planner = _sst_module.RRTWrapper(
         state_bounds=[(-10.0, 10.0), (-20.0, 20.0)],
-        control_bounds=[(-1.0, 1.0)],
+        control_bounds=[(-1.0, 1.0), (-1.0, 1.0)],
         is_circular_topology=[False, False],
         start_state=np.array([0.2, 0.1]),
         goal_state=np.array([5., 5.]),
@@ -162,6 +162,7 @@ def test_custom_system_sst():
 
     for iteration in range(10000):
         planner.step(system, min_time_steps, max_time_steps, integration_step)
+        im = planner.visualize_tree(system)
 
 
 if __name__ == '__main__':
