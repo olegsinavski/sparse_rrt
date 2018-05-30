@@ -16,6 +16,27 @@
 #include "image_creation/svg_image.hpp"
 #include "utilities/parameter_reader.hpp"
 
+
+struct system_interface {
+    /**
+	 * @brief Performs a local propagation using simple numerical integration.
+	 * @details Performs a local propagation using simple numerical integration.
+	 *
+	 * @param start_state The state to start propagating from.
+	 * @param control The control to apply for this propagation.
+	 * @param min_step The smallest number of simulation steps to execute.
+	 * @param max_step The largest number of simulation steps to execute.
+	 * @param result_state The result of the propagation.
+	 * @param duration The amount of simulation time used.
+	 * @return True if this propagation was valid, false if not.
+	 */
+    virtual bool propagate(
+        const double* start_state, unsigned int state_dimension,
+        const double* control, unsigned int control_dimension,
+        int num_steps, double* result_state, double integration_step) = 0;
+
+};
+
 /**
  * @brief A base class for plannable systems.
  * @details A base class for plannable systems. This class implements core functionality
@@ -23,7 +44,7 @@
  * and controls, and visualizing points.
  * 
  */
-class system_t
+class system_t: public system_interface
 {
 public: 
 	system_t(){}
@@ -37,20 +58,6 @@ public:
 	{
 		return control_dimension;
 	}
-
-	/**
-	 * @brief Performs a local propagation using simple numerical integration.
-	 * @details Performs a local propagation using simple numerical integration.
-	 * 
-	 * @param start_state The state to start propagating from.
-	 * @param control The control to apply for this propagation.
-	 * @param min_step The smallest number of simulation steps to execute.
-	 * @param max_step The largest number of simulation steps to execute.
-	 * @param result_state The result of the propagation.
-	 * @param duration The amount of simulation time used.
-	 * @return True if this propagation was valid, false if not.
-	 */
-    virtual bool propagate( const double* start_state, const double* control, int num_steps, double* result_state, double integration_step) = 0;
 
     /**
      * @brief Creates a point in image space corresponding to a given state.
@@ -70,7 +77,7 @@ public:
      * @param doc The image storage.
      * @param dims The image size.
      */
-    virtual void visualize_obstacles(svg::Document& doc ,svg::Dimensions dims)
+    virtual void visualize_obstacles(svg::Document& doc, svg::Dimensions dims)
     {
     	return;
     }

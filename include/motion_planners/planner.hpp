@@ -78,7 +78,7 @@ public:
 	 * @brief Perform an iteration of a motion planning algorithm.
 	 * @details Perform an iteration of a motion planning algorithm.
 	 */
-	virtual void step(system_t* system, int min_time_steps, int max_time_steps, double integration_step) = 0;
+	virtual void step(system_interface* system, int min_time_steps, int max_time_steps, double integration_step) = 0;
 
 	/** @brief The number of nodes in the tree. */
 	unsigned number_of_nodes;

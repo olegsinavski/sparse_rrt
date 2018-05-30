@@ -118,7 +118,7 @@ void sst_t::get_solution(std::vector<std::vector<double>>& solution_path, std::v
 	}
 }
 
-void sst_t::step(system_t* system, int min_time_steps, int max_time_steps, double integration_step)
+void sst_t::step(system_interface* system, int min_time_steps, int max_time_steps, double integration_step)
 {
     /*
      * Generate a random sample
@@ -134,7 +134,9 @@ void sst_t::step(system_t* system, int min_time_steps, int max_time_steps, doubl
     sst_node_t* nearest = nearest_vertex(sample_state);
 	int num_steps = this->random_generator.uniform_int_random(min_time_steps, max_time_steps);
     double duration = num_steps*integration_step;
-	if(system->propagate(nearest->get_point(), sample_control, num_steps, sample_state, integration_step))
+	if(system->propagate(
+	    nearest->get_point(), this->state_dimension, sample_control, this->control_dimension,
+	    num_steps, sample_state, integration_step))
 	{
 		add_to_tree(sample_state, sample_control, nearest, duration);
 	}

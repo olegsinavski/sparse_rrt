@@ -115,7 +115,7 @@ public:
 	/**
 	 * @copydoc planner_t::step()
 	 */
-	 virtual void step(system_t* system, int min_time_steps, int max_time_steps, double integration_step);
+	 virtual void step(system_interface* system, int min_time_steps, int max_time_steps, double integration_step);
 
 protected:
 

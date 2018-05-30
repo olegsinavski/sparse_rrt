@@ -54,7 +54,10 @@ double two_link_acrobot_t::distance(const double* point1, const double* point2)
         return std::sqrt(pow(x-x2,2.0)+pow(y-y2,2.0));
 }
 
-bool two_link_acrobot_t::propagate( const double* start_state, const double* control, int num_steps, double* result_state, double integration_step)
+bool two_link_acrobot_t::propagate(
+    const double* start_state, unsigned int state_dimension,
+    const double* control, unsigned int control_dimension,
+    int num_steps, double* result_state, double integration_step)
 {
         temp_state[0] = start_state[0]; 
         temp_state[1] = start_state[1];

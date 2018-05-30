@@ -138,12 +138,39 @@ def test_create_multiple_times():
         planners.append(planner)
 
 
+def test_custom_system_sst():
+
+    class CustomSystem(_sst_module.ISystem):
+        def propagate(self, start_state, control, num_steps, integration_step):
+            return start_state + control[0]
+
+    planner = _sst_module.RRTWrapper(
+        state_bounds=[(-10.0, 10.0), (-20.0, 20.0)],
+        control_bounds=[(-1.0, 1.0)],
+        is_circular_topology=[False, False],
+        start_state=np.array([0.2, 0.1]),
+        goal_state=np.array([5., 5.]),
+        goal_radius=1.5,
+        random_seed=0
+    )
+
+    min_time_steps = 10
+    max_time_steps = 50
+    integration_step = 0.02
+
+    system = CustomSystem()
+
+    for iteration in range(10000):
+        planner.step(system, min_time_steps, max_time_steps, integration_step)
+
+
 if __name__ == '__main__':
-    st = time.time()
+    # st = time.time()
     # test_point_sst()
     # print(time.time() - st, 21.4076721668)
     #
-    test_car_pose_sst()
+    # test_car_pose_sst()
     # test_car_pose_rrt()
     # test_create_multiple_times()
+    test_custom_system_sst()
     print('Passed all tests!')

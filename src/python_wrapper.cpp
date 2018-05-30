@@ -64,7 +64,7 @@ class PlannerWrapper
 {
 public:
 
-    void step(system_t& system, int min_time_steps, int max_time_steps, double integration_step) {
+    void step(system_interface& system, int min_time_steps, int max_time_steps, double integration_step) {
         planner->step(&system, min_time_steps, max_time_steps, integration_step);
     }
 
@@ -257,12 +257,61 @@ public:
 };
 
 
+class py_system_interface : public system_interface {
+public:
+
+    bool propagate(
+        const double* start_state, unsigned int state_dimension,
+        const double* control, unsigned int control_dimension,
+        int num_steps,
+        double* result_state, double integration_step) override
+    {
+        py::safe_array<double> start_state_array{{state_dimension}};
+        std::copy(start_state, start_state + state_dimension, start_state_array.mutable_data(0));
+
+        py::safe_array<double> control_array{{control_dimension}};
+        std::copy(control, control + control_dimension, control_array.mutable_data(0));
+
+        py::gil_scoped_acquire gil;
+        py::function overload = py::get_overload(static_cast<const system_interface *>(this), "propagate");
+        if (!overload) {
+            pybind11::pybind11_fail("Tried to call pure virtual function propagate");
+            return false;
+        }
+
+        auto result = overload(start_state_array, control_array, num_steps, integration_step);
+        if (py::isinstance<py::none>(result)) {
+            return false;
+        } else {
+            auto result_state_array = py::detail::cast_safe<py::safe_array<double>>(std::move(result));
+            std::copy(result_state_array.data(0), result_state_array.data(0) + state_dimension, result_state);
+            return true;
+        }
+//        //py::safe_array<double> result_state_array{{state_dimension}};
+//
+//        //return py::detail::cast_safe<bool>(std::move(result));
+//        return false;
+
+    }
+};
+
+
 PYBIND11_MODULE(_sst_module, m) {
    m.doc() = "Python wrapper for SST planners";
 
    m.def("get_data", &get_data, py::arg("in_data").noconvert());
 
-   py::class_<system_t> system(m, "System");
+   py::class_<system_interface, py_system_interface> system_interface_var(m, "ISystem");
+   system_interface_var
+        .def(py::init<>())
+        .def("propagate", &system_interface::propagate);
+//   system_interface_var
+//        .def("get_state_bounds", &system_t::get_state_bounds)
+//        .def("get_control_bounds", &system_t::get_control_bounds)
+//        .def("is_circular_topology", &system_t::is_circular_topology)
+//   ;
+
+   py::class_<system_t> system(m, "System", system_interface_var);
    system
         .def("get_state_bounds", &system_t::get_state_bounds)
         .def("get_control_bounds", &system_t::get_control_bounds)

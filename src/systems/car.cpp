@@ -19,7 +19,10 @@
 #include <cmath>
 
 
-bool car_t::propagate( const double* start_state, const double* control, int num_steps, double* result_state, double integration_step)
+bool car_t::propagate(
+    const double* start_state, unsigned int state_dimension,
+    const double* control, unsigned int control_dimension,
+    int num_steps, double* result_state, double integration_step)
 {
 	temp_state[0] = start_state[0]; temp_state[1] = start_state[1];temp_state[2] = start_state[2];
 
