@@ -56,8 +56,9 @@ void visualize_solution_path(const std::vector<std::vector<double>>& last_soluti
 void get_max_cost(tree_node_t* node, double& max_cost, std::vector<tree_node_t*>& nodes)
 {
 	nodes.push_back(node);
-	if(node->get_cost() > max_cost)
-		max_cost = node->get_cost();
+	if(node->get_cost() > max_cost) {
+	    max_cost = node->get_cost();
+	}
 	for (std::list<tree_node_t*>::const_iterator i = node->get_children().begin(); i != node->get_children().end(); ++i)
 	{
 		get_max_cost(*i, max_cost, nodes);
@@ -90,7 +91,7 @@ void sort(std::vector<tree_node_t*>& nodes)
  * @param dim The size of the image.
  */
 void visualize_node(
-    tree_node_t* node,
+    const tree_node_t* node,
     system_t* system,
     svg::Document& doc, svg::Dimensions& dim, double node_diameter, double max_cost)
 {
@@ -100,11 +101,6 @@ void visualize_node(
 	    node_diameter,
 	    svg::Fill( svg::Color((node->get_cost()/max_cost)*255,(node->get_cost()/max_cost)*255,(node->get_cost()/max_cost)*255) ) );
 	doc<<circle;
-	// for (std::list<tree_node_t*>::iterator i = node->children.begin(); i != node->children.end(); ++i)
-	// {
-	// 	visualize_node(*i,doc,dim);
-	// }
-
 }
 
 /**
@@ -133,8 +129,7 @@ void visualize_solution_nodes(
 
 
 
-void visualize_tree(
-    std::string const & file_name,
+std::string visualize_tree(
     tree_node_t* root,
     const std::vector<std::vector<double>>& last_solution_path,
     system_t* system,
@@ -143,7 +138,7 @@ void visualize_tree(
     double solution_node_diameter, double solution_line_width, double tree_line_width)
 {
     svg::Dimensions dimensions(image_width, image_height);
-    svg::Document doc(file_name, svg::Layout(dimensions, svg::Layout::BottomLeft));
+    svg::Document doc(svg::Layout(dimensions, svg::Layout::BottomLeft));
 
     visualize_edge(root, system, doc, dimensions, tree_line_width);
 
@@ -155,11 +150,10 @@ void visualize_tree(
 	visualize_solution_path(last_solution_path, system, doc, dimensions, solution_line_width);
     system->visualize_obstacles(doc,dimensions);
 
-    doc.save();
+    return doc.toString();
 }
 
-void visualize_nodes(
-    std::string const & file_name,
+std::string visualize_nodes(
     tree_node_t* root,
     const std::vector<std::vector<double>>& last_solution_path,
     system_t* system,
@@ -167,7 +161,7 @@ void visualize_nodes(
     int image_width, int image_height, double node_diameter, double solution_node_diameter)
 {
     svg::Dimensions dimensions(image_width, image_height);
-    svg::Document doc(file_name, svg::Layout(dimensions, svg::Layout::BottomLeft));
+    svg::Document doc(svg::Layout(dimensions, svg::Layout::BottomLeft));
 
     std::vector<tree_node_t*> sorted_nodes;
     double max_cost = 0;
@@ -187,6 +181,6 @@ void visualize_nodes(
 	visualize_solution_nodes(last_solution_path, system, doc, dimensions, solution_node_diameter);
     system->visualize_obstacles(doc,dimensions);
 
-    doc.save();
+    return doc.toString();
 }
 

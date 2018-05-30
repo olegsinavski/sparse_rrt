@@ -551,8 +551,8 @@ namespace svg
     class Document
     {
     public:
-        Document(std::string const & file_name, Layout layout = Layout())
-        : file_name(file_name), layout(layout) { }
+        Document(Layout layout = Layout())
+        : layout(layout) { }
         
         Document & operator<<(Shape const & shape)
         {
@@ -571,18 +571,7 @@ namespace svg
             << attribute("version", "1.1") << ">\n" << body_nodes_str << elemEnd("svg");
             return ss.str();
         }
-        bool save() const
-        {
-            std::ofstream ofs(file_name.c_str());
-            if (!ofs.good())
-                return false;
-            
-            ofs << toString();
-            ofs.close();
-            return true;
-        }
     private:
-        std::string file_name;
         Layout layout;
         
         std::string body_nodes_str;

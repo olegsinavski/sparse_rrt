@@ -68,7 +68,7 @@ public:
         planner->step(&system, min_time_steps, max_time_steps, integration_step);
     }
 
-    void visualize_tree_wrapper(std::string const& file_name, system_t& system) {
+    std::string visualize_tree_wrapper(system_t& system) {
 
         int image_width = 500;
         int image_height = 500;
@@ -81,14 +81,13 @@ public:
         std::vector<double> costs;
         planner->get_solution(solution_path, controls, costs);
 
-        visualize_tree(
-            file_name,
+        return visualize_tree(
             planner->get_root(), solution_path, &system,
             planner->get_start_state(), planner->get_goal_state(),
             image_width, image_height, solution_node_diameter, solution_line_width, tree_line_width);
     }
 
-    void visualize_nodes_wrapper(std::string const& file_name, system_t& system) {
+    std::string visualize_nodes_wrapper(system_t& system) {
         int image_width = 500;
         int image_height = 500;
         double node_diameter = 5;
@@ -99,8 +98,7 @@ public:
         std::vector<double> costs;
         planner->get_solution(solution_path, controls, costs);
 
-        visualize_nodes(
-            file_name,
+        return visualize_nodes(
             planner->get_root(), solution_path, &system,
             planner->get_start_state(), planner->get_goal_state(),
             image_width, image_height, node_diameter, solution_node_diameter);

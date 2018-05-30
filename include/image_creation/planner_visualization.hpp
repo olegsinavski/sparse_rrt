@@ -12,8 +12,7 @@
  *
  * @param image_counter A subscript for the image file name. Allows for multiple image output.
  */
-void visualize_tree(
-    std::string const & file_name,
+std::string visualize_tree(
     tree_node_t* root,
     const std::vector<std::vector<double>>& last_solution_path,
     system_t* system,
@@ -28,8 +27,7 @@ void visualize_tree(
  *
  * @param image_counter A subscript for the image file name. Allows for multiple image output.
  */
-void visualize_nodes(
-    std::string const & file_name,
+std::string visualize_nodes(
     tree_node_t* root,
     const std::vector<std::vector<double>>& last_solution_path,
     system_t* system,
