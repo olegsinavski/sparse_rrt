@@ -37,6 +37,7 @@
 #include <string>
 #include <sstream>
 #include <fstream>
+#include <stdexcept>
 
 #include <iostream>
 
@@ -51,6 +52,42 @@ namespace svg
         ss << attribute_name << "=\"" << value << unit << "\" ";
         return ss.str();
     }
+
+    template <typename T>
+    class attribute_streamer
+    {
+    public:
+        attribute_streamer(
+            std::string const & attribute_name,
+            T const & value, std::string const & unit = "")
+            : _attribute_name(attribute_name)
+            , _value(value)
+            , _unit(unit)
+        {}
+
+        template<typename aT>
+        friend std::ostream & operator << (std::ostream &out, const attribute_streamer<aT> &c);
+
+    private:
+        std::string const & _attribute_name;
+        T const & _value;
+        std::string const & _unit;
+    };
+
+    template<typename T>
+    std::ostream & operator << (std::ostream &out, const attribute_streamer<T> &c)
+    {
+        out << c._attribute_name << "=\"" << c._value << c._unit << "\" ";
+        return out;
+    }
+
+    template <typename T>
+    attribute_streamer<T> stream_attribute(std::string const & attribute_name,
+                                           T const & value, std::string const & unit = "")
+    {
+        return std::move(attribute_streamer<T>(attribute_name, value, unit));
+    }
+
     std::string elemStart(std::string const & element_name);
     std::string elemEnd(std::string const & element_name);
     std::string emptyElemEnd();
@@ -122,9 +159,31 @@ namespace svg
     public:
         Serializeable() { }
         virtual ~Serializeable() { };
-        virtual std::string toString(Layout const & layout) const = 0;
+        virtual void toStream(std::ostream& output, Layout const & layout) const = 0;
     };
-    
+
+    class stream
+    {
+    public:
+        stream(
+            Serializeable const & serializeable,
+            Layout const & layout)
+            : _serializeable(serializeable)
+            , _layout(layout)
+        {}
+
+        friend std::ostream & operator << (std::ostream &out, const stream &streamer);
+    private:
+        Serializeable const & _serializeable;
+        Layout const & _layout;
+    };
+
+    inline std::ostream & operator << (std::ostream &out, const stream &streamer)
+    {
+        streamer._serializeable.toStream(out, streamer._layout);
+        return out;
+    }
+
     class Color : public Serializeable
     {
     public:
@@ -156,14 +215,12 @@ namespace svg
             }
         }
         virtual ~Color() { }
-        std::string toString(Layout const &) const
-        {
-            std::stringstream ss;
+
+        void toStream(std::ostream& ss, Layout const & layout) const {
             if (transparent)
                 ss << "transparent";
             else
                 ss << "rgb(" << red << "," << green << "," << blue << ")";
-            return ss.str();
         }
     private:
         bool transparent;
@@ -185,12 +242,11 @@ namespace svg
         Fill(Color::Defaults color) : color(color) { }
         Fill(Color color = Color::Transparent)
         : color(color) { }
-        std::string toString(Layout const & layout) const
-        {
-            std::stringstream ss;
-            ss << attribute("fill", color.toString(layout));
-            return ss.str();
+
+        void toStream(std::ostream& ss, Layout const & layout) const {
+            ss << stream_attribute("fill", stream(color, layout));
         }
+
     private:
         Color color;
     };
@@ -200,16 +256,15 @@ namespace svg
     public:
         Stroke(double width = -1, Color color = Color::Transparent)
         : width(width), color(color) { }
-        std::string toString(Layout const & layout) const
-        {
+
+        void toStream(std::ostream& ss, Layout const & layout) const {
             // If stroke width is invalid.
             if (width < 0)
-                return std::string();
-            
-            std::stringstream ss;
-            ss << attribute("stroke-width", translateScale(width, layout)) << attribute("stroke", color.toString(layout));
-            return ss.str();
+                return;
+
+            ss << attribute("stroke-width", translateScale(width, layout)) << attribute("stroke", stream(color, layout));
         }
+
     private:
         double width;
         Color color;
@@ -219,12 +274,11 @@ namespace svg
     {
     public:
         Font(double size = 12, std::string const & family = "Verdana") : size(size), family(family) { }
-        std::string toString(Layout const & layout) const
-        {
-            std::stringstream ss;
+
+        void toStream(std::ostream& ss, Layout const & layout) const {
             ss << attribute("font-size", translateScale(size, layout)) << attribute("font-family", family);
-            return ss.str();
         }
+
     private:
         double size;
         std::string family;
@@ -236,20 +290,16 @@ namespace svg
         Shape(Fill const & fill = Fill(), Stroke const & stroke = Stroke())
         : fill(fill), stroke(stroke) { }
         virtual ~Shape() { }
-        virtual std::string toString(Layout const & layout) const = 0;
         virtual void offset(Point const & offset) = 0;
     protected:
         Fill fill;
         Stroke stroke;
     };
+
     template <typename T>
-    std::string vectorToString(std::vector<T> collection, Layout const & layout)
+    void vectorToStream(std::ostream& ss, std::vector<T> collection, Layout const & layout)
     {
-        std::string combination_str;
-        for (unsigned i = 0; i < collection.size(); ++i)
-            combination_str += collection[i].toString(layout);
-        
-        return combination_str;
+
     }
     
     class Circle : public Shape
@@ -258,15 +308,14 @@ namespace svg
         Circle(Point const & center, double diameter, Fill const & fill,
                Stroke const & stroke = Stroke())
         : Shape(fill, stroke), center(center), radius(diameter / 2) { }
-        std::string toString(Layout const & layout) const
-        {
-            std::stringstream ss;
+
+        void toStream(std::ostream& ss, Layout const & layout) const {
             ss << elemStart("circle") << attribute("cx", translateX(center.x, layout))
-            << attribute("cy", translateY(center.y, layout))
-            << attribute("r", translateScale(radius, layout)) << fill.toString(layout)
-            << stroke.toString(layout) << emptyElemEnd();
-            return ss.str();
+               << attribute("cy", translateY(center.y, layout))
+               << attribute("r", translateScale(radius, layout)) << stream(fill, layout)
+               << stream(stroke, layout) << emptyElemEnd();
         }
+
         void offset(Point const & offset)
         {
             center.x += offset.x;
@@ -284,15 +333,13 @@ namespace svg
                Fill const & fill = Fill(), Stroke const & stroke = Stroke())
         : Shape(fill, stroke), center(center), radius_width(width / 2),
         radius_height(height / 2) { }
-        std::string toString(Layout const & layout) const
-        {
-            std::stringstream ss;
+
+        void toStream(std::ostream& ss, Layout const & layout) const {
             ss << elemStart("ellipse") << attribute("cx", translateX(center.x, layout))
-            << attribute("cy", translateY(center.y, layout))
-            << attribute("rx", translateScale(radius_width, layout))
-            << attribute("ry", translateScale(radius_height, layout))
-            << fill.toString(layout) << stroke.toString(layout) << emptyElemEnd();
-            return ss.str();
+               << attribute("cy", translateY(center.y, layout))
+               << attribute("rx", translateScale(radius_width, layout))
+               << attribute("ry", translateScale(radius_height, layout))
+               << stream(fill, layout) << stream(stroke, layout) << emptyElemEnd();
         }
         void offset(Point const & offset)
         {
@@ -312,16 +359,15 @@ namespace svg
                   Fill const & fill = Fill(), Stroke const & stroke = Stroke())
         : Shape(fill, stroke), edge(edge), width(width),
         height(height) { }
-        std::string toString(Layout const & layout) const
-        {
-            std::stringstream ss;
+
+        void toStream(std::ostream& ss, Layout const & layout) const {
             ss << elemStart("rect") << attribute("x", translateX(edge.x, layout))
-            << attribute("y", translateY(edge.y, layout))
-            << attribute("width", translateScale(width, layout))
-            << attribute("height", translateScale(height, layout))
-            << fill.toString(layout) << stroke.toString(layout) << emptyElemEnd();
-            return ss.str();
+               << attribute("y", translateY(edge.y, layout))
+               << attribute("width", translateScale(width, layout))
+               << attribute("height", translateScale(height, layout))
+               << stream(fill, layout) << stream(stroke, layout) << emptyElemEnd();
         }
+
         void offset(Point const & offset)
         {
             edge.x += offset.x;
@@ -340,16 +386,15 @@ namespace svg
              Stroke const & stroke = Stroke())
         : Shape(Fill(), stroke), start_point(start_point),
         end_point(end_point) { }
-        std::string toString(Layout const & layout) const
-        {
-            std::stringstream ss;
+
+        void toStream(std::ostream& ss, Layout const & layout) const {
             ss << elemStart("line") << attribute("x1", translateX(start_point.x, layout))
-            << attribute("y1", translateY(start_point.y, layout))
-            << attribute("x2", translateX(end_point.x, layout))
-            << attribute("y2", translateY(end_point.y, layout))
-            << stroke.toString(layout) << emptyElemEnd();
-            return ss.str();
+               << attribute("y1", translateY(start_point.y, layout))
+               << attribute("x2", translateX(end_point.x, layout))
+               << attribute("y2", translateY(end_point.y, layout))
+               << stream(stroke, layout) << emptyElemEnd();
         }
+
         void offset(Point const & offset)
         {
             start_point.x += offset.x;
@@ -374,19 +419,18 @@ namespace svg
             points.push_back(point);
             return *this;
         }
-        std::string toString(Layout const & layout) const
-        {
-            std::stringstream ss;
+
+        void toStream(std::ostream& ss, Layout const & layout) const {
             ss << elemStart("polygon");
-            
+
             ss << "points=\"";
             for (unsigned i = 0; i < points.size(); ++i)
                 ss << translateX(points[i].x, layout) << "," << translateY(points[i].y, layout) << " ";
             ss << "\" ";
-            
-            ss << fill.toString(layout) << stroke.toString(layout) << emptyElemEnd();
-            return ss.str();
+
+            ss << stream(fill, layout) << stream(stroke, layout) << emptyElemEnd();
         }
+
         void offset(Point const & offset)
         {
             for (unsigned i = 0; i < points.size(); ++i) {
@@ -412,19 +456,18 @@ namespace svg
             points.push_back(point);
             return *this;
         }
-        std::string toString(Layout const & layout) const
-        {
-            std::stringstream ss;
+
+        void toStream(std::ostream& ss, Layout const & layout) const {
             ss << elemStart("polyline");
-            
+
             ss << "points=\"";
             for (unsigned i = 0; i < points.size(); ++i)
                 ss << translateX(points[i].x, layout) << "," << translateY(points[i].y, layout) << " ";
             ss << "\" ";
-            
-            ss << fill.toString(layout) << stroke.toString(layout) << emptyElemEnd();
-            return ss.str();
+
+            ss << stream(fill, layout) << stream(stroke, layout) << emptyElemEnd();
         }
+
         void offset(Point const & offset)
         {
             for (unsigned i = 0; i < points.size(); ++i) {
@@ -441,15 +484,14 @@ namespace svg
         Text(Point const & origin, std::string const & content, Fill const & fill = Fill(),
              Font const & font = Font(), Stroke const & stroke = Stroke())
         : Shape(fill, stroke), origin(origin), content(content), font(font) { }
-        std::string toString(Layout const & layout) const
-        {
-            std::stringstream ss;
+
+        void toStream(std::ostream& ss, Layout const & layout) const {
             ss << elemStart("text") << attribute("x", translateX(origin.x, layout))
-            << attribute("y", translateY(origin.y, layout))
-            << fill.toString(layout) << stroke.toString(layout) << font.toString(layout)
-            << ">" << content << elemEnd("text");
-            return ss.str();
+               << attribute("y", translateY(origin.y, layout))
+               << stream(fill, layout) << stream(stroke, layout) << stream(font, layout)
+               << ">" << content << elemEnd("text");
         }
+
         void offset(Point const & offset)
         {
             origin.x += offset.x;
@@ -476,17 +518,17 @@ namespace svg
             polylines.push_back(polyline);
             return *this;
         }
-        std::string toString(Layout const & layout) const
-        {
+
+        void toStream(std::ostream& ss, Layout const & layout) const {
             if (polylines.empty())
-                return "";
+                return;
 
-            std::string ret;
             for (unsigned i = 0; i < polylines.size(); ++i)
-                ret += polylineToString(polylines[i], layout);
+                polylineToStream(ss, polylines[i], layout);
 
-            return ret + axisString(layout);
+            axisString(ss, layout);
         }
+
         void offset(Point const & offset)
         {
             for (unsigned i = 0; i < polylines.size(); ++i)
@@ -518,11 +560,11 @@ namespace svg
 
             return optional<Dimensions>(Dimensions(max->x - min->x, max->y - min->y));
         }
-        std::string axisString(Layout const & layout) const
+        void axisString(std::ostream& ss, Layout const & layout) const
         {
             optional<Dimensions> dimensions = getDimensions();
             if (!dimensions)
-                return "";
+                return;
 
             // Make the axis 10% wider and higher than the data points.
             double width = dimensions->width * 1.1;
@@ -531,20 +573,20 @@ namespace svg
             // Draw the axis.
             Polyline axis(Color::Transparent, axis_stroke);
             axis << Point(margin.width, margin.height + height) << Point(margin.width, margin.height)
-            << Point(margin.width + width, margin.height);
+                 << Point(margin.width + width, margin.height);
 
-            return axis.toString(layout);
+            ss << stream(axis, layout);
         }
-        std::string polylineToString(Polyline const & polyline, Layout const & layout) const
+        void polylineToStream(std::ostream& ss, Polyline const & polyline, Layout const & layout) const
         {
             Polyline shifted_polyline = polyline;
             shifted_polyline.offset(Point(margin.width, margin.height));
+            ss << stream(shifted_polyline, layout);
 
-            std::vector<Circle> vertices;
-            for (unsigned i = 0; i < shifted_polyline.points.size(); ++i)
-                vertices.push_back(Circle(shifted_polyline.points[i], getDimensions()->height / 30.0, Color::Black));
-
-            return shifted_polyline.toString(layout) + vectorToString(vertices, layout);
+            for (unsigned i = 0; i < shifted_polyline.points.size(); ++i) {
+                auto circle = Circle(shifted_polyline.points[i], getDimensions()->height / 30.0, Color::Black);
+                ss << stream(circle, layout);
+            }
         }
     };
 
@@ -556,7 +598,7 @@ namespace svg
         
         Document & operator<<(Shape const & shape)
         {
-            body_nodes_str += shape.toString(layout);
+            shape.toStream(body_nodes_stream, layout);
             return *this;
         }
         std::string toString() const
@@ -568,13 +610,13 @@ namespace svg
             << attribute("width", layout.dimensions.width, "px")
             << attribute("height", layout.dimensions.height, "px")
             << attribute("xmlns", "http://www.w3.org/2000/svg")
-            << attribute("version", "1.1") << ">\n" << body_nodes_str << elemEnd("svg");
+            << attribute("version", "1.1") << ">\n" << this->body_nodes_stream.str() << elemEnd("svg");
             return ss.str();
         }
     private:
         Layout layout;
-        
-        std::string body_nodes_str;
+
+        std::stringstream body_nodes_stream;
     };
 }
 
