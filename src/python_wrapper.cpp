@@ -81,8 +81,11 @@ public:
         std::vector<double> costs;
         planner->get_solution(solution_path, controls, costs);
 
+        using namespace std::placeholders;
         return visualize_tree(
-            planner->get_root(), solution_path, &system,
+            planner->get_root(), solution_path,
+            std::bind(&system_t::visualize_point, &system, _1),
+            &system,
             planner->get_start_state(), planner->get_goal_state(),
             image_width, image_height, solution_node_diameter, solution_line_width, tree_line_width);
     }
@@ -98,9 +101,13 @@ public:
         std::vector<double> costs;
         planner->get_solution(solution_path, controls, costs);
 
+        using namespace std::placeholders;
         return visualize_nodes(
-            planner->get_root(), solution_path, &system,
-            planner->get_start_state(), planner->get_goal_state(),
+            planner->get_root(), solution_path,
+            std::bind(&system_t::visualize_point, &system, _1),
+            &system,
+            planner->get_start_state(),
+            planner->get_goal_state(),
             image_width, image_height, node_diameter, solution_node_diameter);
     }
 

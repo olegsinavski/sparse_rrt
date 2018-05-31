@@ -97,15 +97,14 @@ bool cart_pole_t::valid_state()
     return true;
 }
 
-svg::Point cart_pole_t::visualize_point(const double* state, svg::Dimensions dims)
+std::tuple<double, double> cart_pole_t::visualize_point(const double* state)
 {
-        double x = state[STATE_X] + (L / 2.0) * sin(state[STATE_THETA]);
-        double y = -(L / 2.0) * cos(state[STATE_THETA]);
+    double x = state[STATE_X] + (L / 2.0) * sin(state[STATE_THETA]);
+    double y = -(L / 2.0) * cos(state[STATE_THETA]);
 
-        x = (x-MIN_X)/(MAX_X-MIN_X) * dims.width; 
-        // y = (y+L)/(2*L) * dims.height; 
-        y = (y-MIN_X)/(MAX_X-MIN_X) * dims.height; 
-        return svg::Point(x,y);
+    x = (x-MIN_X)/(MAX_X-MIN_X);
+    y = (y-MIN_X)/(MAX_X-MIN_X);
+    return std::make_tuple(x, y);
 }
 
 void cart_pole_t::update_derivative(const double* control)

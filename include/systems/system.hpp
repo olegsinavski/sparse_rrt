@@ -12,10 +12,10 @@
 
 #ifndef SPARSE_SYSTEM_HPP
 #define SPARSE_SYSTEM_HPP
+#include <tuple>
 
 #include "image_creation/svg_image.hpp"
-#include "utilities/parameter_reader.hpp"
-
+\
 
 struct system_interface {
     /**
@@ -68,7 +68,7 @@ public:
      * 
      * @return A point in image space.
      */
-    virtual svg::Point visualize_point(const double* state,svg::Dimensions dims) = 0;
+    virtual std::tuple<double, double> visualize_point(const double* state) = 0;
 
     /**
      * @brief Visualize the obstacles for this system.

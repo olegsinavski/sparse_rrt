@@ -35,7 +35,7 @@ public:
 	
 	virtual bool valid_state();
 
-	svg::Point visualize_point(const double* state, svg::Dimensions dims);
+	std::tuple<double, double> visualize_point(const double* state) override;
 
 	virtual std::vector<std::pair<double, double> > get_state_bounds();
     virtual std::vector<std::pair<double, double> > get_control_bounds();

@@ -55,7 +55,7 @@ public:
 	/**
 	 * @copydoc system_t::visualize_point(double*, svg::Dimensions)
 	 */
-	svg::Point visualize_point(const double* state, svg::Dimensions dims);
+	std::tuple<double, double> visualize_point(const double* state);
 
 	std::vector<std::pair<double, double>> get_state_bounds() override;
 	std::vector<std::pair<double, double>> get_control_bounds() override;

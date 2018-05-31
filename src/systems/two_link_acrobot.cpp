@@ -108,13 +108,13 @@ bool two_link_acrobot_t::valid_state()
     return true;
 }
 
-svg::Point two_link_acrobot_t::visualize_point(const double* state, svg::Dimensions dims)
+std::tuple<double, double> two_link_acrobot_t::visualize_point(const double* state)
 {
-        double x = (LENGTH) * cos(state[STATE_THETA_1] - M_PI / 2)+(LENGTH) * cos(state[STATE_THETA_1] + state[STATE_THETA_2] - M_PI / 2);
-        double y = (LENGTH) * sin(state[STATE_THETA_1] - M_PI / 2)+(LENGTH) * sin(state[STATE_THETA_1] + state[STATE_THETA_2] - M_PI / 2);
-        x = (x+2*LENGTH)/(4*LENGTH) * dims.width; 
-        y = (y+2*LENGTH)/(4*LENGTH) * dims.height;  
-        return svg::Point(x,y);
+    double x = (LENGTH) * cos(state[STATE_THETA_1] - M_PI / 2)+(LENGTH) * cos(state[STATE_THETA_1] + state[STATE_THETA_2] - M_PI / 2);
+    double y = (LENGTH) * sin(state[STATE_THETA_1] - M_PI / 2)+(LENGTH) * sin(state[STATE_THETA_1] + state[STATE_THETA_2] - M_PI / 2);
+    x = (x+2*LENGTH)/(4*LENGTH);
+    y = (y+2*LENGTH)/(4*LENGTH);
+    return std::make_tuple(x, y);
 }
 
 void two_link_acrobot_t::update_derivative(const double* control)

@@ -85,7 +85,7 @@ def run_point_sst(config_path):
             print("Time: %.2fs, Iterations: %d, Nodes: %d, Solution Quality: %s" %
                   (time.time() - start_time, iteration, planner.get_number_of_nodes(), solution_cost))
 
-            im = planner.visualize_nodes(system)
+            im = planner.visualize_tree(system)
             cv2.imshow('tree', im)
             cv2.waitKey(1)
 

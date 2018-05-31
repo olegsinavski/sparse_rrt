@@ -71,11 +71,11 @@ bool car_t::valid_state()
 			(temp_state[1]!=10);
 }
 
-svg::Point car_t::visualize_point(const double* state, svg::Dimensions dims)
+std::tuple<double, double> car_t::visualize_point(const double* state)
 {
-	double x = (state[0]+10)/(20) * dims.width; 
-	double y = (state[1]+10)/(20) * dims.height; 
-	return svg::Point(x,y);
+	double x = (state[0]+10)/(20);
+	double y = (state[1]+10)/(20);
+	return std::make_tuple(x, y);
 }
 
 std::vector<std::pair<double, double> > car_t::get_state_bounds() {

@@ -4,7 +4,9 @@
 
 #include "motion_planners/tree_node.hpp"
 #include "systems/system.hpp"
+#include <functional>
 
+typedef typename std::function<std::tuple<double, double>(const double*)> projection_function;
 
 /**
  * @brief Generate an image visualizing the tree.
@@ -15,6 +17,7 @@
 std::string visualize_tree(
     tree_node_t* root,
     const std::vector<std::vector<double>>& last_solution_path,
+    projection_function projector,
     system_t* system,
     double* start_state, double* goal_state,
     int image_width, int image_height,
@@ -30,6 +33,7 @@ std::string visualize_tree(
 std::string visualize_nodes(
     tree_node_t* root,
     const std::vector<std::vector<double>>& last_solution_path,
+    projection_function projector,
     system_t* system,
     double* start_state, double* goal_state,
     int image_width, int image_height,

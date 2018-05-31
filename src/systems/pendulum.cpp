@@ -71,11 +71,11 @@ bool pendulum_t::valid_state()
 	return true;
 }
 
-svg::Point pendulum_t::visualize_point(const double* state, svg::Dimensions dims)
+std::tuple<double, double> pendulum_t::visualize_point(const double* state)
 {
-	double x = (state[0]+M_PI)/(2*M_PI) * dims.width; 
-	double y = (state[1]-MIN_W)/(MAX_W-MIN_W) * dims.height; 
-	return svg::Point(x,y);
+	double x = (state[0]+M_PI)/(2*M_PI);
+	double y = (state[1]-MIN_W)/(MAX_W-MIN_W);
+	return std::make_tuple(x, y);
 }
 
 std::vector<std::pair<double, double> > pendulum_t::get_state_bounds() {

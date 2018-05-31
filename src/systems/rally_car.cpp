@@ -180,11 +180,11 @@ bool rally_car_t::valid_state()
         return !obstacle_collision;
 }
 
-svg::Point rally_car_t::visualize_point(const double* state, svg::Dimensions dims)
+std::tuple<double, double> rally_car_t::visualize_point(const double* state)
 {
-        double x = (state[0]-MIN_X)/(MAX_X-MIN_X) * dims.width; 
-        double y = (state[1]-MIN_Y)/(MAX_Y-MIN_Y) * dims.height; 
-        return svg::Point(x,y);
+        double x = (state[0]-MIN_X)/(MAX_X-MIN_X);
+        double y = (state[1]-MIN_Y)/(MAX_Y-MIN_Y);
+        return std::make_tuple(x, y);
 }
 
 void rally_car_t::update_derivative(const double* control)
@@ -266,10 +266,12 @@ void rally_car_t::visualize_obstacles(svg::Document& doc ,svg::Dimensions dims)
         {
                 temp[0] = obstacles[i].low_x;
                 temp[1] = obstacles[i].high_y;
-                doc<<svg::Rectangle(visualize_point(temp,dims), 
-                                        (obstacles[i].high_x-obstacles[i].low_x)/(MAX_X-MIN_X) * dims.width,
-                                        (obstacles[i].high_y-obstacles[i].low_y)/(MAX_Y-MIN_Y) * dims.height,
-                                        svg::Color::Red);
+                double x, y;
+                std::tie(x, y) = this->visualize_point(temp);
+                doc<<svg::Rectangle(svg::Point(x*dims.width, y*dims.height),
+                                    (obstacles[i].high_x-obstacles[i].low_x)/(MAX_X-MIN_X) * dims.width,
+                                    (obstacles[i].high_y-obstacles[i].low_y)/(MAX_Y-MIN_Y) * dims.height,
+                                    svg::Color::Red);
         }
 }
 
