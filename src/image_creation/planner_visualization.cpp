@@ -6,7 +6,6 @@
 
 
 svg::Point visualize_point(projection_function projector, const double* state, svg::Dimensions dims) {
-
     double x, y;
     std::tie(x, y) = projector(state);
     return {x*dims.width, y*dims.height};
@@ -57,7 +56,6 @@ void visualize_solution_path(
 		doc<<traj_line;
 	}
 }
-
 
 
 /**
@@ -141,8 +139,7 @@ void visualize_solution_nodes(
 }
 
 
-
-std::string visualize_tree(
+std::tuple<std::string, std::string, std::string> visualize_tree(
     tree_node_t* root,
     const std::vector<std::vector<double>>& last_solution_path,
     projection_function projector,
@@ -162,18 +159,19 @@ std::string visualize_tree(
 	doc<<circle2;
 
 	visualize_solution_path(last_solution_path, projector, doc, dimensions, solution_line_width);
-    system->visualize_obstacles(doc,dimensions);
+    system->visualize_obstacles(doc, dimensions);
 
     return doc.toString();
 }
 
-std::string visualize_nodes(
+std::tuple<std::string, std::string, std::string> visualize_nodes(
     tree_node_t* root,
     const std::vector<std::vector<double>>& last_solution_path,
     projection_function projector,
     system_t* system,
     double* start_state, double* goal_state,
-    int image_width, int image_height, double node_diameter, double solution_node_diameter)
+    int image_width, int image_height,
+    double node_diameter, double solution_node_diameter)
 {
     svg::Dimensions dimensions(image_width, image_height);
     svg::Document doc(svg::Layout(dimensions, svg::Layout::BottomLeft));
@@ -194,7 +192,7 @@ std::string visualize_nodes(
 	doc<<circle2;
 
 	visualize_solution_nodes(last_solution_path, projector, doc, dimensions, solution_node_diameter);
-    system->visualize_obstacles(doc,dimensions);
+    system->visualize_obstacles(doc, dimensions);
 
     return doc.toString();
 }

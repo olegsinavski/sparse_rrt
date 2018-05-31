@@ -40,6 +40,7 @@
 #include <stdexcept>
 
 #include <iostream>
+#include <tuple>
 
 namespace svg
 {
@@ -590,6 +591,50 @@ namespace svg
         }
     };
 
+    class Header : public Serializeable
+    {
+    public:
+        void toStream(std::ostream& ss, Layout const & layout) const {
+            ss << "<?xml " << attribute("version", "1.0") << attribute("standalone", "no")
+            << "?>\n<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" "
+            << "\"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n<svg "
+            << attribute("width", layout.dimensions.width, "px")
+            << attribute("height", layout.dimensions.height, "px")
+            << attribute("xmlns", "http://www.w3.org/2000/svg")
+            << attribute("version", "1.1") << ">\n";
+        }
+    };
+
+    class Footer : public Serializeable
+    {
+    public:
+        void toStream(std::ostream& ss, Layout const & layout) const {
+            ss << elemEnd("svg");
+        }
+    };
+
+    class DocumentBody
+    {
+    public:
+        DocumentBody(Layout layout = Layout())
+        : layout(layout) { }
+
+        DocumentBody & operator<<(Shape const & shape)
+        {
+            shape.toStream(body_nodes_stream, layout);
+            return *this;
+        }
+
+        std::string  toString() const
+        {
+            return this->body_nodes_stream.str();
+        }
+    private:
+        Layout layout;
+
+        std::stringstream body_nodes_stream;
+    };
+
     class Document
     {
     public:
@@ -601,17 +646,14 @@ namespace svg
             shape.toStream(body_nodes_stream, layout);
             return *this;
         }
-        std::string toString() const
+        std::tuple<std::string, std::string, std::string>  toString() const
         {
-            std::stringstream ss;
-            ss << "<?xml " << attribute("version", "1.0") << attribute("standalone", "no")
-            << "?>\n<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\" "
-            << "\"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n<svg "
-            << attribute("width", layout.dimensions.width, "px")
-            << attribute("height", layout.dimensions.height, "px")
-            << attribute("xmlns", "http://www.w3.org/2000/svg")
-            << attribute("version", "1.1") << ">\n" << this->body_nodes_stream.str() << elemEnd("svg");
-            return ss.str();
+            std::stringstream ss_header;
+            Header().toStream(ss_header, layout);
+
+            std::stringstream ss_footer;
+            Footer().toStream(ss_footer, layout);
+            return std::make_tuple(ss_header.str(), this->body_nodes_stream.str(), ss_footer.str());
         }
     private:
         Layout layout;

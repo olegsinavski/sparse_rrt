@@ -68,14 +68,14 @@ public:
         planner->step(&system, min_time_steps, max_time_steps, integration_step);
     }
 
-    std::string visualize_tree_wrapper(system_t& system) {
-
-        int image_width = 500;
-        int image_height = 500;
-        double solution_node_diameter = 4;
-        double solution_line_width = 3;
-        double tree_line_width = 0.5;
-
+    std::tuple<std::string, std::string, std::string> visualize_tree_wrapper(
+        system_t& system,
+        int image_width,
+        int image_height,
+        double solution_node_diameter,
+        double solution_line_width,
+        double tree_line_width)
+    {
         std::vector<std::vector<double>> solution_path;
         std::vector<std::vector<double>> controls;
         std::vector<double> costs;
@@ -90,12 +90,13 @@ public:
             image_width, image_height, solution_node_diameter, solution_line_width, tree_line_width);
     }
 
-    std::string visualize_nodes_wrapper(system_t& system) {
-        int image_width = 500;
-        int image_height = 500;
-        double node_diameter = 5;
-        double solution_node_diameter = 4;
-
+    std::tuple<std::string, std::string, std::string> visualize_nodes_wrapper(
+        system_t& system,
+        int image_width,
+        int image_height,
+        double node_diameter,
+        double solution_node_diameter)
+    {
         std::vector<std::vector<double>> solution_path;
         std::vector<std::vector<double>> controls;
         std::vector<double> costs;
@@ -334,8 +335,21 @@ PYBIND11_MODULE(_sst_module, m) {
    py::class_<PlannerWrapper> planner(m, "PlannerWrapper");
    planner
         .def("step", &PlannerWrapper::step)
-        .def("visualize_tree", &PlannerWrapper::visualize_tree_wrapper)
-        .def("visualize_nodes", &PlannerWrapper::visualize_nodes_wrapper)
+        .def("visualize_tree", &PlannerWrapper::visualize_tree_wrapper,
+            "system"_a,
+            "image_width"_a=500,
+            "image_height"_a=500,
+            "solution_node_diameter"_a=4.,
+            "solution_line_width"_a=3,
+            "tree_line_width"_a=0.5
+            )
+        .def("visualize_nodes", &PlannerWrapper::visualize_nodes_wrapper,
+            "system"_a,
+            "image_width"_a=500,
+            "image_height"_a=500,
+            "node_diameter"_a=5,
+            "solution_node_diameter"_a=4
+            )
         .def("get_solution", &PlannerWrapper::get_solution)
         .def("get_number_of_nodes", &PlannerWrapper::get_number_of_nodes)
    ;
