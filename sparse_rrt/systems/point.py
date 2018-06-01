@@ -37,14 +37,18 @@ class Point(BaseSystem):
 
     def propagate(self, start_state, control, num_steps, integration_step):
         control_v = np.array([control[0] * np.cos(control[1]), control[0] * np.sin(control[1])])
-        state = start_state
-        for i in range(num_steps):
-            state = state + integration_step*control_v
-            state = np.clip(state, [self.MIN_X, self.MIN_Y], [self.MAX_X, self.MAX_Y])
-            for (low_x, low_y, high_x, high_y) in self._obstacles:
-                if state[0] >= low_x and state[0] <= high_x and state[1] >= low_y and state[1] <= high_y:
-                    return None
+        trajectory = start_state + np.arange(num_steps)[:, None]*integration_step*control_v
+        for (low_x, low_y, high_x, high_y) in self._obstacles:
+            low_x_bound = trajectory[:, 0] >= low_x
+            high_x_bound = trajectory[:, 0] <= high_x
+            low_y_bound = trajectory[:, 1] >= low_y
+            high_y_bound = trajectory[:, 1] <= high_y
 
+            collisions = low_x_bound & high_x_bound & low_y_bound & high_y_bound
+            if np.any(collisions):
+                return None
+
+        state = np.clip(trajectory[-1], [self.MIN_X, self.MIN_Y], [self.MAX_X, self.MAX_Y])
         return state
 
     def visualize_point(self, state):

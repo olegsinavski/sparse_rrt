@@ -12,7 +12,6 @@ import StringIO
 from planners import SST, RRT
 from sparse_rrt.systems.point import Point
 
-
 system_classes = {
     'car': _sst_module.Car,
     'cart_pole': _sst_module.CartPole,

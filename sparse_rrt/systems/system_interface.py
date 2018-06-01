@@ -1,9 +1,9 @@
 
-import _sst_module
+import sparse_rrt._sst_module
 from abc import abstractmethod
 
 
-class ISystem(_sst_module.ISystem):
+class ISystem(sparse_rrt._sst_module.ISystem):
     '''
     An interface for SST system defined in python. System is a controllable entity that is
     governed by certain dynamics under planner control.
@@ -25,7 +25,7 @@ class ISystem(_sst_module.ISystem):
         '''
         Calling pybind constructor is necessary to avoid segfaults
         '''
-        _sst_module.ISystem.__init__(self)
+        sparse_rrt._sst_module.ISystem.__init__(self)
 
     @abstractmethod
     def propagate(self, start_state, control, num_steps, integration_step):
