@@ -13,6 +13,7 @@
 
 #include "systems/rally_car.hpp"
 #include "utilities/random.hpp"
+#include "image_creation/svg_image.hpp"
 
 
 #define _USE_MATH_DEFINES
@@ -180,7 +181,7 @@ bool rally_car_t::valid_state()
         return !obstacle_collision;
 }
 
-std::tuple<double, double> rally_car_t::visualize_point(const double* state)
+std::tuple<double, double> rally_car_t::visualize_point(const double* state) const
 {
         double x = (state[0]-MIN_X)/(MAX_X-MIN_X);
         double y = (state[1]-MIN_Y)/(MAX_Y-MIN_Y);
@@ -252,27 +253,32 @@ void rally_car_t::update_derivative(const double* control)
         double fRx = mu_Rx * fRz;
         double fRy = mu_Ry * fRz;;
 
-
         deriv[STATE_VX] = (fFx*cos(_theta+_sta)-fFy*sin(_theta+_sta)+fRx*cos(_theta)-fRy*sin(_theta) )/M;
         deriv[STATE_VY] = (fFx*sin(_theta+_sta)+fFy*cos(_theta+_sta)+fRx*sin(_theta)+fRy*cos(_theta) )/M;
         deriv[STATE_THETADOT] = ((fFy*cos(_sta)+fFx*sin(_sta))*LF - fRy*LR)/IZ;
         deriv[STATE_WF] = (_tf-fFx*R)/IF;
         deriv[STATE_WR] = (_tr-fRx*R)/IR;
 }
-void rally_car_t::visualize_obstacles(svg::Document& doc ,svg::Dimensions dims)
+
+std::string rally_car_t::visualize_obstacles(int image_width, int image_height) const
 {
-        double temp[2];
-        for(unsigned i=0;i<obstacles.size();i++)
-        {
-                temp[0] = obstacles[i].low_x;
-                temp[1] = obstacles[i].high_y;
-                double x, y;
-                std::tie(x, y) = this->visualize_point(temp);
-                doc<<svg::Rectangle(svg::Point(x*dims.width, y*dims.height),
-                                    (obstacles[i].high_x-obstacles[i].low_x)/(MAX_X-MIN_X) * dims.width,
-                                    (obstacles[i].high_y-obstacles[i].low_y)/(MAX_Y-MIN_Y) * dims.height,
-                                    svg::Color::Red);
-        }
+    svg::Dimensions dims(image_width, image_height);
+    svg::DocumentBody doc(svg::Layout(dims, svg::Layout::BottomLeft));
+
+    double temp[2];
+    for(unsigned i=0;i<obstacles.size();i++)
+    {
+            temp[0] = obstacles[i].low_x;
+            temp[1] = obstacles[i].high_y;
+            double x, y;
+            std::tie(x, y) = this->visualize_point(temp);
+            doc<<svg::Rectangle(svg::Point(x*dims.width, y*dims.height),
+                                (obstacles[i].high_x-obstacles[i].low_x)/(MAX_X-MIN_X) * dims.width,
+                                (obstacles[i].high_y-obstacles[i].low_y)/(MAX_Y-MIN_Y) * dims.height,
+                                svg::Color::Red);
+    }
+
+    return doc.toString();
 }
 
 std::vector<std::pair<double, double> > rally_car_t::get_state_bounds() {

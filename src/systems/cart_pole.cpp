@@ -97,7 +97,7 @@ bool cart_pole_t::valid_state()
     return true;
 }
 
-std::tuple<double, double> cart_pole_t::visualize_point(const double* state)
+std::tuple<double, double> cart_pole_t::visualize_point(const double* state) const
 {
     double x = state[STATE_X] + (L / 2.0) * sin(state[STATE_THETA]);
     double y = -(L / 2.0) * cos(state[STATE_THETA]);

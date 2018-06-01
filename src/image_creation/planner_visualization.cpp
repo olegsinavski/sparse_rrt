@@ -19,7 +19,7 @@ svg::Point visualize_point(projection_function projector, const double* state, s
  * @param doc The image storage.
  * @param dim The size of the image.
  */
-void visualize_edge(tree_node_t* node, projection_function projector, svg::Document& doc, svg::Dimensions& dim, double tree_line_width)
+void visualize_edge(tree_node_t* node, projection_function projector, svg::DocumentBody& doc, svg::Dimensions& dim, double tree_line_width)
 {
 	for (std::list<tree_node_t*>::const_iterator i = node->get_children().begin(); i != node->get_children().end(); ++i)
 	{
@@ -43,7 +43,7 @@ void visualize_edge(tree_node_t* node, projection_function projector, svg::Docum
 void visualize_solution_path(
     const std::vector<std::vector<double>>& last_solution_path,
     projection_function projector,
-    svg::Document& doc, svg::Dimensions& dim,
+    svg::DocumentBody& doc, svg::Dimensions& dim,
     double solution_line_width)
 {
 	if(last_solution_path.size()!=0)
@@ -104,7 +104,7 @@ void sort(std::vector<tree_node_t*>& nodes)
 void visualize_node(
     const tree_node_t* node,
     projection_function projector,
-    svg::Document& doc, svg::Dimensions& dim, double node_diameter, double max_cost)
+    svg::DocumentBody& doc, svg::Dimensions& dim, double node_diameter, double max_cost)
 {
 
 	svg::Circle circle(
@@ -125,7 +125,7 @@ void visualize_node(
 void visualize_solution_nodes(
     const std::vector<std::vector<double>>& last_solution_path,
     projection_function projector,
-    svg::Document& doc, svg::Dimensions& dim, double solution_node_diameter)
+    svg::DocumentBody& doc, svg::Dimensions& dim, double solution_node_diameter)
 {
 
 	if(last_solution_path.size()!=0)
@@ -139,17 +139,16 @@ void visualize_solution_nodes(
 }
 
 
-std::tuple<std::string, std::string, std::string> visualize_tree(
+std::string visualize_tree(
     tree_node_t* root,
     const std::vector<std::vector<double>>& last_solution_path,
     projection_function projector,
-    system_t* system,
     double* start_state, double* goal_state,
     int image_width, int image_height,
     double solution_node_diameter, double solution_line_width, double tree_line_width)
 {
     svg::Dimensions dimensions(image_width, image_height);
-    svg::Document doc(svg::Layout(dimensions, svg::Layout::BottomLeft));
+    svg::DocumentBody doc(svg::Layout(dimensions, svg::Layout::BottomLeft));
 
     visualize_edge(root, projector, doc, dimensions, tree_line_width);
 
@@ -159,22 +158,20 @@ std::tuple<std::string, std::string, std::string> visualize_tree(
 	doc<<circle2;
 
 	visualize_solution_path(last_solution_path, projector, doc, dimensions, solution_line_width);
-    system->visualize_obstacles(doc, dimensions);
 
     return doc.toString();
 }
 
-std::tuple<std::string, std::string, std::string> visualize_nodes(
+std::string visualize_nodes(
     tree_node_t* root,
     const std::vector<std::vector<double>>& last_solution_path,
     projection_function projector,
-    system_t* system,
     double* start_state, double* goal_state,
     int image_width, int image_height,
     double node_diameter, double solution_node_diameter)
 {
     svg::Dimensions dimensions(image_width, image_height);
-    svg::Document doc(svg::Layout(dimensions, svg::Layout::BottomLeft));
+    svg::DocumentBody doc(svg::Layout(dimensions, svg::Layout::BottomLeft));
 
     std::vector<tree_node_t*> sorted_nodes;
     double max_cost = 0;
@@ -192,7 +189,6 @@ std::tuple<std::string, std::string, std::string> visualize_nodes(
 	doc<<circle2;
 
 	visualize_solution_nodes(last_solution_path, projector, doc, dimensions, solution_node_diameter);
-    system->visualize_obstacles(doc, dimensions);
 
     return doc.toString();
 }

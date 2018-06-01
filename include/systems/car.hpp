@@ -35,7 +35,7 @@ public:
 	
 	virtual bool valid_state();
 
-	std::tuple<double, double> visualize_point(const double* state) override;
+	std::tuple<double, double> visualize_point(const double* state) const override;
 
 	virtual std::vector<std::pair<double, double> > get_state_bounds();
     virtual std::vector<std::pair<double, double> > get_control_bounds();

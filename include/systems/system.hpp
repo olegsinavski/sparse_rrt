@@ -13,9 +13,8 @@
 #ifndef SPARSE_SYSTEM_HPP
 #define SPARSE_SYSTEM_HPP
 #include <tuple>
+#include <vector>
 
-#include "image_creation/svg_image.hpp"
-\
 
 struct system_interface {
     /**
@@ -68,7 +67,7 @@ public:
      * 
      * @return A point in image space.
      */
-    virtual std::tuple<double, double> visualize_point(const double* state) = 0;
+    virtual std::tuple<double, double> visualize_point(const double* state) const = 0;
 
     /**
      * @brief Visualize the obstacles for this system.
@@ -77,9 +76,9 @@ public:
      * @param doc The image storage.
      * @param dims The image size.
      */
-    virtual void visualize_obstacles(svg::Document& doc, svg::Dimensions dims)
+    virtual std::string visualize_obstacles(int image_width, int image_height) const
     {
-    	return;
+    	return "";
     }
 
     virtual std::vector<std::pair<double, double>> get_state_bounds() = 0;

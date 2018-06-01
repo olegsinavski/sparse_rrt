@@ -627,7 +627,7 @@ namespace svg
 
         std::string  toString() const
         {
-            return this->body_nodes_stream.str();
+            return std::move(this->body_nodes_stream.str());
         }
     private:
         Layout layout;

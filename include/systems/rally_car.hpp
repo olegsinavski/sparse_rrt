@@ -58,12 +58,12 @@ public:
 	/**
 	 * @copydoc system_t::visualize_point(double*, svg::Dimensions)
 	 */
-	std::tuple<double, double> visualize_point(const double* state);
+	std::tuple<double, double> visualize_point(const double* state) const override;
 	
 	/**
 	 * @copydoc system_t::visualize_obstacles(svg::Document&, svg::Dimensions)
 	 */
-    virtual void visualize_obstacles(svg::Document& doc ,svg::Dimensions dims);
+    std::string visualize_obstacles(int image_width, int image_height) const override;
 
 	std::vector<std::pair<double, double>> get_state_bounds() override;
 	std::vector<std::pair<double, double>> get_control_bounds() override;

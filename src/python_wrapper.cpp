@@ -68,7 +68,7 @@ public:
         planner->step(&system, min_time_steps, max_time_steps, integration_step);
     }
 
-    std::tuple<std::string, std::string, std::string> visualize_tree_wrapper(
+    std::string visualize_tree_wrapper(
         system_t& system,
         int image_width,
         int image_height,
@@ -82,15 +82,16 @@ public:
         planner->get_solution(solution_path, controls, costs);
 
         using namespace std::placeholders;
-        return visualize_tree(
+        std::string document_body = visualize_tree(
             planner->get_root(), solution_path,
             std::bind(&system_t::visualize_point, &system, _1),
-            &system,
             planner->get_start_state(), planner->get_goal_state(),
             image_width, image_height, solution_node_diameter, solution_line_width, tree_line_width);
+
+        return std::move(document_body);
     }
 
-    std::tuple<std::string, std::string, std::string> visualize_nodes_wrapper(
+    std::string visualize_nodes_wrapper(
         system_t& system,
         int image_width,
         int image_height,
@@ -103,13 +104,14 @@ public:
         planner->get_solution(solution_path, controls, costs);
 
         using namespace std::placeholders;
-        return visualize_nodes(
+        std::string document_body = visualize_nodes(
             planner->get_root(), solution_path,
             std::bind(&system_t::visualize_point, &system, _1),
-            &system,
             planner->get_start_state(),
             planner->get_goal_state(),
             image_width, image_height, node_diameter, solution_node_diameter);
+
+        return std::move(document_body);
     }
 
     py::object get_solution() {
@@ -311,17 +313,13 @@ PYBIND11_MODULE(_sst_module, m) {
    system_interface_var
         .def(py::init<>())
         .def("propagate", &system_interface::propagate);
-//   system_interface_var
-//        .def("get_state_bounds", &system_t::get_state_bounds)
-//        .def("get_control_bounds", &system_t::get_control_bounds)
-//        .def("is_circular_topology", &system_t::is_circular_topology)
-//   ;
 
    py::class_<system_t> system(m, "System", system_interface_var);
    system
         .def("get_state_bounds", &system_t::get_state_bounds)
         .def("get_control_bounds", &system_t::get_control_bounds)
         .def("is_circular_topology", &system_t::is_circular_topology)
+        .def("visualize_obstacles", &system_t::visualize_obstacles)
    ;
 
    py::class_<car_t>(m, "Car", system).def(py::init<>());

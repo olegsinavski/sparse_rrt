@@ -12,6 +12,7 @@
 
 #include "systems/point.hpp"
 #include "utilities/random.hpp"
+#include "image_creation/svg_image.hpp"
 #include <cmath>
 #include <assert.h>
 
@@ -82,15 +83,17 @@ bool point_t::valid_state()
 			(temp_state[1]!=MAX_Y);
 }
 
-std::tuple<double, double> point_t::visualize_point(const double* state)
+std::tuple<double, double> point_t::visualize_point(const double* state) const
 {
 	double x = (state[0]-MIN_X)/(MAX_X-MIN_X);
 	double y = (state[1]-MIN_Y)/(MAX_Y-MIN_Y);
 	return std::make_tuple(x, y);
 }
 
-void point_t::visualize_obstacles(svg::Document& doc ,svg::Dimensions dims)
-{// doc << Rectangle(Point(-4.5*50+500-175,5*50+500+37.5), 7*50, 1.5*50, Color::Red);
+std::string point_t::visualize_obstacles(int image_width, int image_height) const
+{
+    svg::Dimensions dims(image_width, image_height);
+    svg::DocumentBody doc(svg::Layout(dims, svg::Layout::BottomLeft));
 	double temp[2];
 	for(unsigned i=0;i<obstacles.size();i++)
 	{
@@ -104,6 +107,7 @@ void point_t::visualize_obstacles(svg::Document& doc ,svg::Dimensions dims)
 							(obstacles[i].high_y-obstacles[i].low_y)/(MAX_Y-MIN_Y) * dims.height,
 							svg::Color::Red);
 	}
+    return doc.toString();
 }
 
 std::vector<std::pair<double, double> > point_t::get_state_bounds() {

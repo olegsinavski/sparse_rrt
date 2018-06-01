@@ -71,7 +71,7 @@ bool car_t::valid_state()
 			(temp_state[1]!=10);
 }
 
-std::tuple<double, double> car_t::visualize_point(const double* state)
+std::tuple<double, double> car_t::visualize_point(const double* state) const
 {
 	double x = (state[0]+10)/(20);
 	double y = (state[1]+10)/(20);

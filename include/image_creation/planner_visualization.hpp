@@ -14,11 +14,10 @@ typedef typename std::function<std::tuple<double, double>(const double*)> projec
  *
  * @param image_counter A subscript for the image file name. Allows for multiple image output.
  */
-std::tuple<std::string, std::string, std::string> visualize_tree(
+std::string visualize_tree(
     tree_node_t* root,
     const std::vector<std::vector<double>>& last_solution_path,
     projection_function projector,
-    system_t* system,
     double* start_state, double* goal_state,
     int image_width, int image_height,
     double solution_node_diameter, double solution_line_width, double tree_line_width);
@@ -30,11 +29,10 @@ std::tuple<std::string, std::string, std::string> visualize_tree(
  *
  * @param image_counter A subscript for the image file name. Allows for multiple image output.
  */
-std::tuple<std::string, std::string, std::string> visualize_nodes(
+std::string visualize_nodes(
     tree_node_t* root,
     const std::vector<std::vector<double>>& last_solution_path,
     projection_function projector,
-    system_t* system,
     double* start_state, double* goal_state,
     int image_width, int image_height,
     double node_diameter, double solution_node_diameter);
