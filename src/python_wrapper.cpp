@@ -69,7 +69,7 @@ public:
     }
 
     std::string visualize_tree_wrapper(
-        system_t& system,
+        system_interface& system,
         int image_width,
         int image_height,
         double solution_node_diameter,
@@ -84,7 +84,7 @@ public:
         using namespace std::placeholders;
         std::string document_body = visualize_tree(
             planner->get_root(), solution_path,
-            std::bind(&system_t::visualize_point, &system, _1),
+            std::bind(&system_t::visualize_point, &system, _1, planner->get_state_dimension()),
             planner->get_start_state(), planner->get_goal_state(),
             image_width, image_height, solution_node_diameter, solution_line_width, tree_line_width);
 
@@ -92,7 +92,7 @@ public:
     }
 
     std::string visualize_nodes_wrapper(
-        system_t& system,
+        system_interface& system,
         int image_width,
         int image_height,
         double node_diameter,
@@ -106,7 +106,7 @@ public:
         using namespace std::placeholders;
         std::string document_body = visualize_nodes(
             planner->get_root(), solution_path,
-            std::bind(&system_t::visualize_point, &system, _1),
+            std::bind(&system_t::visualize_point, &system, _1, planner->get_state_dimension()),
             planner->get_start_state(),
             planner->get_goal_state(),
             image_width, image_height, node_diameter, solution_node_diameter);
@@ -265,7 +265,8 @@ public:
 };
 
 
-class py_system_interface : public system_interface {
+class py_system_interface : public system_interface
+{
 public:
 
     bool propagate(
@@ -295,13 +296,33 @@ public:
             std::copy(result_state_array.data(0), result_state_array.data(0) + state_dimension, result_state);
             return true;
         }
-//        //py::safe_array<double> result_state_array{{state_dimension}};
-//
-//        //return py::detail::cast_safe<bool>(std::move(result));
-//        return false;
+    }
 
+    std::tuple<double, double> visualize_point(const double* state, unsigned int state_dimension) const override {
+        py::safe_array<double> state_array{{state_dimension}};
+        std::copy(state, state + state_dimension, state_array.mutable_data(0));
+
+        py::gil_scoped_acquire gil;
+        py::function overload = py::get_overload(static_cast<const system_interface *>(this), "visualize_point");
+        if (!overload) {
+            pybind11::pybind11_fail("Tried to call pure virtual function visualize_point");
+            return std::make_tuple(-1., -1.);
+        }
+        auto result = overload(state_array);
+        return py::detail::cast_safe<std::tuple<double, double>>(std::move(result));
+    }
+
+    std::string visualize_obstacles(int image_width, int image_height) const override
+    {
+    	PYBIND11_OVERLOAD(
+            std::string, /* Return type */
+            system_interface,      /* Parent class */
+            visualize_obstacles,          /* Name of function in C++ (must match Python name) */
+            image_width, image_height     /* Argument(s) */
+        );
     }
 };
+
 
 
 PYBIND11_MODULE(_sst_module, m) {
@@ -312,7 +333,9 @@ PYBIND11_MODULE(_sst_module, m) {
    py::class_<system_interface, py_system_interface> system_interface_var(m, "ISystem");
    system_interface_var
         .def(py::init<>())
-        .def("propagate", &system_interface::propagate);
+        .def("propagate", &system_interface::propagate)
+        .def("visualize_point", &system_interface::visualize_point)
+        .def("visualize_obstacles", &system_interface::visualize_obstacles);
 
    py::class_<system_t> system(m, "System", system_interface_var);
    system
@@ -325,7 +348,10 @@ PYBIND11_MODULE(_sst_module, m) {
    py::class_<car_t>(m, "Car", system).def(py::init<>());
    py::class_<cart_pole_t>(m, "CartPole", system).def(py::init<>());
    py::class_<pendulum_t>(m, "Pendulum", system).def(py::init<>());
-   py::class_<point_t>(m, "Point", system).def(py::init<>());
+   py::class_<point_t>(m, "Point", system)
+       .def(py::init<int>(),
+            "number_of_obstacles"_a=5
+       );
    py::class_<rally_car_t>(m, "RallyCar", system).def(py::init<>());
    py::class_<two_link_acrobot_t>(m, "TwoLinkAcrobot", system).def(py::init<>());
 

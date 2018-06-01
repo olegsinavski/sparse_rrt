@@ -108,7 +108,7 @@ bool two_link_acrobot_t::valid_state()
     return true;
 }
 
-std::tuple<double, double> two_link_acrobot_t::visualize_point(const double* state) const
+std::tuple<double, double> two_link_acrobot_t::visualize_point(const double* state, unsigned int state_dimension) const
 {
     double x = (LENGTH) * cos(state[STATE_THETA_1] - M_PI / 2)+(LENGTH) * cos(state[STATE_THETA_1] + state[STATE_THETA_2] - M_PI / 2);
     double y = (LENGTH) * sin(state[STATE_THETA_1] - M_PI / 2)+(LENGTH) * sin(state[STATE_THETA_1] + state[STATE_THETA_2] - M_PI / 2);

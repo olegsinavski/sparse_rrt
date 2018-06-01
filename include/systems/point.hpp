@@ -62,18 +62,25 @@ public:
 class point_t : public system_t
 {
 public:
-	point_t()
+	point_t(int number_of_obstacles=5)
 	{
 		state_dimension = 2;
 		control_dimension = 2;
 		temp_state = new double[state_dimension];
-		obstacles.push_back(Rectangle_t(   1,  -1.5,    5,  9.5));
-		obstacles.push_back(Rectangle_t(  -8,  4.25,   -1, 5.75));
-		obstacles.push_back(Rectangle_t(   5,   3.5,    9,  4.5));
-		obstacles.push_back(Rectangle_t(-8.5,  -7.5, -3.5, -2.5));
-		obstacles.push_back(Rectangle_t(   5,  -8.5,    9, -4.5));
+
+		std::vector<Rectangle_t> available_obstacles;
+		available_obstacles.push_back(Rectangle_t(   1,  -1.5,    5,  9.5));
+		available_obstacles.push_back(Rectangle_t(  -8,  4.25,   -1, 5.75));
+		available_obstacles.push_back(Rectangle_t(   5,   3.5,    9,  4.5));
+		available_obstacles.push_back(Rectangle_t(-8.5,  -7.5, -3.5, -2.5));
+		available_obstacles.push_back(Rectangle_t(   5,  -8.5,    9, -4.5));
+
+		for (int i =0; i<number_of_obstacles; i++) {
+		    obstacles.push_back(available_obstacles[i]);
+		}
+
 	}
-	virtual ~point_t(){}
+	virtual ~point_t(){ delete temp_state;}
 
 	/**
 	 * @copydoc system_t::propagate(double*, double*, int, int, double*, double& )
@@ -96,7 +103,7 @@ public:
 	/**
 	 * @copydoc system_t::visualize_point(double*, svg::Dimensions)
 	 */
-	std::tuple<double, double> visualize_point(const double* state) const override;
+	std::tuple<double, double> visualize_point(const double* state, unsigned int state_dimension) const override;
 
 	/**
 	 * @copydoc system_t::visualize_obstacles(svg::DocumentBody&, svg::Dimensions)

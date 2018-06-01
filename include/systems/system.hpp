@@ -33,8 +33,30 @@ struct system_interface {
         const double* start_state, unsigned int state_dimension,
         const double* control, unsigned int control_dimension,
         int num_steps, double* result_state, double integration_step) = 0;
+    /**
+     * @brief Creates a point in image space corresponding to a given state.
+     * @details Creates a point in image space corresponding to a given state.
+     *
+     * @param state The state in the system's space.
+     * @param dims The size of the destination image.
+     *
+     * @return A point in image space.
+     */
+    virtual std::tuple<double, double> visualize_point(const double* state, unsigned int state_dimension) const = 0;
 
+    /**
+     * @brief Visualize the obstacles for this system.
+     * @details Visualize the obstacles for this system.
+     *
+     * @param doc The image storage.
+     * @param dims The image size.
+     */
+    virtual std::string visualize_obstacles(int image_width, int image_height) const
+    {
+    	return "";
+    }
 };
+
 
 /**
  * @brief A base class for plannable systems.
@@ -57,29 +79,6 @@ public:
 	{
 		return control_dimension;
 	}
-
-    /**
-     * @brief Creates a point in image space corresponding to a given state.
-     * @details Creates a point in image space corresponding to a given state.
-     * 
-     * @param state The state in the system's space.
-     * @param dims The size of the destination image.
-     * 
-     * @return A point in image space.
-     */
-    virtual std::tuple<double, double> visualize_point(const double* state) const = 0;
-
-    /**
-     * @brief Visualize the obstacles for this system.
-     * @details Visualize the obstacles for this system.
-     * 
-     * @param doc The image storage.
-     * @param dims The image size.
-     */
-    virtual std::string visualize_obstacles(int image_width, int image_height) const
-    {
-    	return "";
-    }
 
     virtual std::vector<std::pair<double, double>> get_state_bounds() = 0;
     virtual std::vector<std::pair<double, double>> get_control_bounds() = 0;

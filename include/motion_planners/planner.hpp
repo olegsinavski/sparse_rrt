@@ -114,6 +114,9 @@ public:
 	double* get_start_state() {return this->start_state;};
     double* get_goal_state() {return this->goal_state;};
 
+    unsigned int get_state_dimension() const {return this->state_dimension;};
+    unsigned int get_control_dimension() const {return this->control_dimension;};
+
 protected:
 
     unsigned int state_dimension;

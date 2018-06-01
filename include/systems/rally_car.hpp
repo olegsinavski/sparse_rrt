@@ -58,7 +58,7 @@ public:
 	/**
 	 * @copydoc system_t::visualize_point(double*, svg::Dimensions)
 	 */
-	std::tuple<double, double> visualize_point(const double* state) const override;
+	std::tuple<double, double> visualize_point(const double* state, unsigned int state_dimension) const override;
 	
 	/**
 	 * @copydoc system_t::visualize_obstacles(svg::Document&, svg::Dimensions)

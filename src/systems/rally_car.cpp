@@ -181,7 +181,7 @@ bool rally_car_t::valid_state()
         return !obstacle_collision;
 }
 
-std::tuple<double, double> rally_car_t::visualize_point(const double* state) const
+std::tuple<double, double> rally_car_t::visualize_point(const double* state, unsigned int state_dimension) const
 {
         double x = (state[0]-MIN_X)/(MAX_X-MIN_X);
         double y = (state[1]-MIN_Y)/(MAX_Y-MIN_Y);
@@ -271,7 +271,7 @@ std::string rally_car_t::visualize_obstacles(int image_width, int image_height) 
             temp[0] = obstacles[i].low_x;
             temp[1] = obstacles[i].high_y;
             double x, y;
-            std::tie(x, y) = this->visualize_point(temp);
+            std::tie(x, y) = this->visualize_point(temp, 8);
             doc<<svg::Rectangle(svg::Point(x*dims.width, y*dims.height),
                                 (obstacles[i].high_x-obstacles[i].low_x)/(MAX_X-MIN_X) * dims.width,
                                 (obstacles[i].high_y-obstacles[i].low_y)/(MAX_Y-MIN_Y) * dims.height,

@@ -71,7 +71,7 @@ bool pendulum_t::valid_state()
 	return true;
 }
 
-std::tuple<double, double> pendulum_t::visualize_point(const double* state) const
+std::tuple<double, double> pendulum_t::visualize_point(const double* state, unsigned int state_dimension) const
 {
 	double x = (state[0]+M_PI)/(2*M_PI);
 	double y = (state[1]-MIN_W)/(MAX_W-MIN_W);
