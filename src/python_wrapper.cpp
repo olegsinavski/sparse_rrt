@@ -342,7 +342,6 @@ PYBIND11_MODULE(_sst_module, m) {
         .def("get_state_bounds", &system_t::get_state_bounds)
         .def("get_control_bounds", &system_t::get_control_bounds)
         .def("is_circular_topology", &system_t::is_circular_topology)
-        .def("visualize_obstacles", &system_t::visualize_obstacles)
    ;
 
    py::class_<car_t>(m, "Car", system).def(py::init<>());

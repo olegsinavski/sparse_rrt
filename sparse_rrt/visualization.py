@@ -100,3 +100,24 @@ def render_svg(svg_string):
             exceptions.append(traceback.format_exc())
 
     raise Exception("Failed to convert svg to numpy. Here is the list of exceptions from converters:\n%s" % ('/n'.join(exceptions),))
+
+
+def create_svg_drawing():
+    import svgwrite
+    class RawSVGDrawing(svgwrite.container.SVG, svgwrite.elementfactory.ElementFactory):
+        pass
+
+    return RawSVGDrawing()
+
+
+def svg_rectangle((x, y), (width, height), (image_width, image_height), **extra):
+    '''
+    Generate an svg rectangle with x, y in image coordinates in bottom-left coordinate system (!)
+    :param x, y: left-bottom corner
+    :param width, height: dimentions
+    :return: string to add to svg xml
+    '''
+    drawing = create_svg_drawing()
+    return drawing.rect(
+        (x, image_height-y),
+        size=(width, -height), **extra).tostring()

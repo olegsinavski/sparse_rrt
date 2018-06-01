@@ -35,7 +35,7 @@ public:
 	}
 	/**
 	 * @brief Create a rectangle with center position and dimensions.
-	 * 
+	 *
 	 * @param pos_x Center X coordinate.
 	 * @param pos_y Center Y coordinate.
 	 * @param dim_x X Dimension

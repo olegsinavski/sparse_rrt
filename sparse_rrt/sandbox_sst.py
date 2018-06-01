@@ -10,7 +10,7 @@ import StringIO
 
 
 from planners import SST, RRT
-from sparse_rrt.systems.free_point import FreePoint
+from sparse_rrt.systems.point import Point
 
 
 system_classes = {
@@ -18,14 +18,14 @@ system_classes = {
     'cart_pole': _sst_module.CartPole,
     'pendulum': _sst_module.Pendulum,
     'point': _sst_module.Point,
-    'free_point': lambda: _sst_module.Point(number_of_obstacles=0),
+    'free_point': lambda: _sst_module.Point(number_of_obstacles=1),
     'rally_car': _sst_module.RallyCar,
     'two_link_acrobot': _sst_module.TwoLinkAcrobot,
-    'py_free_point': FreePoint
+    'py_free_point': Point
 }
 
 python_configs = {
-    'py_free_point_sst': dict(
+    'py_sst_free_point': dict(
         system='py_free_point',
         planner='sst',
         start_state=np.array([0., 0.]),
@@ -54,6 +54,12 @@ def load_standard_config(config_name):
     config['random_seed'] = int(config['random_seed'])
 
     return config
+
+
+def find_config(name):
+    if name in python_configs:
+        return python_configs[name]
+    return load_standard_config(name)
 
 
 def run_config(config):
@@ -148,11 +154,5 @@ def run_planning_experiment(
     cv2.waitKey(-1)
 
 
-def find_config(name):
-    if name in python_configs:
-        return python_configs[name]
-    return load_standard_config(name)
-
-
 if __name__ == '__main__':
-    run_config(find_config('py_free_point_sst'))
+    run_config(find_config('py_sst_free_point'))
