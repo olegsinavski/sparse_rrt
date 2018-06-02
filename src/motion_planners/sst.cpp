@@ -50,23 +50,28 @@ sst_t::sst_t(
     double in_radius,
     const std::vector<std::pair<double, double> >& a_state_bounds,
     const std::vector<std::pair<double, double> >& a_control_bounds,
-    std::function<double(const double*, const double*)> distance_function,
+    std::function<double(const double*, const double*, unsigned int)> a_distance_function,
     unsigned int random_seed,
     double delta_near, double delta_drain)
     : planner_t(in_start, in_goal, in_radius,
-                a_state_bounds, a_control_bounds, distance_function, random_seed)
+                a_state_bounds, a_control_bounds, a_distance_function, random_seed)
     , sst_delta_near(delta_near)
     , sst_delta_drain(delta_drain)
     , best_goal(nullptr)
 {
     //initialize the metrics
-    metric.set_distance(this->distance);
+    unsigned int state_dimensions = this->get_state_dimension();
+    std::function<double(const double*, const double*)> raw_distance =
+        [state_dimensions, a_distance_function](const double* s0, const double* s1) {
+            return a_distance_function(s0, s1, state_dimensions);
+        };
+    metric.set_distance(raw_distance);
 
     root = new sst_node_t(in_start, a_state_bounds.size(), nullptr, tree_edge_t(nullptr, 0, -1.), 0.);
     metric.add_node(root);
     number_of_nodes++;
 
-    samples.set_distance(this->distance);
+    samples.set_distance(raw_distance);
 
     sample_node_t* first_witness_sample = new sample_node_t(static_cast<sst_node_t*>(root), start_state, this->state_dimension);
     samples.add_node(first_witness_sample);
@@ -186,12 +191,13 @@ void sst_t::add_to_tree(const double* sample_state, const double* sample_control
             ));
 			number_of_nodes++;
 
-	        if(best_goal==NULL && this->distance(new_node->get_point(), goal_state)<goal_radius)
+	        if(best_goal==NULL && this->distance(new_node->get_point(), goal_state, this->state_dimension)<goal_radius)
 	        {
 	        	best_goal = new_node;
 	        	branch_and_bound((sst_node_t*)root);
 	        }
-	        else if(best_goal!=NULL && best_goal->get_cost() > new_node->get_cost() && this->distance(new_node->get_point(), goal_state)<goal_radius)
+	        else if(best_goal!=NULL && best_goal->get_cost() > new_node->get_cost() &&
+	                this->distance(new_node->get_point(), goal_state, this->state_dimension)<goal_radius)
 	        {
 	        	best_goal = new_node;
 	        	branch_and_bound((sst_node_t*)root);

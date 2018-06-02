@@ -78,7 +78,7 @@ std::tuple<double, double> pendulum_t::visualize_point(const double* state, unsi
 	return std::make_tuple(x, y);
 }
 
-std::vector<std::pair<double, double> > pendulum_t::get_state_bounds() {
+std::vector<std::pair<double, double> > pendulum_t::get_state_bounds() const {
 	return {
 			{-M_PI,M_PI},
 			{MIN_W,MAX_W},
@@ -86,13 +86,13 @@ std::vector<std::pair<double, double> > pendulum_t::get_state_bounds() {
 }
 
 
-std::vector<std::pair<double, double> > pendulum_t::get_control_bounds() {
+std::vector<std::pair<double, double> > pendulum_t::get_control_bounds() const {
 	return {
 			{MIN_TORQUE,MAX_TORQUE},
 	};
 }
 
-std::vector<bool> pendulum_t::is_circular_topology() {
+std::vector<bool> pendulum_t::is_circular_topology() const {
 	return {
             true,
 			false

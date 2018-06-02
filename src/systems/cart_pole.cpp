@@ -123,7 +123,7 @@ void cart_pole_t::update_derivative(const double* control)
 }
 
 
-std::vector<std::pair<double, double> > cart_pole_t::get_state_bounds() {
+std::vector<std::pair<double, double> > cart_pole_t::get_state_bounds() const {
     return {
             {MIN_X,MAX_X},
             {MIN_V,MAX_V},
@@ -133,14 +133,14 @@ std::vector<std::pair<double, double> > cart_pole_t::get_state_bounds() {
 }
 
 
-std::vector<std::pair<double, double> > cart_pole_t::get_control_bounds() {
+std::vector<std::pair<double, double> > cart_pole_t::get_control_bounds() const {
     return {
             {-300,300},
     };
 }
 
 
-std::vector<bool> cart_pole_t::is_circular_topology() {
+std::vector<bool> cart_pole_t::is_circular_topology() const {
     return {
             false,
             false,

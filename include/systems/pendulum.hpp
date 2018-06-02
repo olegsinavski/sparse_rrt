@@ -49,9 +49,9 @@ public:
 	 */
 	std::tuple<double, double> visualize_point(const double* state, unsigned int state_dimension) const override;
 
-	std::vector<std::pair<double, double>> get_state_bounds() override;
-	std::vector<std::pair<double, double>> get_control_bounds() override;
-	std::vector<bool> is_circular_topology() override;
+	std::vector<std::pair<double, double>> get_state_bounds() const override;
+	std::vector<std::pair<double, double>> get_control_bounds() const override;
+	std::vector<bool> is_circular_topology() const override;
 };
 
 

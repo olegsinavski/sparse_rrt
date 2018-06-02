@@ -49,13 +49,18 @@ public:
 	      double in_radius,
 	      const std::vector<std::pair<double, double> >& a_state_bounds,
 		  const std::vector<std::pair<double, double> >& a_control_bounds,
-		  std::function<double(const double*, const double*)> distance_function,
+		  std::function<double(const double*, const double*, unsigned int)> a_distance_function,
           unsigned int random_seed)
 			: planner_t(in_start, in_goal, in_radius,
-			            a_state_bounds, a_control_bounds, distance_function, random_seed)
+			            a_state_bounds, a_control_bounds, a_distance_function, random_seed)
 	{
         //initialize the metric
-        metric.set_distance(this->distance);
+        unsigned int state_dimensions = this->get_state_dimension();
+        metric.set_distance(
+            [state_dimensions, a_distance_function](const double* s0, const double* s1) {
+                return a_distance_function(s0, s1, state_dimensions);
+            }
+        );
 
         this->root = new rrt_node_t(start_state, this->state_dimension, NULL, tree_edge_t(NULL, 0, -1.), 0.);
         number_of_nodes++;

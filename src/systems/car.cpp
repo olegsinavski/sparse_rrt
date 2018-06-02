@@ -78,7 +78,7 @@ std::tuple<double, double> car_t::visualize_point(const double* state, unsigned 
 	return std::make_tuple(x, y);
 }
 
-std::vector<std::pair<double, double> > car_t::get_state_bounds() {
+std::vector<std::pair<double, double> > car_t::get_state_bounds() const {
 	return {
         {-10,10},
         {-10,10},
@@ -87,14 +87,14 @@ std::vector<std::pair<double, double> > car_t::get_state_bounds() {
 }
 
 
-std::vector<std::pair<double, double> > car_t::get_control_bounds() {
+std::vector<std::pair<double, double> > car_t::get_control_bounds() const {
     return {
             {0, 1},
             {-.5,.5},
     };
 }
 
-std::vector<bool> car_t::is_circular_topology() {
+std::vector<bool> car_t::is_circular_topology() const {
 	return {
 			false,
 			false,

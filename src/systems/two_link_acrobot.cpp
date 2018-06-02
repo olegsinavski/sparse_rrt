@@ -45,7 +45,7 @@
 #define MIN_T -4
 #define MAX_T 4
 
-double two_link_acrobot_t::distance(const double* point1, const double* point2)
+double two_link_acrobot_t::distance(const double* point1, const double* point2, unsigned int state_dimension)
 {
         double x = (LENGTH) * cos(point1[STATE_THETA_1] - M_PI / 2)+(LENGTH) * cos(point1[STATE_THETA_1] + point1[STATE_THETA_2] - M_PI / 2);
         double y = (LENGTH) * sin(point1[STATE_THETA_1] - M_PI / 2)+(LENGTH) * sin(point1[STATE_THETA_1] + point1[STATE_THETA_2] - M_PI / 2);
@@ -151,7 +151,7 @@ void two_link_acrobot_t::update_derivative(const double* control)
 }
 
 
-std::vector<std::pair<double, double> > two_link_acrobot_t::get_state_bounds() {
+std::vector<std::pair<double, double> > two_link_acrobot_t::get_state_bounds() const {
     return {
             {-M_PI,M_PI},
             {-M_PI,M_PI},
@@ -160,14 +160,14 @@ std::vector<std::pair<double, double> > two_link_acrobot_t::get_state_bounds() {
     };
 }
 
-std::vector<std::pair<double, double> > two_link_acrobot_t::get_control_bounds() {
+std::vector<std::pair<double, double> > two_link_acrobot_t::get_control_bounds() const{
     return {
             {MIN_T,MAX_T}
     };
 }
 
 
-std::vector<bool> two_link_acrobot_t::is_circular_topology() {
+std::vector<bool> two_link_acrobot_t::is_circular_topology() const{
     return {
             true,
             true,

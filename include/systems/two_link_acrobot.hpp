@@ -32,7 +32,7 @@ public:
 	/**
 	 * @copydoc system_t::distance(double*, double*)
 	 */
-	static double distance(const double* point1, const double* point2);
+	static double distance(const double* point1, const double* point2, unsigned int);
 
 	/**
 	 * @copydoc system_t::propagate(double*, double*, int, int, double*, double& )
@@ -57,9 +57,9 @@ public:
 	 */
 	std::tuple<double, double> visualize_point(const double* state, unsigned int state_dimension) const;
 
-	std::vector<std::pair<double, double>> get_state_bounds() override;
-	std::vector<std::pair<double, double>> get_control_bounds() override;
-	std::vector<bool> is_circular_topology() override;
+	std::vector<std::pair<double, double>> get_state_bounds() const override;
+	std::vector<std::pair<double, double>> get_control_bounds() const override;
+	std::vector<bool> is_circular_topology() const override;
 	
 protected:
 	double* deriv;

@@ -281,7 +281,7 @@ std::string rally_car_t::visualize_obstacles(int image_width, int image_height) 
     return doc.toString();
 }
 
-std::vector<std::pair<double, double> > rally_car_t::get_state_bounds() {
+std::vector<std::pair<double, double> > rally_car_t::get_state_bounds() const {
         return {
                 {MIN_X,MAX_X},
                 {MIN_Y,MAX_Y},
@@ -294,7 +294,7 @@ std::vector<std::pair<double, double> > rally_car_t::get_state_bounds() {
         };
 }
 
-std::vector<std::pair<double, double> > rally_car_t::get_control_bounds() {
+std::vector<std::pair<double, double> > rally_car_t::get_control_bounds() const {
         return {
                 {-1.0472,1.0472},
                 {-700,0},
@@ -302,7 +302,7 @@ std::vector<std::pair<double, double> > rally_car_t::get_control_bounds() {
         };
 }
 
-std::vector<bool> rally_car_t::is_circular_topology() {
+std::vector<bool> rally_car_t::is_circular_topology() const {
     return {
             false,
             false,

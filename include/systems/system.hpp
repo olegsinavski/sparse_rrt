@@ -15,6 +15,8 @@
 #include <tuple>
 #include <vector>
 
+#include "systems/distance_functions.h"
+
 
 struct system_interface {
     /**
@@ -55,6 +57,17 @@ struct system_interface {
     {
     	return "";
     }
+
+     /**
+     * @brief Compute a distance between two points in the state space
+     * @details Compute a distance between two points in the state space
+     *
+     * @param state0 the first state point
+     * @param state1 the second state point
+     *
+     * @return A distance value
+     */
+    //virtual double distance(const double* state0, const double* state1, unsigned int state_dimension) const = 0;
 };
 
 
@@ -80,15 +93,19 @@ public:
 		return control_dimension;
 	}
 
-    virtual std::vector<std::pair<double, double>> get_state_bounds() = 0;
-    virtual std::vector<std::pair<double, double>> get_control_bounds() = 0;
+    virtual std::vector<std::pair<double, double>> get_state_bounds() const = 0;
+    virtual std::vector<std::pair<double, double>> get_control_bounds() const = 0;
 
     /**
      * @brief Array of flags indicating that a degree of freedom has circular topology
      * @details Array of flags indicating that a degree of freedom has circular topology
      *
      */
-	virtual std::vector<bool> is_circular_topology() = 0;
+	virtual std::vector<bool> is_circular_topology() const = 0;
+
+//	double distance(const double* state0, const double* state1, unsigned int state_dimension) const override {
+//	    return euclidian_distance(std::move(this->is_circular_topology()))(state0, state1);
+//	}
 
 protected:
 

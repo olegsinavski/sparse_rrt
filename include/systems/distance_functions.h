@@ -20,8 +20,8 @@
  */
 
 
-std::function<double(const double*, const double*)> euclidian_distance(const std::vector<bool> is_circular_topology);
+std::function<double(const double*, const double*, unsigned int)> euclidian_distance(const std::vector<bool> is_circular_topology);
 
-std::function<double(const double*, const double*)> two_link_acrobot_distance();
+std::function<double(const double*, const double*, unsigned int)> two_link_acrobot_distance();
 
 #endif //SPARSERRT_DISTANCE_FUNCTIONS_H

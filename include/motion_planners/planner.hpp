@@ -42,7 +42,7 @@ public:
 	    double in_radius,
 	    const std::vector<std::pair<double, double> >& a_state_bounds,
         const std::vector<std::pair<double, double> >& a_control_bounds,
-        std::function<double(const double*, const double*)> distance_function,
+        std::function<double(const double*, const double*, unsigned int)> distance_function,
         unsigned int random_seed
     )
         : goal_radius(in_radius)
@@ -145,7 +145,7 @@ protected:
     std::vector<std::pair<double, double> > state_bounds;
     std::vector<std::pair<double, double> > control_bounds;
 
-    std::function<double(const double*, const double*)> distance;
+    std::function<double(const double*, const double*, unsigned int)> distance;
 
 	RandomGenerator random_generator;
 };

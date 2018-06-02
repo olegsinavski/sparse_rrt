@@ -44,7 +44,7 @@ void rrt_t::get_solution(std::vector<std::vector<double>>& solution_path, std::v
         }
     }
     //now nearest should be the closest node to the goal state
-    if(this->distance(goal_state,nearest->get_point()) < goal_radius)
+    if(this->distance(goal_state,nearest->get_point(), this->state_dimension) < goal_radius)
     {
         std::deque<const rrt_node_t*> path;
         while(nearest->get_parent()!=NULL)

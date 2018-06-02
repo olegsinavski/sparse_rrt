@@ -110,7 +110,7 @@ std::string point_t::visualize_obstacles(int image_width, int image_height) cons
     return doc.toString();
 }
 
-std::vector<std::pair<double, double> > point_t::get_state_bounds() {
+std::vector<std::pair<double, double> > point_t::get_state_bounds() const {
 	return {
 			{MIN_X,MAX_X},
 			{MIN_Y,MAX_Y}
@@ -118,7 +118,7 @@ std::vector<std::pair<double, double> > point_t::get_state_bounds() {
 }
 
 
-std::vector<std::pair<double, double> > point_t::get_control_bounds() {
+std::vector<std::pair<double, double> > point_t::get_control_bounds() const {
 	return {
 			{MIN_V, MAX_V},
 			{MIN_THETA, MAX_THETA},
@@ -126,7 +126,7 @@ std::vector<std::pair<double, double> > point_t::get_control_bounds() {
 }
 
 
-std::vector<bool> point_t::is_circular_topology() {
+std::vector<bool> point_t::is_circular_topology() const {
     return {
             false,
             false
