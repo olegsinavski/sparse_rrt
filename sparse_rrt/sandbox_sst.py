@@ -10,6 +10,7 @@ import StringIO
 
 
 from planners import SST, RRT
+from sparse_rrt.systems.acrobot import Acrobot
 from sparse_rrt.systems.car import Car
 from sparse_rrt.systems.pendulum import Pendulum
 from sparse_rrt.systems.point import Point
@@ -24,7 +25,8 @@ system_classes = {
     'two_link_acrobot': _sst_module.TwoLinkAcrobot,
     'py_free_point': Point,
     'py_car': Car,
-    'py_pendulum': Pendulum
+    'py_pendulum': Pendulum,
+    'py_acrobot': Acrobot
 }
 
 python_configs = {
@@ -66,6 +68,19 @@ python_configs = {
         integration_step=0.002,
         min_time_steps=20,
         max_time_steps=200,
+        number_of_iterations=300000),
+    'py_sst_acrobot': dict(
+        system='py_acrobot',
+        planner='sst',
+        start_state=np.array([0., 0., 0., 0]),
+        goal_state=np.array([np.pi, 0., 0., 0.]),
+        goal_radius=0.2,
+        random_seed=0,
+        sst_delta_near=1.,
+        sst_delta_drain=0.5,
+        integration_step=0.02,
+        min_time_steps=10,
+        max_time_steps=50,
         number_of_iterations=300000)
 }
 
@@ -184,4 +199,4 @@ def run_planning_experiment(
 
 
 if __name__ == '__main__':
-    run_config(find_config('py_sst_pendulum'))
+    run_config(find_config('py_sst_acrobot'))

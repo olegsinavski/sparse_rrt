@@ -23,9 +23,13 @@ class Pendulum(BaseSystem):
         state = start_state
         for i in range(num_steps):
             state[0] += integration_step * state[1]
-            state[1] += integration_coeff*(control[0] - gravity_coeff*np.cos(state[0]) - self.DAMPING*state[1])
+            state[1] += integration_coeff * (control[0] - gravity_coeff*np.cos(state[0]) - self.DAMPING*state[1])
 
-        state = np.clip(state, [self.MIN_ANGLE, self.MIN_W], [self.MAX_ANGLE, self.MAX_W])
+            if state[0] < -np.pi:
+                state[0] += 2*np.pi
+            elif state[0] > np.pi:
+                state[0] -= 2 * np.pi
+            state = np.clip(state, [self.MIN_ANGLE, self.MIN_W], [self.MAX_ANGLE, self.MAX_W])
         return state
 
     def visualize_point(self, state):
