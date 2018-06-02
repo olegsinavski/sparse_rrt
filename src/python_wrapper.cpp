@@ -1,6 +1,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
 #include <pybind11/stl.h>
+#include <pybind11/functional.h>
 
 #include <iostream>
 
@@ -45,6 +46,38 @@ namespace pybind11 {
 namespace py = pybind11;
 using namespace pybind11::literals;
 
+
+double global_dist(const double* point1, const double* point2, unsigned int state_dimensions){
+    double result = 0;
+    for (int i=0; i<state_dimensions; ++i) {
+        result += (point1[i]-point2[i]) * (point1[i]-point2[i]);
+    }
+    return std::sqrt(result);
+};
+
+
+
+//std::function<double(const double*, const double*, unsigned int)> global_dist = [] (const double* point1, const double* point2, unsigned int state_dimensions) -> double {
+//    double result = 0;
+//    for (int i=0; i<state_dimensions; ++i) {
+//        result += (point1[i]-point2[i]) * (point1[i]-point2[i]);
+//    }
+//    return std::sqrt(result);
+//};
+
+
+#include <assert.h>
+
+euclidean_distance create_euclidean_distance(
+    const py::safe_array<bool> &is_circular_topology_array)
+{
+    auto is_circular_topology = is_circular_topology_array.unchecked<1>();
+    std::vector<bool> is_circular_topology_v;
+    for (int i = 0; i < is_circular_topology_array.shape()[0]; i++) {
+        is_circular_topology_v.push_back(is_circular_topology(i));
+    }
+    return euclidean_distance(is_circular_topology_v);
+}
 
 py::safe_array<double> get_data(py::safe_array<double>& in_data) {
     //if (in_data.ndim() != 2) throw std::domain_error("error: ndim != 2");
@@ -161,7 +194,7 @@ public:
     SSTWrapper(
             const py::safe_array<double> &state_bounds_array,
             const py::safe_array<double> &control_bounds_array,
-            const py::safe_array<bool> &is_circular_topology_array,
+            distance_t* distance_computer,
             const py::safe_array<double> &start_state_array,
             const py::safe_array<double> &goal_state_array,
             double goal_radius,
@@ -169,10 +202,6 @@ public:
             double sst_delta_near,
             double sst_delta_drain
     ) {
-        if (state_bounds_array.shape()[0] != is_circular_topology_array.shape()[0]) {
-            throw std::domain_error("State and topology arrays have to be equal size");
-        }
-
         if (state_bounds_array.shape()[0] != start_state_array.shape()[0]) {
             throw std::domain_error("State bounds and start state arrays have to be equal size");
         }
@@ -182,17 +211,14 @@ public:
         }
         auto state_bounds = state_bounds_array.unchecked<2>();
         auto control_bounds = control_bounds_array.unchecked<2>();
-        auto is_circular_topology = is_circular_topology_array.unchecked<1>();
         auto start_state = start_state_array.unchecked<1>();
         auto goal_state = goal_state_array.unchecked<1>();
 
         typedef std::pair<double, double> bounds_t;
         std::vector<bounds_t> state_bounds_v;
-        std::vector<bool> is_circular_topology_v;
 
         for (int i = 0; i < state_bounds_array.shape()[0]; i++) {
             state_bounds_v.push_back(bounds_t(state_bounds(i, 0), state_bounds(i, 1)));
-            is_circular_topology_v.push_back(is_circular_topology[i]);
         }
 
         std::vector<bounds_t> control_bounds_v;
@@ -200,11 +226,16 @@ public:
             control_bounds_v.push_back(bounds_t(control_bounds(i, 0), control_bounds(i, 1)));
         }
 
+        std::function<double(const double*, const double*, unsigned int)>  distance_f =
+            [distance_computer] (const double* p0, const double* p1, unsigned int dims) {
+                return distance_computer->distance(p0, p1, dims);
+            };
+
         planner.reset(
                 new sst_t(
                         &start_state(0), &goal_state(0), goal_radius,
                         state_bounds_v, control_bounds_v,
-                        euclidian_distance(is_circular_topology_v),
+                        distance_f,
                         random_seed,
                         sst_delta_near, sst_delta_drain)
         );
@@ -217,16 +248,12 @@ public:
     RRTWrapper(
             const py::safe_array<double> &state_bounds_array,
             const py::safe_array<double> &control_bounds_array,
-            const py::safe_array<bool> &is_circular_topology_array,
+            distance_t* distance_computer,
             const py::safe_array<double> &start_state_array,
             const py::safe_array<double> &goal_state_array,
             double goal_radius,
             unsigned int random_seed
     ) {
-        if (state_bounds_array.shape()[0] != is_circular_topology_array.shape()[0]) {
-            throw std::runtime_error("State and topology arrays have to be equal size");
-        }
-
         if (state_bounds_array.shape()[0] != start_state_array.shape()[0]) {
             throw std::runtime_error("State bounds and start state arrays have to be equal size");
         }
@@ -237,16 +264,13 @@ public:
 
         auto state_bounds = state_bounds_array.unchecked<2>();
         auto control_bounds = control_bounds_array.unchecked<2>();
-        auto is_circular_topology = is_circular_topology_array.unchecked<1>();
         auto start_state = start_state_array.unchecked<1>();
         auto goal_state = goal_state_array.unchecked<1>();
 
         typedef std::pair<double, double> bounds_t;
         std::vector<bounds_t> state_bounds_v;
-        std::vector<bool> is_circular_topology_v;
         for (int i = 0; i < state_bounds_array.shape()[0]; i++) {
             state_bounds_v.push_back(bounds_t(state_bounds(i, 0), state_bounds(i, 1)));
-            is_circular_topology_v.push_back(is_circular_topology(i));
         }
 
         std::vector<bounds_t> control_bounds_v;
@@ -254,11 +278,16 @@ public:
             control_bounds_v.push_back(bounds_t(control_bounds(i, 0), control_bounds(i, 1)));
         }
 
+        std::function<double(const double*, const double*, unsigned int)>  distance_f =
+            [distance_computer] (const double* p0, const double* p1, unsigned int dims) {
+                return distance_computer->distance(p0, p1, dims);
+            };
+
         planner.reset(
                 new rrt_t(
                         &start_state(0), &goal_state(0), goal_radius,
                         state_bounds_v, control_bounds_v,
-                        euclidian_distance(is_circular_topology_v),
+                        distance_f,
                         random_seed)
         );
     }
@@ -324,13 +353,16 @@ public:
 };
 
 
-
-
-
 PYBIND11_MODULE(_sst_module, m) {
    m.doc() = "Python wrapper for SST planners";
 
-   m.def("get_data", &get_data, py::arg("in_data").noconvert());
+   //m.def("get_data", &get_data, py::arg("in_data").noconvert());
+
+   py::class_<distance_t> distance_interface_var(m, "IDistance");
+   py::class_<euclidean_distance, distance_t>(m, "EuclideanDistance");
+   py::class_<two_link_acrobot_distance, distance_t>(m, "TwoLinkAcrobotDistance").def(py::init<>());
+
+   m.def("euclidean_distance", &create_euclidean_distance, "is_circular_topology"_a.noconvert());
 
    py::class_<system_interface, py_system_interface> system_interface_var(m, "ISystem");
    system_interface_var
@@ -382,14 +414,14 @@ PYBIND11_MODULE(_sst_module, m) {
    py::class_<RRTWrapper>(m, "RRTWrapper", planner)
         .def(py::init<const py::safe_array<double>&,
                       const py::safe_array<double>&,
-                      const py::safe_array<bool>&,
+                      distance_t*,
                       const py::safe_array<double>&,
                       const py::safe_array<double>&,
                       double,
                       unsigned int>(),
             "state_bounds"_a,
             "control_bounds"_a,
-            "is_circular_topology"_a,
+            "distance"_a,
             "start_state"_a,
             "goal_state"_a,
             "goal_radius"_a,
@@ -400,7 +432,7 @@ PYBIND11_MODULE(_sst_module, m) {
    py::class_<SSTWrapper>(m, "SSTWrapper", planner)
         .def(py::init<const py::safe_array<double>&,
                       const py::safe_array<double>&,
-                      const py::safe_array<bool>&,
+                      distance_t*,
                       const py::safe_array<double>&,
                       const py::safe_array<double>&,
                       double,
@@ -409,7 +441,7 @@ PYBIND11_MODULE(_sst_module, m) {
                       double>(),
             "state_bounds"_a,
             "control_bounds"_a,
-            "is_circular_topology"_a,
+            "distance"_a,
             "start_state"_a,
             "goal_state"_a,
             "goal_radius"_a,

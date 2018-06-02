@@ -109,11 +109,14 @@ def find_config(name):
 def run_config(config):
     system = system_classes[config['system']]()
 
+    distance = _sst_module.euclidean_distance(np.array(system.is_circular_topology()))
+    distance = _sst_module.TwoLinkAcrobotDistance()
+
     if config['planner'] == 'sst':
         planner = SST(
             state_bounds=system.get_state_bounds(),
             control_bounds=system.get_control_bounds(),
-            is_circular_topology=system.is_circular_topology(),
+            distance=distance,
             start_state=config['start_state'],
             goal_state=config['goal_state'],
             goal_radius=config['goal_radius'],
@@ -199,4 +202,5 @@ def run_planning_experiment(
 
 
 if __name__ == '__main__':
-    run_config(find_config('py_sst_acrobot'))
+
+    run_config(find_config('sst_acrobot'))
