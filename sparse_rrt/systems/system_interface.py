@@ -1,6 +1,7 @@
 
 import sparse_rrt._sst_module
 from abc import abstractmethod
+import numpy as np
 
 
 class ISystem(sparse_rrt._sst_module.ISystem):
@@ -27,7 +28,6 @@ class ISystem(sparse_rrt._sst_module.ISystem):
         '''
         sparse_rrt._sst_module.ISystem.__init__(self)
 
-    @abstractmethod
     def propagate(self, start_state, control, num_steps, integration_step):
         '''
         Integrate system dynamics under certain control for several steps.
@@ -37,14 +37,15 @@ class ISystem(sparse_rrt._sst_module.ISystem):
         :param integration_step: time step for integration
         :return: boolean indicating that integration is successful (e.g. it should return False if collision is detected)
         '''
+        raise NotImplementedError()
 
-    @abstractmethod
     def visualize_point(self, state):
         '''
         Project state space point of state_dimensions onto two dimensional plane for plane visualization
         :param state: numpy vector of (state_dimensions,) shape of a point in the state space
         :return: a tuple (x, y) of plane visualization coordinates for the state space point
         '''
+        raise NotImplementedError()
 
     def visualize_obstacles(self, image_width, image_height):
         '''
@@ -55,13 +56,20 @@ class ISystem(sparse_rrt._sst_module.ISystem):
         '''
         return ''
 
+    def distance_computer(self):
+        '''
+        Return an object that implements cpp distance_t interface that can compute distance between points in the state space
+        :return: an object that inherits from _sst_wrapper.distance_t interface
+        '''
+        raise NotImplementedError()
+
 
 class BaseSystem(ISystem):
     '''
     It is typical that state and control space are defined by the system itself.
     This is a helper interface to document necessary descriptor functions
     '''
-    @abstractmethod
+
     def get_state_bounds(self):
         '''
         Define state space bounds. Random planner is not going to sample points outside of this bounds
@@ -69,15 +77,14 @@ class BaseSystem(ISystem):
             and each tuple indicate bounds of the particular state space coordinate
         '''
 
-    @abstractmethod
     def get_control_bounds(self):
         '''
         Define control space bounds. Random planner is not going to sample control outside of this bounds
         :return: a list of tuples (min, max), where length of the list is equal to control_dimensions
             and each tuple indicate bounds of the particular control space coordinate
         '''
+        raise NotImplementedError()
 
-    @abstractmethod
     def is_circular_topology(self):
         '''
         Define a topology of the state space. Currently planners support planar and circular topology.
@@ -88,6 +95,7 @@ class BaseSystem(ISystem):
         :return: return a list of booleans, such that each boolean indicates whether a particular state space coordinate
             has circular topology (False for planar topology).
         '''
+        raise NotImplementedError()
 
     def get_state_dimensions(self):
         '''
@@ -102,3 +110,6 @@ class BaseSystem(ISystem):
         :return: integer == state_dimensions
         '''
         return len(self.get_control_dimensions())
+
+    def distance_computer(self):
+        return sparse_rrt._sst_module.euclidean_distance(np.array(self.is_circular_topology()))

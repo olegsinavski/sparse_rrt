@@ -14,15 +14,16 @@ from sparse_rrt.systems.acrobot import Acrobot
 from sparse_rrt.systems.car import Car
 from sparse_rrt.systems.pendulum import Pendulum
 from sparse_rrt.systems.point import Point
+from sparse_rrt.systems import standard_cpp_systems
 
 system_classes = {
-    'car': _sst_module.Car,
-    'cart_pole': _sst_module.CartPole,
-    'pendulum': _sst_module.Pendulum,
-    'point': _sst_module.Point,
-    'free_point': lambda: _sst_module.Point(number_of_obstacles=1),
-    'rally_car': _sst_module.RallyCar,
-    'two_link_acrobot': _sst_module.TwoLinkAcrobot,
+    'car': standard_cpp_systems.Car,
+    'cart_pole': standard_cpp_systems.CartPole,
+    'pendulum': standard_cpp_systems.Pendulum,
+    'point': standard_cpp_systems.Point,
+    'free_point': lambda: standard_cpp_systems.Point(number_of_obstacles=1),
+    'rally_car': standard_cpp_systems.RallyCar,
+    'two_link_acrobot': standard_cpp_systems.TwoLinkAcrobot,
     'py_free_point': Point,
     'py_car': Car,
     'py_pendulum': Pendulum,
@@ -74,10 +75,10 @@ python_configs = {
         planner='sst',
         start_state=np.array([0., 0., 0., 0]),
         goal_state=np.array([np.pi, 0., 0., 0.]),
-        goal_radius=0.2,
+        goal_radius=1.0,
         random_seed=0,
-        sst_delta_near=1.,
-        sst_delta_drain=0.5,
+        sst_delta_near=2.,
+        sst_delta_drain=1.,
         integration_step=0.02,
         min_time_steps=10,
         max_time_steps=50,
@@ -109,8 +110,8 @@ def find_config(name):
 def run_config(config):
     system = system_classes[config['system']]()
 
-    distance = _sst_module.euclidean_distance(np.array(system.is_circular_topology()))
-    distance = _sst_module.TwoLinkAcrobotDistance()
+    # distance = _sst_module.TwoLinkAcrobotDistance()
+    distance = system.distance_computer()
 
     if config['planner'] == 'sst':
         planner = SST(
@@ -203,4 +204,4 @@ def run_planning_experiment(
 
 if __name__ == '__main__':
 
-    run_config(find_config('sst_acrobot'))
+    run_config(find_config('py_sst_acrobot'))

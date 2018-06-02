@@ -2,6 +2,7 @@
 import numpy as np
 
 from sparse_rrt.systems.system_interface import BaseSystem
+from sparse_rrt import _sst_module
 
 
 class Acrobot(BaseSystem):
@@ -100,5 +101,5 @@ class Acrobot(BaseSystem):
     def get_control_bounds(self):
         return [(self.MIN_TORQUE, self.MAX_TORQUE)]
 
-    def is_circular_topology(self):
-        return [True, True, False, False]
+    def distance_computer(self):
+        return _sst_module.TwoLinkAcrobotDistance()
