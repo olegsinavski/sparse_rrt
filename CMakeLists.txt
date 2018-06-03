@@ -34,19 +34,6 @@ execute_process(
     OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
-# Find actual numpy in use (as opposed to system numpy)
-# execute_process(
-# COMMAND "python2.7" -c
-#         "from __future__ import print_function\ntry: import numpy; print(numpy.__version__, end='')\nexcept:pass\n"
-# OUTPUT_VARIABLE Numpy_VERSION)
-# set( REQUIRED_NUMPY_VERSION "1.11.2" )
-# if( NOT (${Numpy_VERSION} STREQUAL ${REQUIRED_NUMPY_VERSION}) )
-#    message( FATAL_ERROR "Bad numpy version ${Numpy_VERSION}. Please run 'sudo pip install numpy==${REQUIRED_NUMPY_VERSION}'" )
-#  endif()
-# execute_process(
-# COMMAND "python2.7" -c
-#         "from __future__ import print_function\ntry: import numpy; print(numpy.get_include(), end='')\nexcept:pass\n"
-#         OUTPUT_VARIABLE Numpy_INCLUDE_DIRS)
 
 include_directories(
         # ${Numpy_INCLUDE_DIRS}  # this should come before PYTHON includes because it also contains system numpy
@@ -66,8 +53,6 @@ set(SOURCE_FILES
         src/systems/point.cpp
         src/systems/rally_car.cpp
         src/systems/two_link_acrobot.cpp
-        src/utilities/condition_check.cpp
-        src/utilities/parameter_reader.cpp
         src/utilities/random.cpp
         src/utilities/timer.cpp
         src/image_creation/svg_image.cpp
@@ -76,18 +61,6 @@ set(SOURCE_FILES
 
 add_library(${PROJECT_NAME} STATIC
     ${SOURCE_FILES})
-
-file(GLOB files ${PROJECT_SOURCE_DIR}/tests/*.cpp)
-
-#foreach(f ${files})
-#GET_FILENAME_COMPONENT(fname ${f} NAME_WE )
-#add_executable(${fname} ${f} )
-#target_link_libraries(${fname} ${PROJECT_NAME} ${PYTHON_LIBRARIES})
-#endforeach()
-
-# add_library(sst_module SHARED
-#     ${PROJECT_SOURCE_DIR}/src/motion_planners/sst_wrapper.cpp)
-# target_link_libraries(sst_module ${PYTHON_LIBRARIES} ${PROJECT_NAME})
 
 add_library(sst_module SHARED
     ${PROJECT_SOURCE_DIR}/src/python_wrapper.cpp)
