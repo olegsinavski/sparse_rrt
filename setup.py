@@ -13,7 +13,7 @@ os.environ['OPT'] = " ".join(
 
 setup(
     name='sparse_rrt',
-    version='0.0.1',
+    version='0.0.2',
     description='Sparse stable trees planner',
     long_description=long_description,
     author='Oleg Sinyavskiy',
@@ -22,6 +22,9 @@ setup(
     download_url='',
     license='BSD License 2.0',
     install_requires=['numpy>=1.13.3'],
+    # package_data={'': ['README.md']},
+    # data_files=[('', ['README.md'])],
+    include_package_data=True,
     extras_require={
         'tests': ['pytest>=2.7.2',
                   'pytest-pep8>=1.0.6',
