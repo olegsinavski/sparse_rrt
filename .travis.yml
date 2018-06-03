@@ -6,3 +6,5 @@ script:
      - cd build
      - cmake ..
      - make
+     - py.test --pep8 -m pep8 -n0
+     - py.test
