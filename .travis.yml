@@ -6,6 +6,7 @@ script:
      - cd build
      - cmake ..
      - make
+     - pip install -e .
      - python -c "import sparse_rrt"
      - py.test --pep8 -m pep8 -n0
      - py.test
