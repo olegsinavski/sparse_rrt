@@ -45,16 +45,17 @@ public:
         std::function<double(const double*, const double*, unsigned int)> distance_function,
         unsigned int random_seed
     )
-        : goal_radius(in_radius)
-        , state_dimension(a_state_bounds.size())
-        , state_bounds(a_state_bounds)
+        : state_dimension(a_state_bounds.size())
         , control_dimension(a_control_bounds.size())
-        , control_bounds(a_control_bounds)
-        , distance(distance_function)
+        , root(nullptr)
         , start_state(new double[this->state_dimension])
         , goal_state(new double[this->state_dimension])
-        , number_of_nodes(0)
+        , goal_radius(in_radius)
+        , state_bounds(a_state_bounds)
+        , control_bounds(a_control_bounds)
+        , distance(distance_function)
         , random_generator(random_seed)
+        , number_of_nodes(0)
     {
         std::copy(in_start, in_start + this->state_dimension, start_state);
 	    std::copy(in_goal, in_goal + this->state_dimension, goal_state);
@@ -80,9 +81,6 @@ public:
 	 */
 	virtual void step(system_interface* system, int min_time_steps, int max_time_steps, double integration_step) = 0;
 
-	/** @brief The number of nodes in the tree. */
-	unsigned number_of_nodes;
-
 	tree_node_t* get_root() { return this->root; }
 
 	/**
@@ -93,7 +91,7 @@ public:
 	 */
 	void random_state(double* state)
 	{
-		for (int i = 0; i < this->state_bounds.size(); ++i) {
+		for (unsigned int i =0; i < this->state_bounds.size(); ++i) {
             state[i] = this->random_generator.uniform_random(this->state_bounds[i].first, this->state_bounds[i].second);
         }
 	}
@@ -106,7 +104,7 @@ public:
 	 */
 	void random_control(double* control)
 	{
-        for (int i = 0; i < this->control_bounds.size(); ++i) {
+        for (unsigned int i =0; i < this->control_bounds.size(); ++i) {
             control[i] = this->random_generator.uniform_random(this->control_bounds[i].first, this->control_bounds[i].second);
         }
 	}
@@ -116,6 +114,8 @@ public:
 
     unsigned int get_state_dimension() const {return this->state_dimension;};
     unsigned int get_control_dimension() const {return this->control_dimension;};
+
+    unsigned int get_number_of_nodes() const {return this->number_of_nodes;};
 
 protected:
 
@@ -148,6 +148,9 @@ protected:
     std::function<double(const double*, const double*, unsigned int)> distance;
 
 	RandomGenerator random_generator;
+
+	/** @brief The number of nodes in the tree. */
+	unsigned number_of_nodes;
 };
 
 

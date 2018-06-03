@@ -26,8 +26,8 @@ class tree_edge_t
 {
 public:
     tree_edge_t(const double* a_control, unsigned int control_dimension, double a_duration)
-        : control(new double[control_dimension])
-        , duration(a_duration)
+        : duration(a_duration)
+        , control(new double[control_dimension])
     {
         if (a_control) {
             std::copy(a_control, a_control + control_dimension, this->control);
@@ -35,8 +35,8 @@ public:
     }
 
     tree_edge_t(tree_edge_t&& other)
-        : control(other.control)
-        , duration(other.duration)
+        : duration(other.duration)
+        , control(other.control)
     {
         other.control = nullptr;
         other.duration = -1;
@@ -163,10 +163,6 @@ public:
     }
 
 private:
-     /**
-     * @brief Children vertices
-     */
-    std::list<tree_node_t*> children;
     /**
     * @brief Parent edge
     */
@@ -176,6 +172,10 @@ private:
      * @brief The path cost to this node.
      */
     double cost;
+     /**
+     * @brief Children vertices
+     */
+    std::list<tree_node_t*> children;
 };
 
 #endif

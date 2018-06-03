@@ -1,9 +1,15 @@
 from setuptools import setup, Extension, find_packages
+import os
+from distutils.sysconfig import get_config_vars
 
 
 with open("README.md", "r") as f:
     long_description = f.read()
 
+(opt,) = get_config_vars('OPT')
+os.environ['OPT'] = " ".join(
+    flag for flag in opt.split() if flag != '-Wstrict-prototypes'
+)
 
 setup(
     name='sparse_rrt',
@@ -57,6 +63,7 @@ setup(
             'src/utilities/timer.cpp',
             'src/image_creation/svg_image.cpp',
             'src/image_creation/planner_visualization.cpp',
-            'src/systems/distance_functions.cpp'])
+            'src/systems/distance_functions.cpp',
+            'src/python_wrapper.cpp'])
     ]
 )

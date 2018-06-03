@@ -1,15 +1,7 @@
 language: python
 
-
 script:
-     # build cpp with bindings
-     - mkdir -p build
-     - cd build
-     - cmake ..
-     - make
-     - cd ..
      # install the package and test
      - pip install -e .
-     - python -c "import sparse_rrt"
      - py.test --pep8 -m pep8 -n0
      - py.test
