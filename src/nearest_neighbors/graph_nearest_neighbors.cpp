@@ -10,6 +10,10 @@
  * 
  */
 
+#include <assert.h>
+#include <limits>
+#include <cmath>
+
 #include "nearest_neighbors/graph_nearest_neighbors.hpp"
 #include "motion_planners/tree_node.hpp"
 
@@ -248,7 +252,7 @@ int graph_nearest_neighbors_t::find_k_close( const double* state, proximity_node
     if( nodes.size() == 0 )
         return 0;
 
-    boost::unordered_map<proximity_node_t*,bool> added_nodes;
+    std::unordered_map<proximity_node_t*,bool> added_nodes;
     
 	if(k > MAX_KK)
 	{
@@ -355,7 +359,7 @@ std::vector<proximity_node_t*> graph_nearest_neighbors_t::find_delta_close_and_c
     if( nodes.size() == 0 )
         return close_nodes;
 
-    boost::unordered_map<proximity_node_t*,bool> added_nodes;
+    std::unordered_map<proximity_node_t*,bool> added_nodes;
 
     int nr_samples = sampling_function();
     double min_distance = std::numeric_limits<double>::max();;
@@ -420,7 +424,7 @@ int graph_nearest_neighbors_t::find_delta_close( const double* state, proximity_
     if( nodes.size() == 0 )
         return 0;
 
-    boost::unordered_map<proximity_node_t*,bool> added_nodes;
+    std::unordered_map<proximity_node_t*,bool> added_nodes;
     int nr_samples = sampling_function();
     double min_distance = std::numeric_limits<double>::max();;
     int min_index = -1;
@@ -482,7 +486,7 @@ int graph_nearest_neighbors_t::find_delta_close( const double* state, proximity_
     return nr_points;
 }
 
-bool graph_nearest_neighbors_t::does_node_exist(boost::unordered_map<proximity_node_t*,bool> const& added_nodes, proximity_node_t* query_node)
+bool graph_nearest_neighbors_t::does_node_exist(std::unordered_map<proximity_node_t*,bool> const& added_nodes, proximity_node_t* query_node)
 {
     return added_nodes.find(query_node)!=added_nodes.end();
 }

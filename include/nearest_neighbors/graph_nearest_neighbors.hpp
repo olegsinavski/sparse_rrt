@@ -13,7 +13,9 @@
 #ifndef SPARSE_GRAPH_NEIGHBORS_HPP
 #define SPARSE_GRAPH_NEIGHBORS_HPP
 
-#include <boost/unordered_map.hpp>
+#include <vector>
+#include <unordered_map>
+#include <functional>
 
 class state_point_t;
 
@@ -215,7 +217,7 @@ class graph_nearest_neighbors_t
          * @param query_node The node to search for.
          * @return If query_node exists in node_list.
          */
-        bool does_node_exist(boost::unordered_map<proximity_node_t*,bool> const& added_nodes, proximity_node_t* query_node);
+        bool does_node_exist(std::unordered_map<proximity_node_t*,bool> const& added_nodes, proximity_node_t* query_node);
         
         /**
          * Determine the number of nodes to sample for initial populations in queries.
