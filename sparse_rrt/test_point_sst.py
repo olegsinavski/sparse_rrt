@@ -4,6 +4,7 @@ from sparse_rrt.systems import standard_cpp_systems
 import numpy as np
 import time
 
+from sparse_rrt.systems.acrobot import Acrobot, AcrobotDistance
 from sparse_rrt.systems.point import Point
 
 
@@ -164,13 +165,41 @@ def test_py_system_sst():
         im = planner.visualize_tree(system)
 
 
+def test_py_system_sst_custom_distance():
+    '''
+    Check that distance overriding in python works
+    '''
+
+    system = Acrobot()
+
+    planner = _sst_module.RRTWrapper(
+        state_bounds=system.get_state_bounds(),
+        control_bounds=system.get_control_bounds(),
+        # use custom distance computer
+        distance=AcrobotDistance(),
+        start_state=np.array([0., 0., 0., 0.]),
+        goal_state=np.array([np.pi, 0., 0., 0.]),
+        goal_radius=2.,
+        random_seed=0
+    )
+
+    min_time_steps = 10
+    max_time_steps = 50
+    integration_step = 0.02
+
+    for iteration in range(100):
+        planner.step(system, min_time_steps, max_time_steps, integration_step)
+        im = planner.visualize_tree(system)
+
+
 if __name__ == '__main__':
     st = time.time()
     test_point_sst()
-    print(time.time() - st, 21.4076721668)
+    # print(time.time() - st, 21.4076721668)
 
     test_car_pose_sst()
     test_car_pose_rrt()
     test_create_multiple_times()
     test_py_system_sst()
+    test_py_system_sst_custom_distance()
     print('Passed all tests!')

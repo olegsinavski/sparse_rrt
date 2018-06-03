@@ -1,5 +1,4 @@
 
-import _sst_module
 import numpy as np
 import time
 import cv2
@@ -200,4 +199,4 @@ def run_planning_experiment(
 
 if __name__ == '__main__':
 
-    run_config(find_config('py_sst_point'))
+    run_config(find_config('py_sst_acrobot'))

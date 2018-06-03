@@ -68,6 +68,31 @@ double global_dist(const double* point1, const double* point2, unsigned int stat
 
 #include <assert.h>
 
+
+class py_distance_interface : public distance_t
+{
+public:
+
+    double distance(const double* point1, const double* point2, unsigned int state_dimension) const override
+    {
+        py::safe_array<double> point1_array{{state_dimension}};
+        std::copy(point1, point1 + state_dimension, point1_array.mutable_data(0));
+
+        py::safe_array<double> point2_array{{state_dimension}};
+        std::copy(point2, point2 + state_dimension, point2_array.mutable_data(0));
+
+        py::gil_scoped_acquire gil;
+        py::function overload = py::get_overload(static_cast<const distance_t *>(this), "distance");
+        if (!overload) {
+            pybind11::pybind11_fail("Tried to call pure virtual function distance");
+            return false;
+        }
+
+        auto result = overload(point1_array, point2_array);
+        return py::detail::cast_safe<double>(std::move(result));;
+    }
+};
+
 euclidean_distance create_euclidean_distance(
     const py::safe_array<bool> &is_circular_topology_array)
 {
@@ -369,7 +394,9 @@ PYBIND11_MODULE(_sst_module, m) {
 
    //m.def("get_data", &get_data, py::arg("in_data").noconvert());
 
-   py::class_<distance_t> distance_interface_var(m, "IDistance");
+   py::class_<distance_t, py_distance_interface> distance_interface_var(m, "IDistance");
+   distance_interface_var
+        .def(py::init<>());
    py::class_<euclidean_distance, distance_t>(m, "EuclideanDistance");
    py::class_<two_link_acrobot_distance, distance_t>(m, "TwoLinkAcrobotDistance").def(py::init<>());
 

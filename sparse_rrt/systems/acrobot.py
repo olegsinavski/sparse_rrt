@@ -5,6 +5,17 @@ from sparse_rrt.systems.system_interface import BaseSystem
 from sparse_rrt import _sst_module
 
 
+class AcrobotDistance(_sst_module.IDistance):
+
+    def distance(self, point1, point2):
+        LENGTH = 20.
+        x = (LENGTH) * np.cos(point1[0] - np.pi / 2)+(LENGTH) * np.cos(point1[0] + point1[1] - np.pi / 2);
+        y = (LENGTH) * np.sin(point1[0] - np.pi / 2)+(LENGTH) * np.sin(point1[0] + point1[1] - np.pi / 2);
+        x2 = (LENGTH) * np.cos(point2[0] - np.pi / 2)+(LENGTH) * np.cos(point2[0] + point2[1] - np.pi / 2);
+        y2 = (LENGTH) * np.sin(point2[0] - np.pi / 2)+(LENGTH) * np.sin(point2[0] + point2[1] - np.pi / 2);
+        return np.sqrt((x-x2)**2+(y-y2)**2)
+
+
 class Acrobot(BaseSystem):
     '''
     Single joint pendulum
