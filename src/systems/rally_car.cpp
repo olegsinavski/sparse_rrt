@@ -13,6 +13,7 @@
 
 #include "systems/rally_car.hpp"
 #include "utilities/random.hpp"
+#include "image_creation/svg_image.hpp"
 
 
 #define _USE_MATH_DEFINES
@@ -76,7 +77,10 @@
 //}
 
 
-bool rally_car_t::propagate( double* start_state, double* control, int num_steps, double* result_state, double integration_step)
+bool rally_car_t::propagate(
+    const double* start_state, unsigned int state_dimension,
+    const double* control, unsigned int control_dimension,
+    int num_steps, double* result_state, double integration_step)
 {
         temp_state[0] = start_state[0]; 
         temp_state[1] = start_state[1];
@@ -177,14 +181,14 @@ bool rally_car_t::valid_state()
         return !obstacle_collision;
 }
 
-svg::Point rally_car_t::visualize_point(const double* state, svg::Dimensions dims)
+std::tuple<double, double> rally_car_t::visualize_point(const double* state, unsigned int state_dimension) const
 {
-        double x = (state[0]-MIN_X)/(MAX_X-MIN_X) * dims.width; 
-        double y = (state[1]-MIN_Y)/(MAX_Y-MIN_Y) * dims.height; 
-        return svg::Point(x,y);
+        double x = (state[0]-MIN_X)/(MAX_X-MIN_X);
+        double y = (state[1]-MIN_Y)/(MAX_Y-MIN_Y);
+        return std::make_tuple(x, y);
 }
 
-void rally_car_t::update_derivative(double* control)
+void rally_car_t::update_derivative(const double* control)
 {
         double _x = temp_state[0];
         double _y = temp_state[1];
@@ -249,28 +253,35 @@ void rally_car_t::update_derivative(double* control)
         double fRx = mu_Rx * fRz;
         double fRy = mu_Ry * fRz;;
 
-
         deriv[STATE_VX] = (fFx*cos(_theta+_sta)-fFy*sin(_theta+_sta)+fRx*cos(_theta)-fRy*sin(_theta) )/M;
         deriv[STATE_VY] = (fFx*sin(_theta+_sta)+fFy*cos(_theta+_sta)+fRx*sin(_theta)+fRy*cos(_theta) )/M;
         deriv[STATE_THETADOT] = ((fFy*cos(_sta)+fFx*sin(_sta))*LF - fRy*LR)/IZ;
         deriv[STATE_WF] = (_tf-fFx*R)/IF;
         deriv[STATE_WR] = (_tr-fRx*R)/IR;
 }
-void rally_car_t::visualize_obstacles(svg::Document& doc ,svg::Dimensions dims)
+
+std::string rally_car_t::visualize_obstacles(int image_width, int image_height) const
 {
-        double temp[2];
-        for(unsigned i=0;i<obstacles.size();i++)
-        {
-                temp[0] = obstacles[i].low_x;
-                temp[1] = obstacles[i].high_y;
-                doc<<svg::Rectangle(visualize_point(temp,dims), 
-                                        (obstacles[i].high_x-obstacles[i].low_x)/(MAX_X-MIN_X) * dims.width,
-                                        (obstacles[i].high_y-obstacles[i].low_y)/(MAX_Y-MIN_Y) * dims.height,
-                                        svg::Color::Red);
-        }
+    svg::Dimensions dims(image_width, image_height);
+    svg::DocumentBody doc(svg::Layout(dims, svg::Layout::BottomLeft));
+
+    double temp[2];
+    for(unsigned i=0;i<obstacles.size();i++)
+    {
+            temp[0] = obstacles[i].low_x;
+            temp[1] = obstacles[i].high_y;
+            double x, y;
+            std::tie(x, y) = this->visualize_point(temp, 8);
+            doc<<svg::Rectangle(svg::Point(x*dims.width, y*dims.height),
+                                (obstacles[i].high_x-obstacles[i].low_x)/(MAX_X-MIN_X) * dims.width,
+                                (obstacles[i].high_y-obstacles[i].low_y)/(MAX_Y-MIN_Y) * dims.height,
+                                svg::Color::Red);
+    }
+
+    return doc.toString();
 }
 
-std::vector<std::pair<double, double> > rally_car_t::get_state_bounds() {
+std::vector<std::pair<double, double> > rally_car_t::get_state_bounds() const {
         return {
                 {MIN_X,MAX_X},
                 {MIN_Y,MAX_Y},
@@ -283,7 +294,7 @@ std::vector<std::pair<double, double> > rally_car_t::get_state_bounds() {
         };
 }
 
-std::vector<std::pair<double, double> > rally_car_t::get_control_bounds() {
+std::vector<std::pair<double, double> > rally_car_t::get_control_bounds() const {
         return {
                 {-1.0472,1.0472},
                 {-700,0},
@@ -291,7 +302,7 @@ std::vector<std::pair<double, double> > rally_car_t::get_control_bounds() {
         };
 }
 
-std::vector<bool> rally_car_t::is_circular_topology() {
+std::vector<bool> rally_car_t::is_circular_topology() const {
     return {
             false,
             false,

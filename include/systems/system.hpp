@@ -12,9 +12,64 @@
 
 #ifndef SPARSE_SYSTEM_HPP
 #define SPARSE_SYSTEM_HPP
+#include <tuple>
+#include <vector>
 
-#include "image_creation/svg_image.hpp"
-#include "utilities/parameter_reader.hpp"
+#include "systems/distance_functions.h"
+
+
+struct system_interface {
+    /**
+	 * @brief Performs a local propagation using simple numerical integration.
+	 * @details Performs a local propagation using simple numerical integration.
+	 *
+	 * @param start_state The state to start propagating from.
+	 * @param control The control to apply for this propagation.
+	 * @param min_step The smallest number of simulation steps to execute.
+	 * @param max_step The largest number of simulation steps to execute.
+	 * @param result_state The result of the propagation.
+	 * @param duration The amount of simulation time used.
+	 * @return True if this propagation was valid, false if not.
+	 */
+    virtual bool propagate(
+        const double* start_state, unsigned int state_dimension,
+        const double* control, unsigned int control_dimension,
+        int num_steps, double* result_state, double integration_step) = 0;
+    /**
+     * @brief Creates a point in image space corresponding to a given state.
+     * @details Creates a point in image space corresponding to a given state.
+     *
+     * @param state The state in the system's space.
+     * @param dims The size of the destination image.
+     *
+     * @return A point in image space.
+     */
+    virtual std::tuple<double, double> visualize_point(const double* state, unsigned int state_dimension) const = 0;
+
+    /**
+     * @brief Visualize the obstacles for this system.
+     * @details Visualize the obstacles for this system.
+     *
+     * @param doc The image storage.
+     * @param dims The image size.
+     */
+    virtual std::string visualize_obstacles(int image_width, int image_height) const
+    {
+    	return "";
+    }
+
+     /**
+     * @brief Compute a distance between two points in the state space
+     * @details Compute a distance between two points in the state space
+     *
+     * @param state0 the first state point
+     * @param state1 the second state point
+     *
+     * @return A distance value
+     */
+    //virtual double distance(const double* state0, const double* state1, unsigned int state_dimension) const = 0;
+};
+
 
 /**
  * @brief A base class for plannable systems.
@@ -23,7 +78,7 @@
  * and controls, and visualizing points.
  * 
  */
-class system_t
+class system_t: public system_interface
 {
 public: 
 	system_t(){}
@@ -38,52 +93,19 @@ public:
 		return control_dimension;
 	}
 
-	/**
-	 * @brief Performs a local propagation using simple numerical integration.
-	 * @details Performs a local propagation using simple numerical integration.
-	 * 
-	 * @param start_state The state to start propagating from.
-	 * @param control The control to apply for this propagation.
-	 * @param min_step The smallest number of simulation steps to execute.
-	 * @param max_step The largest number of simulation steps to execute.
-	 * @param result_state The result of the propagation.
-	 * @param duration The amount of simulation time used.
-	 * @return True if this propagation was valid, false if not.
-	 */
-    virtual bool propagate( double* start_state, double* control, int num_steps, double* result_state, double integration_step) = 0;
-
-    /**
-     * @brief Creates a point in image space corresponding to a given state.
-     * @details Creates a point in image space corresponding to a given state.
-     * 
-     * @param state The state in the system's space.
-     * @param dims The size of the destination image.
-     * 
-     * @return A point in image space.
-     */
-    virtual svg::Point visualize_point(const double* state,svg::Dimensions dims) = 0;
-
-    /**
-     * @brief Visualize the obstacles for this system.
-     * @details Visualize the obstacles for this system.
-     * 
-     * @param doc The image storage.
-     * @param dims The image size.
-     */
-    virtual void visualize_obstacles(svg::Document& doc ,svg::Dimensions dims)
-    {
-    	return;
-    }
-
-    virtual std::vector<std::pair<double, double>> get_state_bounds() = 0;
-    virtual std::vector<std::pair<double, double>> get_control_bounds() = 0;
+    virtual std::vector<std::pair<double, double>> get_state_bounds() const = 0;
+    virtual std::vector<std::pair<double, double>> get_control_bounds() const = 0;
 
     /**
      * @brief Array of flags indicating that a degree of freedom has circular topology
      * @details Array of flags indicating that a degree of freedom has circular topology
      *
      */
-	virtual std::vector<bool> is_circular_topology() = 0;
+	virtual std::vector<bool> is_circular_topology() const = 0;
+
+//	double distance(const double* state0, const double* state1, unsigned int state_dimension) const override {
+//	    return euclidian_distance(std::move(this->is_circular_topology()))(state0, state1);
+//	}
 
 protected:
 

@@ -16,6 +16,25 @@
 #include "systems/system.hpp"
 #include "motion_planners/planner.hpp"
 
+
+class rrt_node_t : public tree_node_t
+{
+public:
+	rrt_node_t(double* point, unsigned int state_dimension, rrt_node_t* a_parent, tree_edge_t&& a_parent_edge, double a_cost);
+
+	~rrt_node_t();
+
+    rrt_node_t* get_parent() const {
+        return this->parent;
+    }
+
+private:
+    /**
+     * @brief Parent node.
+     */
+    rrt_node_t* parent;
+};
+
 /**
  * @brief The motion planning algorithm RRT (Rapidly-exploring Random Tree)
  * @details The motion planning algorithm RRT (Rapidly-exploring Random Tree)
@@ -26,20 +45,33 @@ public:
 	/**
 	 * @copydoc planner_t::planner_t(system_t*)
 	 */
-	rrt_t(const std::vector<std::pair<double, double> >& a_state_bounds,
+	rrt_t(const double* in_start, const double* in_goal,
+	      double in_radius,
+	      const std::vector<std::pair<double, double> >& a_state_bounds,
 		  const std::vector<std::pair<double, double> >& a_control_bounds,
-		  std::function<double(const double*, const double*)> distance_function,
+		  std::function<double(const double*, const double*, unsigned int)> a_distance_function,
           unsigned int random_seed)
-			: planner_t(a_state_bounds, a_control_bounds, distance_function, random_seed)
+			: planner_t(in_start, in_goal, in_radius,
+			            a_state_bounds, a_control_bounds, a_distance_function, random_seed)
 	{
+        //initialize the metric
+        unsigned int state_dimensions = this->get_state_dimension();
+        metric.set_distance(
+            [state_dimensions, a_distance_function](const double* s0, const double* s1) {
+                return a_distance_function(s0, s1, state_dimensions);
+            }
+        );
 
+        this->root = new rrt_node_t(start_state, this->state_dimension, NULL, tree_edge_t(NULL, 0, -1.), 0.);
+        number_of_nodes++;
+
+        //add root to nearest neighbor structure
+        metric.add_node(root);
 	}
-	virtual ~rrt_t(){}
-
-	/**
-	 * @copydoc planner_t::setup_planning()
-	 */
-	virtual void setup_planning();
+	virtual ~rrt_t(){
+        delete this->root;
+        this->root = nullptr;
+	}
 
 	/**
 	 * @copydoc planner_t::get_solution(std::vector<std::pair<double*,double> >&)
@@ -49,56 +81,25 @@ public:
 	/**
 	 * @copydoc planner_t::step()
 	 */
-	virtual void step(system_t* system, int min_time_steps, int max_time_steps, double integration_step);
+	virtual void step(system_interface* system, int min_time_steps, int max_time_steps, double integration_step);
 
 protected:
 
     /**
      * @brief The nearest neighbor data structure.
      */
-    graph_nearest_neighbors_t* metric;
-	
-	/**
-	 * @brief A randomly sampled state.
-	 */
-	double* sample_state;
-
-	/**
-	 * @brief A randomly sampled control.
-	 */
-	double* sample_control;
-
-
-	/**
-	 * @brief A resulting duration of a propagation step.
-	 */
-	double duration;
+    graph_nearest_neighbors_t metric;
 
 	/**
 	 * @brief The result of a query in the nearest neighbor structure.
 	 */
-	tree_node_t* nearest;
+	rrt_node_t* nearest;
 
 	/**
 	 * @brief Find the nearest node to the randomly sampled state.
 	 * @details Find the nearest node to the randomly sampled state.
 	 */
-	void nearest_vertex();
-
-	/**
-	 * @brief If propagation was successful, add the new state to the tree.
-	 * @details If propagation was successful, add the new state to the tree.
-	 */
-	void add_to_tree();
-
-	/**
-	 * @brief Add a state into the nearest neighbor structure for retrieval in later iterations.
-	 * @details Add a state into the nearest neighbor structure for retrieval in later iterations.
-	 * 
-	 * @param node The node to add.
-	 */
-	void add_point_to_metric(tree_node_t* node);
-
+	rrt_node_t* nearest_vertex(const double* state) const;
 
 };
 

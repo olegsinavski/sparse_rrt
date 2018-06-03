@@ -29,7 +29,10 @@ public:
 	/**
 	 * @copydoc system_t::propagate(double*, double*, int, int, double*, double& )
 	 */
-	virtual bool propagate( double* start_state, double* control, int num_steps, double* result_state, double integration_step);
+	virtual bool propagate(
+		const double* start_state, unsigned int state_dimension,
+        const double* control, unsigned int control_dimension,
+	    int num_steps, double* result_state, double integration_step);
 
 	/**
 	 * @copydoc system_t::enforce_bounds()
@@ -44,11 +47,11 @@ public:
 	/**
 	 * @copydoc system_t::visualize_point(double*, svg::Dimensions)
 	 */
-	svg::Point visualize_point(const double* state, svg::Dimensions dims);
+	std::tuple<double, double> visualize_point(const double* state, unsigned int state_dimension) const override;
 
-	std::vector<std::pair<double, double>> get_state_bounds() override;
-	std::vector<std::pair<double, double>> get_control_bounds() override;
-	std::vector<bool> is_circular_topology() override;
+	std::vector<std::pair<double, double>> get_state_bounds() const override;
+	std::vector<std::pair<double, double>> get_control_bounds() const override;
+	std::vector<bool> is_circular_topology() const override;
 };
 
 

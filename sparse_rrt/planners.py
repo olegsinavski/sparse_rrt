@@ -1,48 +1,36 @@
 import _sst_module
-import cv2
-import tempfile
-import os
-import shutil
 
-import PySide.QtSvg
-import PySide.QtGui
-
-import numpy as np
+from sparse_rrt.visualization import render_svg, svg_header, svg_footer
 
 
-def render_svg(svg_filepath):
-    '''
-    https://stackoverflow.com/questions/6589358/convert-svg-to-png-in-python/23093425#23093425
-    '''
-    r = PySide.QtSvg.QSvgRenderer(svg_filepath)
-    image = PySide.QtGui.QImage(r.defaultSize().width(), r.defaultSize().height(), PySide.QtGui.QImage.Format_ARGB32)
+def visualize_wrapper(parent_class):
+    class VisualizeWrapper(parent_class):
+        def visualize_tree(self, system, image_width=500, image_height=500):
+            body_string = parent_class.visualize_tree(
+                self,
+                system,
+                image_width=image_width,
+                image_height=image_height
+            )
+            body_string += system.visualize_obstacles(image_width, image_height)
+            return render_svg(svg_header(width=image_width, height=image_height) + body_string + svg_footer())
 
-    image.fill(PySide.QtGui.QColor(255, 255, 255, 255))
+        def visualize_nodes(self, system, image_width=500, image_height=500):
+            body_string = parent_class.visualize_nodes(
+                self,
+                system,
+                image_width=image_width,
+                image_height=image_height
+            )
+            body_string += system.visualize_obstacles(image_width, image_height)
+            return render_svg(svg_header(width=image_width, height=image_height) + body_string + svg_footer())
 
-    r.render(PySide.QtGui.QPainter(image))
-    width = image.width()
-    height = image.height()
-
-    ptr = image.bits()
-    return np.array(ptr).reshape(height, width, 4)
-
-
-def visualize_to_numpy(generator):
-    d = tempfile.mkdtemp()
-    name = os.path.join(d, 'tmp.svg')
-    generator(name)
-    assert(os.path.exists(name))
-    im = render_svg(name)
-    assert(im is not None)
-    shutil.rmtree(d)
-    return im
+    return VisualizeWrapper
 
 
-class SST(_sst_module.SSTWrapper):
-    def visualize_tree(self, system):
-        return visualize_to_numpy(lambda name: _sst_module.SSTWrapper.visualize_tree(self, name, system))
+class SST(visualize_wrapper(_sst_module.SSTWrapper)):
+    pass
 
 
-class RRT(_sst_module.RRTWrapper):
-    def visualize_tree(self, system):
-        return visualize_to_numpy(lambda name: _sst_module.RRTWrapper.visualize_tree(self, name, system))
+class RRT(visualize_wrapper(_sst_module.RRTWrapper)):
+    pass

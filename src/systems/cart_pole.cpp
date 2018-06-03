@@ -41,7 +41,10 @@
 #define MAX_W 2
 
 
-bool cart_pole_t::propagate( double* start_state, double* control, int num_steps, double* result_state, double integration_step)
+bool cart_pole_t::propagate(
+    const double* start_state, unsigned int state_dimension,
+    const double* control, unsigned int control_dimension,
+    int num_steps, double* result_state, double integration_step)
 {
         temp_state[0] = start_state[0]; 
         temp_state[1] = start_state[1];
@@ -94,18 +97,17 @@ bool cart_pole_t::valid_state()
     return true;
 }
 
-svg::Point cart_pole_t::visualize_point(const double* state, svg::Dimensions dims)
+std::tuple<double, double> cart_pole_t::visualize_point(const double* state, unsigned int state_dimension) const
 {
-        double x = state[STATE_X] + (L / 2.0) * sin(state[STATE_THETA]);
-        double y = -(L / 2.0) * cos(state[STATE_THETA]);
+    double x = state[STATE_X] + (L / 2.0) * sin(state[STATE_THETA]);
+    double y = -(L / 2.0) * cos(state[STATE_THETA]);
 
-        x = (x-MIN_X)/(MAX_X-MIN_X) * dims.width; 
-        // y = (y+L)/(2*L) * dims.height; 
-        y = (y-MIN_X)/(MAX_X-MIN_X) * dims.height; 
-        return svg::Point(x,y);
+    x = (x-MIN_X)/(MAX_X-MIN_X);
+    y = (y-MIN_X)/(MAX_X-MIN_X);
+    return std::make_tuple(x, y);
 }
 
-void cart_pole_t::update_derivative(double* control)
+void cart_pole_t::update_derivative(const double* control)
 {
     double _v = temp_state[STATE_V];
     double _w = temp_state[STATE_W];
@@ -121,7 +123,7 @@ void cart_pole_t::update_derivative(double* control)
 }
 
 
-std::vector<std::pair<double, double> > cart_pole_t::get_state_bounds() {
+std::vector<std::pair<double, double> > cart_pole_t::get_state_bounds() const {
     return {
             {MIN_X,MAX_X},
             {MIN_V,MAX_V},
@@ -131,14 +133,14 @@ std::vector<std::pair<double, double> > cart_pole_t::get_state_bounds() {
 }
 
 
-std::vector<std::pair<double, double> > cart_pole_t::get_control_bounds() {
+std::vector<std::pair<double, double> > cart_pole_t::get_control_bounds() const {
     return {
             {-300,300},
     };
 }
 
 
-std::vector<bool> cart_pole_t::is_circular_topology() {
+std::vector<bool> cart_pole_t::is_circular_topology() const {
     return {
             false,
             false,

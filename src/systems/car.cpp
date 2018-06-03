@@ -19,7 +19,10 @@
 #include <cmath>
 
 
-bool car_t::propagate( double* start_state, double* control, int num_steps, double* result_state, double integration_step)
+bool car_t::propagate(
+    const double* start_state, unsigned int state_dimension,
+    const double* control, unsigned int control_dimension,
+    int num_steps, double* result_state, double integration_step)
 {
 	temp_state[0] = start_state[0]; temp_state[1] = start_state[1];temp_state[2] = start_state[2];
 
@@ -68,14 +71,14 @@ bool car_t::valid_state()
 			(temp_state[1]!=10);
 }
 
-svg::Point car_t::visualize_point(const double* state, svg::Dimensions dims)
+std::tuple<double, double> car_t::visualize_point(const double* state, unsigned int state_dimension) const
 {
-	double x = (state[0]+10)/(20) * dims.width; 
-	double y = (state[1]+10)/(20) * dims.height; 
-	return svg::Point(x,y);
+	double x = (state[0]+10)/(20);
+	double y = (state[1]+10)/(20);
+	return std::make_tuple(x, y);
 }
 
-std::vector<std::pair<double, double> > car_t::get_state_bounds() {
+std::vector<std::pair<double, double> > car_t::get_state_bounds() const {
 	return {
         {-10,10},
         {-10,10},
@@ -84,14 +87,14 @@ std::vector<std::pair<double, double> > car_t::get_state_bounds() {
 }
 
 
-std::vector<std::pair<double, double> > car_t::get_control_bounds() {
+std::vector<std::pair<double, double> > car_t::get_control_bounds() const {
     return {
             {0, 1},
             {-.5,.5},
     };
 }
 
-std::vector<bool> car_t::is_circular_topology() {
+std::vector<bool> car_t::is_circular_topology() const {
 	return {
 			false,
 			false,

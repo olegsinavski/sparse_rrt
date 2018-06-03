@@ -35,7 +35,7 @@ public:
 	}
 	/**
 	 * @brief Create a rectangle with center position and dimensions.
-	 * 
+	 *
 	 * @param pos_x Center X coordinate.
 	 * @param pos_y Center Y coordinate.
 	 * @param dim_x X Dimension
@@ -62,23 +62,33 @@ public:
 class point_t : public system_t
 {
 public:
-	point_t()
+	point_t(int number_of_obstacles=5)
 	{
 		state_dimension = 2;
 		control_dimension = 2;
 		temp_state = new double[state_dimension];
-		obstacles.push_back(Rectangle_t(   1,  -1.5,    5,  9.5));
-		obstacles.push_back(Rectangle_t(  -8,  4.25,   -1, 5.75));
-		obstacles.push_back(Rectangle_t(   5,   3.5,    9,  4.5));
-		obstacles.push_back(Rectangle_t(-8.5,  -7.5, -3.5, -2.5));
-		obstacles.push_back(Rectangle_t(   5,  -8.5,    9, -4.5));
+
+		std::vector<Rectangle_t> available_obstacles;
+		available_obstacles.push_back(Rectangle_t(   1,  -1.5,    5,  9.5));
+		available_obstacles.push_back(Rectangle_t(  -8,  4.25,   -1, 5.75));
+		available_obstacles.push_back(Rectangle_t(   5,   3.5,    9,  4.5));
+		available_obstacles.push_back(Rectangle_t(-8.5,  -7.5, -3.5, -2.5));
+		available_obstacles.push_back(Rectangle_t(   5,  -8.5,    9, -4.5));
+
+		for (int i =0; i<number_of_obstacles; i++) {
+		    obstacles.push_back(available_obstacles[i]);
+		}
+
 	}
-	virtual ~point_t(){}
+	virtual ~point_t(){ delete temp_state;}
 
 	/**
 	 * @copydoc system_t::propagate(double*, double*, int, int, double*, double& )
 	 */
-	virtual bool propagate( double* start_state, double* control, int num_steps, double* result_state, double integration_step) override;
+	virtual bool propagate(
+	    const double* start_state, unsigned int state_dimension,
+        const double* control, unsigned int control_dimension,
+	    int num_steps, double* result_state, double integration_step) override;
 
 	/**
 	 * @copydoc system_t::enforce_bounds()
@@ -93,16 +103,16 @@ public:
 	/**
 	 * @copydoc system_t::visualize_point(double*, svg::Dimensions)
 	 */
-	svg::Point visualize_point(const double* state, svg::Dimensions dims) override;
+	std::tuple<double, double> visualize_point(const double* state, unsigned int state_dimension) const override;
 
 	/**
-	 * @copydoc system_t::visualize_obstacles(svg::Document&, svg::Dimensions)
+	 * @copydoc system_t::visualize_obstacles(svg::DocumentBody&, svg::Dimensions)
 	 */
-    virtual void visualize_obstacles(svg::Document& doc ,svg::Dimensions dims) override;
+    std::string visualize_obstacles(int image_width, int image_height) const override;
 
-	std::vector<std::pair<double, double>> get_state_bounds() override;
-	std::vector<std::pair<double, double>> get_control_bounds() override;
-	std::vector<bool> is_circular_topology() override;
+	std::vector<std::pair<double, double>> get_state_bounds() const override;
+	std::vector<std::pair<double, double>> get_control_bounds() const override;
+	std::vector<bool> is_circular_topology() const override;
 
 protected:
 

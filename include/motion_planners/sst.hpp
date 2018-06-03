@@ -25,18 +25,40 @@ class sample_node_t;
 class sst_node_t : public tree_node_t
 {
 public:
-	sst_node_t() : tree_node_t()
-	{
-		inactive = false;
-		witness = NULL;
+	sst_node_t(const double* point, unsigned int state_dimension, sst_node_t* a_parent, tree_edge_t&& a_parent_edge, double a_cost);
+	~sst_node_t();
+
+	bool is_active() const {
+	    return active;
 	}
+
+	void make_inactive() {
+	    this->active = false;
+	}
+
+	void set_witness(sample_node_t* a_witness) {
+	    this->witness = a_witness;
+	}
+
+    sample_node_t* get_witness() const {
+	    return this->witness;
+	}
+
+    sst_node_t* get_parent() const {
+        return this->parent;
+    }
+
+private:
+    /**
+     * @brief Parent node.
+     */
+    sst_node_t* parent;
+
 	/**
 	 * A flag for inclusion in the metric.
 	 */
-	bool inactive;
-
-	sample_node_t* witness;
-
+	bool active;
+    sample_node_t* witness;
 };
 
 /**
@@ -44,18 +66,25 @@ public:
  * @details A special storage node for witness nodes in SST.
  * 
  */
-class sample_node_t : public tree_node_t
+class sample_node_t : public state_point_t
 {
 public:
-	sample_node_t() : tree_node_t()
-	{
-		rep = NULL;
-	}
-	/**
+	sample_node_t(sst_node_t* const representative,
+	              const double* a_point, unsigned int state_dimension);
+	~sample_node_t();
+
+    void set_representative(sst_node_t* const representative) {
+        this->rep = representative;
+    }
+
+    sst_node_t* get_representative() const {
+        return this->rep;
+    }
+private:
+    /**
 	 * The node that represents this sample.
 	 */
 	sst_node_t* rep;
-
 };
 
 
@@ -69,23 +98,14 @@ public:
 	/**
 	 * @copydoc planner_t::planner_t()
 	 */
-	sst_t(const std::vector<std::pair<double, double> >& a_state_bounds,
+	sst_t(const double* in_start, const double* in_goal,
+	      double in_radius,
+	      const std::vector<std::pair<double, double> >& a_state_bounds,
 		  const std::vector<std::pair<double, double> >& a_control_bounds,
-		  std::function<double(const double*, const double*)> distance_function,
+		  std::function<double(const double*, const double*, unsigned int)> distance_function,
 		  unsigned int random_seed,
-		  double delta_near, double delta_drain)
-		: planner_t(a_state_bounds, a_control_bounds, distance_function, random_seed)
-	    , sst_delta_near(delta_near)
-	    , sst_delta_drain(delta_drain)
-	{
-
-	}
-	virtual ~sst_t(){}
-
-	/**
-	 * @copydoc planner_t::setup_planning()
-	 */
-	virtual void setup_planning();
+		  double delta_near, double delta_drain);
+	virtual ~sst_t();
 
 	/**
 	 * @copydoc planner_t::get_solution(std::vector<std::pair<double*,double> >&)
@@ -95,7 +115,7 @@ public:
 	/**
 	 * @copydoc planner_t::step()
 	 */
-	 virtual void step(system_t* system, int min_time_steps, int max_time_steps, double integration_step);
+	 virtual void step(system_interface* system, int min_time_steps, int max_time_steps, double integration_step);
 
 protected:
 
@@ -123,34 +143,10 @@ protected:
 	void add_to_tree(const double* sample_state, const double* sample_control, sst_node_t* nearest, double duration);
 
 	/**
-	 * @brief Add a state into the nearest neighbor structure for retrieval in later iterations.
-	 * @details Add a state into the nearest neighbor structure for retrieval in later iterations.
-	 * 
-	 * @param node The node to add.
-	 */
-	void add_point_to_metric(tree_node_t* node);
-
-	/**
-	 * @brief Add a sample into the nearest neighbor structure for retrieval in later iterations.
-	 * @details Add a sample into the nearest neighbor structure for retrieval in later iterations.
-	 * 
-	 * @param node The sample to add.
-	 */
-	void add_point_to_samples(tree_node_t* node);
-
-	/**
 	 * @brief Check if the currently created state is close to a witness.
 	 * @details Check if the currently created state is close to a witness.
 	 */
 	sample_node_t* find_witness(const double* sample_state);
-
-	/**
-	 * @brief Removes a node from the nearest neighbor structure.
-	 * @details Removes a node from the nearest neighbor structure.
-	 * 
-	 * @param node The node to remove.
-	 */
-	void remove_point_from_metric(tree_node_t* node);
 
 	/**
 	 * @brief Checks if this node has any children.
@@ -176,7 +172,7 @@ protected:
 	 * 
 	 * @param node The node to remove.
 	 */
-	void remove_leaf(tree_node_t* node);
+	void remove_leaf(sst_node_t* node);
 
 	void branch_and_bound(sst_node_t* node);
 
@@ -188,7 +184,7 @@ protected:
 	double sst_delta_near;
 	double sst_delta_drain;
 
-
+    std::vector<sample_node_t*> witness_nodes;
 };
 
 #endif

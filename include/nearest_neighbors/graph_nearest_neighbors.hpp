@@ -13,9 +13,11 @@
 #ifndef SPARSE_GRAPH_NEIGHBORS_HPP
 #define SPARSE_GRAPH_NEIGHBORS_HPP
 
-#include <boost/unordered_map.hpp>
+#include <vector>
+#include <unordered_map>
+#include <functional>
 
-class tree_node_t;
+class state_point_t;
 
 #define INIT_NODE_SIZE    1000
 #define INIT_CAP_NEIGHBORS 200
@@ -33,30 +35,21 @@ class proximity_node_t
          * @brief Constructor
          * @param st The node to store.
          */
-        proximity_node_t( const tree_node_t* st );
-        virtual ~proximity_node_t();
-
-        /**
-         * Determines distance with another node.
-         * @brief Determines distance with another node.
-         * @param st The node to determine distance with.
-         * @return The distance value.
-         */
-        double distance ( const double* st );
+        proximity_node_t( const state_point_t* st );
 
         /**
          * Gets the internal node that is represented.
          * @brief Gets the internal node that is represented.
          * @return The internal node.
          */
-        const tree_node_t* get_state( );
+        const state_point_t* get_state( ) const;
 
         /**
          * Gets the position of the node in the data structure. Used for fast deletion.
          * @brief Gets the position of the node in the data structure.
          * @return The index value.
          */
-        int get_index();
+        int get_index() const;
         
         /**
          * Sets the position of the node in the data structure. Used for fast deletion.
@@ -71,7 +64,7 @@ class proximity_node_t
          * @param nr_neigh Storage for the number of neighbors returned.
          * @return The neighbor indices.
          */
-        unsigned int* get_neighbors( int* nr_neigh );
+        const std::vector<unsigned int>& get_neighbors() const;
 
         /**
          * Adds a node index into this node's neighbor list.
@@ -95,12 +88,11 @@ class proximity_node_t
          */
         void replace_neighbor( unsigned prev, int new_index );
 
-        std::function<double(const double*, const double*)> distance_function;
     protected:
         /**
          * @brief The node represented.
          */
-        const tree_node_t* state; 
+        const state_point_t* state;
 
         /**
          * @brief Index in the data structure. Serves as an identifier to other nodes.
@@ -108,19 +100,9 @@ class proximity_node_t
         int index;
 
         /**
-         * @brief The max number of neighbors.
+         * @brief The neighbor container for this node.
          */
-        int cap_neighbors;
-        
-        /**
-         * @brief The current number of neighbors.
-         */
-        int nr_neighbors;
-        
-        /**
-         * @brief The neighbor list for this node.
-         */
-        unsigned int* neighbors;
+        std::vector<unsigned int> neighbors;
 };
 
 
@@ -163,13 +145,13 @@ class graph_nearest_neighbors_t
          * @brief Adds a node to the proximity structure
          * @param node The node to insert.
          */
-        void add_node( proximity_node_t* node );
+        void add_node( state_point_t* node );
         
         /**
          * @brief Removes a node from the structure.
          * @param node
          */
-        void remove_node( proximity_node_t* node );
+        void remove_node( state_point_t* node );
 
         /**
          * Prints the average degree of all vertices in the data structure.
@@ -184,7 +166,7 @@ class graph_nearest_neighbors_t
          * @param distance The resulting distance between the closest point and the query point.
          * @return The closest point.
          */
-        proximity_node_t* find_closest( const double* state, double* distance );
+        proximity_node_t* find_closest( const double* state, double* distance ) const;
         
         /**
          * Find the k closest nodes to the query point. This is performed using a graph search starting from sqrt(nr_points) random points.
@@ -235,14 +217,14 @@ class graph_nearest_neighbors_t
          * @param query_node The node to search for.
          * @return If query_node exists in node_list.
          */
-        bool does_node_exist(boost::unordered_map<proximity_node_t*,bool> const& added_nodes, proximity_node_t* query_node);
+        bool does_node_exist(std::unordered_map<proximity_node_t*,bool> const& added_nodes, proximity_node_t* query_node);
         
         /**
          * Determine the number of nodes to sample for initial populations in queries.
          * @brief Determine the number of nodes to sample for initial populations in queries.
          * @return The number of random nodes to initially select.
          */
-        int sampling_function();
+        int sampling_function() const;
         
         /**
          * Given the number of nodes, get the number of neighbors required for connectivity (in the limit).
@@ -254,28 +236,19 @@ class graph_nearest_neighbors_t
         /**
          * @brief The nodes being stored.
          */
-        proximity_node_t** nodes;
-        
-        /**
-         * @brief The current number of nodes being stored.
-         */
-        int nr_nodes;
-        
-        /**
-         * @brief The maximum number of nodes that can be stored. 
-         */
-        int cap_nodes;
+        std::vector<proximity_node_t*> nodes;
 
         /**
          * @brief Temporary storage for query functions.
          */
-        proximity_node_t** second_nodes;
+        std::vector<proximity_node_t*> second_nodes;
         
         /**
          * @brief Temporary storage for query functions.
          */
-        double* second_distances;
-
+        std::vector<double> second_distances;
+    private:
+        double compute_distance(const proximity_node_t* node, const double* state) const;
 };
 
 #endif 

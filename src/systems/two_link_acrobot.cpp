@@ -45,7 +45,7 @@
 #define MIN_T -4
 #define MAX_T 4
 
-double two_link_acrobot_t::distance(const double* point1, const double* point2)
+double two_link_acrobot_t::distance(const double* point1, const double* point2, unsigned int state_dimension)
 {
         double x = (LENGTH) * cos(point1[STATE_THETA_1] - M_PI / 2)+(LENGTH) * cos(point1[STATE_THETA_1] + point1[STATE_THETA_2] - M_PI / 2);
         double y = (LENGTH) * sin(point1[STATE_THETA_1] - M_PI / 2)+(LENGTH) * sin(point1[STATE_THETA_1] + point1[STATE_THETA_2] - M_PI / 2);
@@ -54,7 +54,10 @@ double two_link_acrobot_t::distance(const double* point1, const double* point2)
         return std::sqrt(pow(x-x2,2.0)+pow(y-y2,2.0));
 }
 
-bool two_link_acrobot_t::propagate( double* start_state, double* control, int num_steps, double* result_state, double integration_step)
+bool two_link_acrobot_t::propagate(
+    const double* start_state, unsigned int state_dimension,
+    const double* control, unsigned int control_dimension,
+    int num_steps, double* result_state, double integration_step)
 {
         temp_state[0] = start_state[0]; 
         temp_state[1] = start_state[1];
@@ -105,16 +108,16 @@ bool two_link_acrobot_t::valid_state()
     return true;
 }
 
-svg::Point two_link_acrobot_t::visualize_point(const double* state, svg::Dimensions dims)
+std::tuple<double, double> two_link_acrobot_t::visualize_point(const double* state, unsigned int state_dimension) const
 {
-        double x = (LENGTH) * cos(state[STATE_THETA_1] - M_PI / 2)+(LENGTH) * cos(state[STATE_THETA_1] + state[STATE_THETA_2] - M_PI / 2);
-        double y = (LENGTH) * sin(state[STATE_THETA_1] - M_PI / 2)+(LENGTH) * sin(state[STATE_THETA_1] + state[STATE_THETA_2] - M_PI / 2);
-        x = (x+2*LENGTH)/(4*LENGTH) * dims.width; 
-        y = (y+2*LENGTH)/(4*LENGTH) * dims.height;  
-        return svg::Point(x,y);
+    double x = (LENGTH) * cos(state[STATE_THETA_1] - M_PI / 2)+(LENGTH) * cos(state[STATE_THETA_1] + state[STATE_THETA_2] - M_PI / 2);
+    double y = (LENGTH) * sin(state[STATE_THETA_1] - M_PI / 2)+(LENGTH) * sin(state[STATE_THETA_1] + state[STATE_THETA_2] - M_PI / 2);
+    x = (x+2*LENGTH)/(4*LENGTH);
+    y = (y+2*LENGTH)/(4*LENGTH);
+    return std::make_tuple(x, y);
 }
 
-void two_link_acrobot_t::update_derivative(double* control)
+void two_link_acrobot_t::update_derivative(const double* control)
 {
     double theta2 = temp_state[STATE_THETA_2];
     double theta1 = temp_state[STATE_THETA_1] - M_PI / 2;
@@ -148,7 +151,7 @@ void two_link_acrobot_t::update_derivative(double* control)
 }
 
 
-std::vector<std::pair<double, double> > two_link_acrobot_t::get_state_bounds() {
+std::vector<std::pair<double, double> > two_link_acrobot_t::get_state_bounds() const {
     return {
             {-M_PI,M_PI},
             {-M_PI,M_PI},
@@ -157,14 +160,14 @@ std::vector<std::pair<double, double> > two_link_acrobot_t::get_state_bounds() {
     };
 }
 
-std::vector<std::pair<double, double> > two_link_acrobot_t::get_control_bounds() {
+std::vector<std::pair<double, double> > two_link_acrobot_t::get_control_bounds() const{
     return {
             {MIN_T,MAX_T}
     };
 }
 
 
-std::vector<bool> two_link_acrobot_t::is_circular_topology() {
+std::vector<bool> two_link_acrobot_t::is_circular_topology() const{
     return {
             true,
             true,

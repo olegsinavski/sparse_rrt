@@ -33,32 +33,38 @@ public:
 	 * @brief Planner Constructor
 	 * @details Planner Constructor
 	 * 
-	 * @param in_system The system this planner will plan for.
+	 * @param in_start The start state.
+	 * @param in_goal The goal state
+	 * @param in_radius The radial size of the goal region centered at in_goal.
 	 */
-	planner_t(const std::vector<std::pair<double, double> >& a_state_bounds,
-              const std::vector<std::pair<double, double> >& a_control_bounds,
-              std::function<double(const double*, const double*)> distance_function,
-              unsigned int random_seed
+	planner_t(
+	    const double* in_start, const double* in_goal,
+	    double in_radius,
+	    const std::vector<std::pair<double, double> >& a_state_bounds,
+        const std::vector<std::pair<double, double> >& a_control_bounds,
+        std::function<double(const double*, const double*, unsigned int)> distance_function,
+        unsigned int random_seed
     )
-        : state_dimension(a_state_bounds.size()), state_bounds(a_state_bounds)
-        , control_dimension(a_control_bounds.size()), control_bounds(a_control_bounds)
+        : goal_radius(in_radius)
+        , state_dimension(a_state_bounds.size())
+        , state_bounds(a_state_bounds)
+        , control_dimension(a_control_bounds.size())
+        , control_bounds(a_control_bounds)
         , distance(distance_function)
-        , start_state(this->alloc_state_point())
-        , goal_state(this->alloc_state_point())
+        , start_state(new double[this->state_dimension])
+        , goal_state(new double[this->state_dimension])
         , number_of_nodes(0)
         , random_generator(random_seed)
     {
+        std::copy(in_start, in_start + this->state_dimension, start_state);
+	    std::copy(in_goal, in_goal + this->state_dimension, goal_state);
 	}
+
 	virtual ~planner_t()
 	{
-
+	    delete[] start_state;
+	    delete[] goal_state;
 	}
-
-	/**
-	 * @brief Perform any initialization tasks required before calling step().
-	 * @details Perform any initialization tasks required before calling step().
-	 */
-	virtual void setup_planning() = 0;
 
 	/**
 	 * @brief Get the solution path.
@@ -72,73 +78,12 @@ public:
 	 * @brief Perform an iteration of a motion planning algorithm.
 	 * @details Perform an iteration of a motion planning algorithm.
 	 */
-	virtual void step(system_t* system, int min_time_steps, int max_time_steps, double integration_step) = 0;
-
-	/**
-	 * @brief Set the start and goal state for the planner.
-	 * @details Set the start and goal state for the planner.
-	 *
-	 * @param in_start The start state.
-	 * @param in_goal The goal state
-	 * @param in_radius The radial size of the goal region centered at in_goal.
-	 */
-	void set_start_goal_state(const double* in_start, const double* in_goal,double in_radius) {
-        this->copy_state_point(start_state, in_start);
-        this->copy_state_point(goal_state,in_goal);
-        goal_radius = in_radius;
-    }
-
+	virtual void step(system_interface* system, int min_time_steps, int max_time_steps, double integration_step) = 0;
 
 	/** @brief The number of nodes in the tree. */
 	unsigned number_of_nodes;
 
 	tree_node_t* get_root() { return this->root; }
-
-    /**
-	 * @brief Copies one state into another.
-	 * @details Copies one state into another.
-	 *
-	 * @param destination The destination memory.
-	 * @param source The point to copy.
-	 */
-	void copy_state_point(double* destination, const double* source) const
-	{
-		for(unsigned i=0;i<this->state_dimension;i++)
-			destination[i] = source[i];
-	}
-
-	/**
-	 * @brief Allocates a double array representing a state of this system.
-	 * @details Allocates a double array representing a state of this system.
-	 * @return Allocated memory for a state.
-	 */
-	double* alloc_state_point()
-	{
-		return new double[this->state_dimension];
-	}
-
-	/**
-	 * @brief Allocates a double array representing a control of this system.
-	 * @details Allocates a double array representing a control of this system.
-	 * @return Allocated memory for a control.
-	 */
-	double* alloc_control_point()
-	{
-		return new double[this->control_dimension];
-	}
-
-	/**
-	 * @brief Copies one control into another.
-	 * @details Copies one control into another.
-	 *
-	 * @param destination The destination memory.
-	 * @param source The control to copy.
-	 */
-	void copy_control_point(double* destination, const double* source)
-	{
-		for(unsigned i=0;i<this->control_dimension;i++)
-			destination[i] = source[i];
-	}
 
 	/**
 	 * @brief Performs a random sampling for a new state.
@@ -169,7 +114,13 @@ public:
 	double* get_start_state() {return this->start_state;};
     double* get_goal_state() {return this->goal_state;};
 
+    unsigned int get_state_dimension() const {return this->state_dimension;};
+    unsigned int get_control_dimension() const {return this->control_dimension;};
+
 protected:
+
+    unsigned int state_dimension;
+	unsigned int control_dimension;
 
     /**
      * @brief The tree of the motion planner starts here.
@@ -191,13 +142,10 @@ protected:
 	 */
 	double goal_radius;
 
-	unsigned int state_dimension;
-	unsigned int control_dimension;
-
     std::vector<std::pair<double, double> > state_bounds;
     std::vector<std::pair<double, double> > control_bounds;
 
-    std::function<double(const double*, const double*)> distance;
+    std::function<double(const double*, const double*, unsigned int)> distance;
 
 	RandomGenerator random_generator;
 };

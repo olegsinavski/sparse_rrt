@@ -2,31 +2,12 @@
 // Created by Oleg Sinyavskiy on 11/28/16.
 //
 
-
+#include <assert.h>
 #include "systems/distance_functions.h"
 #include "systems/two_link_acrobot.hpp"
 
 
-std::function<double(const double*, const double*)> euclidian_distance(const std::vector<bool> is_circular_topology) {
-
-    return [is_circular_topology] (const double* point1, const double* point2) {
-        double result = 0;
-        for (int i=0; i<is_circular_topology.size(); ++i) {
-            if (is_circular_topology[i]) {
-                double val = fabs(point1[i]-point2[i]);
-                if(val > M_PI)
-                    val = 2*M_PI-val;
-                result += val*val;
-            } else {
-                result += (point1[i]-point2[i]) * (point1[i]-point2[i]);
-            }
-        }
-        return std::sqrt(result);
-    };
-}
-
-
-std::function<double(const double*, const double*)> two_link_acrobot_distance()
+double two_link_acrobot_distance::distance(const double* p0, const double* p1, unsigned int state_dimensions) const
 {
-    return two_link_acrobot_t::distance;
+    return two_link_acrobot_t::distance(p0, p1, state_dimensions);
 }

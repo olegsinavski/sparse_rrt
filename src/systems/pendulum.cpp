@@ -29,7 +29,10 @@
 #define DAMPING .05
 
 
-bool pendulum_t::propagate( double* start_state, double* control, int num_steps, double* result_state, double integration_step)
+bool pendulum_t::propagate(
+    const double* start_state, unsigned int state_dimension,
+    const double* control, unsigned int control_dimension,
+    int num_steps, double* result_state, double integration_step)
 {
 	temp_state[0] = start_state[0]; temp_state[1] = start_state[1];
 	bool validity = true;
@@ -68,14 +71,14 @@ bool pendulum_t::valid_state()
 	return true;
 }
 
-svg::Point pendulum_t::visualize_point(const double* state, svg::Dimensions dims)
+std::tuple<double, double> pendulum_t::visualize_point(const double* state, unsigned int state_dimension) const
 {
-	double x = (state[0]+M_PI)/(2*M_PI) * dims.width; 
-	double y = (state[1]-MIN_W)/(MAX_W-MIN_W) * dims.height; 
-	return svg::Point(x,y);
+	double x = (state[0]+M_PI)/(2*M_PI);
+	double y = (state[1]-MIN_W)/(MAX_W-MIN_W);
+	return std::make_tuple(x, y);
 }
 
-std::vector<std::pair<double, double> > pendulum_t::get_state_bounds() {
+std::vector<std::pair<double, double> > pendulum_t::get_state_bounds() const {
 	return {
 			{-M_PI,M_PI},
 			{MIN_W,MAX_W},
@@ -83,13 +86,13 @@ std::vector<std::pair<double, double> > pendulum_t::get_state_bounds() {
 }
 
 
-std::vector<std::pair<double, double> > pendulum_t::get_control_bounds() {
+std::vector<std::pair<double, double> > pendulum_t::get_control_bounds() const {
 	return {
 			{MIN_TORQUE,MAX_TORQUE},
 	};
 }
 
-std::vector<bool> pendulum_t::is_circular_topology() {
+std::vector<bool> pendulum_t::is_circular_topology() const {
 	return {
             true,
 			false
