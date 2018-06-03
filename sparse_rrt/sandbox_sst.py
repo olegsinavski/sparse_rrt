@@ -24,15 +24,15 @@ system_classes = {
     'free_point': lambda: standard_cpp_systems.Point(number_of_obstacles=1),
     'rally_car': standard_cpp_systems.RallyCar,
     'two_link_acrobot': standard_cpp_systems.TwoLinkAcrobot,
-    'py_free_point': Point,
+    'py_point': Point,
     'py_car': Car,
     'py_pendulum': Pendulum,
     'py_acrobot': Acrobot
 }
 
 python_configs = {
-    'py_sst_free_point': dict(
-        system='py_free_point',
+    'py_sst_point': dict(
+        system='py_point',
         planner='sst',
         start_state=np.array([0., 0.]),
         goal_state=np.array([9., 9.]),
@@ -109,15 +109,11 @@ def find_config(name):
 
 def run_config(config):
     system = system_classes[config['system']]()
-
-    # distance = _sst_module.TwoLinkAcrobotDistance()
-    distance = system.distance_computer()
-
     if config['planner'] == 'sst':
         planner = SST(
             state_bounds=system.get_state_bounds(),
             control_bounds=system.get_control_bounds(),
-            distance=distance,
+            distance=system.distance_computer(),
             start_state=config['start_state'],
             goal_state=config['goal_state'],
             goal_radius=config['goal_radius'],
@@ -129,7 +125,7 @@ def run_config(config):
         planner = RRT(
             state_bounds=system.get_state_bounds(),
             control_bounds=system.get_control_bounds(),
-            is_circular_topology=system.is_circular_topology(),
+            distance=system.distance_computer(),
             start_state=config['start_state'],
             goal_state=config['goal_state'],
             goal_radius=config['goal_radius'],
@@ -204,4 +200,4 @@ def run_planning_experiment(
 
 if __name__ == '__main__':
 
-    run_config(find_config('py_sst_acrobot'))
+    run_config(find_config('py_sst_point'))

@@ -1,16 +1,19 @@
 
 import _sst_module
+from sparse_rrt.systems import standard_cpp_systems
 import numpy as np
 import time
 
+from sparse_rrt.systems.point import Point
+
 
 def test_point_sst():
-    system = _sst_module.Point()
+    system = standard_cpp_systems.Point()
 
     planner = _sst_module.SSTWrapper(
         state_bounds=system.get_state_bounds(),
         control_bounds=system.get_control_bounds(),
-        is_circular_topology=system.is_circular_topology(),
+        distance=system.distance_computer(),
         start_state=np.array([0., 0.]),
         goal_state=np.array([9., 9.]),
         goal_radius=0.5,
@@ -68,12 +71,12 @@ def test_point_sst():
 
 
 def test_car_pose_sst():
-    system = _sst_module.CartPole()
+    system = standard_cpp_systems.CartPole()
 
     planner = _sst_module.SSTWrapper(
         state_bounds=system.get_state_bounds(),
         control_bounds=system.get_control_bounds(),
-        is_circular_topology=system.is_circular_topology(),
+        distance=system.distance_computer(),
         start_state=np.array([-20, 0, 3.14, 0]),
         goal_state=np.array([20, 0, 3.14, 0]),
         goal_radius=1.5,
@@ -91,12 +94,12 @@ def test_car_pose_sst():
 
 
 def test_car_pose_rrt():
-    system = _sst_module.CartPole()
+    system = standard_cpp_systems.CartPole()
 
     planner = _sst_module.RRTWrapper(
         state_bounds=system.get_state_bounds(),
         control_bounds=system.get_control_bounds(),
-        is_circular_topology=system.is_circular_topology(),
+        distance=system.distance_computer(),
         start_state=np.array([-20, 0, 3.14, 0]),
         goal_state=np.array([20, 0, 3.14, 0]),
         goal_radius=1.5,
@@ -115,13 +118,13 @@ def test_create_multiple_times():
     '''
     There used to be a crash during construction
     '''
-    system = _sst_module.CartPole()
+    system = standard_cpp_systems.CartPole()
     planners = []
     for i in range(100):
         planner = _sst_module.SSTWrapper(
             state_bounds=system.get_state_bounds(),
             control_bounds=system.get_control_bounds(),
-            is_circular_topology=system.is_circular_topology(),
+            distance=system.distance_computer(),
             start_state=np.array([-20, 0, 3.14, 0]),
             goal_state=np.array([20, 0, 3.14, 0]),
             goal_radius=1.5,
@@ -138,16 +141,14 @@ def test_create_multiple_times():
         planners.append(planner)
 
 
-def test_custom_system_sst():
+def test_py_system_sst():
 
-    class CustomSystem(_sst_module.ISystem):
-        def propagate(self, start_state, control, num_steps, integration_step):
-            return start_state + control*integration_step*num_steps
+    system = Point()
 
     planner = _sst_module.RRTWrapper(
-        state_bounds=[(-10.0, 10.0), (-20.0, 20.0)],
-        control_bounds=[(-1.0, 1.0), (-1.0, 1.0)],
-        is_circular_topology=[False, False],
+        state_bounds=system.get_state_bounds(),
+        control_bounds=system.get_control_bounds(),
+        distance=system.distance_computer(),
         start_state=np.array([0.2, 0.1]),
         goal_state=np.array([5., 5.]),
         goal_radius=1.5,
@@ -158,20 +159,18 @@ def test_custom_system_sst():
     max_time_steps = 50
     integration_step = 0.02
 
-    system = CustomSystem()
-
-    for iteration in range(10000):
+    for iteration in range(1000):
         planner.step(system, min_time_steps, max_time_steps, integration_step)
         im = planner.visualize_tree(system)
 
 
 if __name__ == '__main__':
-    # st = time.time()
-    # test_point_sst()
-    # print(time.time() - st, 21.4076721668)
-    #
-    # test_car_pose_sst()
-    # test_car_pose_rrt()
-    # test_create_multiple_times()
-    test_custom_system_sst()
+    st = time.time()
+    test_point_sst()
+    print(time.time() - st, 21.4076721668)
+
+    test_car_pose_sst()
+    test_car_pose_rrt()
+    test_create_multiple_times()
+    test_py_system_sst()
     print('Passed all tests!')

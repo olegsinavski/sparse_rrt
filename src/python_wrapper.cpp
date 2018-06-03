@@ -189,19 +189,21 @@ protected:
 
 
 
-class SSTWrapper : public PlannerWrapper{
+class __attribute__ ((visibility ("hidden"))) SSTWrapper : public PlannerWrapper{
 public:
     SSTWrapper(
             const py::safe_array<double> &state_bounds_array,
             const py::safe_array<double> &control_bounds_array,
-            distance_t* distance_computer,
+            py::object distance_computer_py,
             const py::safe_array<double> &start_state_array,
             const py::safe_array<double> &goal_state_array,
             double goal_radius,
             unsigned int random_seed,
             double sst_delta_near,
             double sst_delta_drain
-    ) {
+    )
+        : _distance_computer_py(distance_computer_py)  // capture distance computer to avoid segfaults because we use a raw pointer from it
+    {
         if (state_bounds_array.shape()[0] != start_state_array.shape()[0]) {
             throw std::domain_error("State bounds and start state arrays have to be equal size");
         }
@@ -209,6 +211,9 @@ public:
         if (state_bounds_array.shape()[0] != goal_state_array.shape()[0]) {
             throw std::domain_error("State bounds and goal state arrays have to be equal size");
         }
+
+        distance_t* distance_computer = distance_computer_py.cast<distance_t*>();
+
         auto state_bounds = state_bounds_array.unchecked<2>();
         auto control_bounds = control_bounds_array.unchecked<2>();
         auto start_state = start_state_array.unchecked<1>();
@@ -240,20 +245,23 @@ public:
                         sst_delta_near, sst_delta_drain)
         );
     }
+private:
+    py::object  _distance_computer_py;
 };
 
 
-class RRTWrapper : public PlannerWrapper{
+class __attribute__ ((visibility ("hidden"))) RRTWrapper : public PlannerWrapper{
 public:
     RRTWrapper(
             const py::safe_array<double> &state_bounds_array,
             const py::safe_array<double> &control_bounds_array,
-            distance_t* distance_computer,
+            py::object distance_computer_py,
             const py::safe_array<double> &start_state_array,
             const py::safe_array<double> &goal_state_array,
             double goal_radius,
             unsigned int random_seed
-    ) {
+    ) : _distance_computer_py(distance_computer_py)
+    {
         if (state_bounds_array.shape()[0] != start_state_array.shape()[0]) {
             throw std::runtime_error("State bounds and start state arrays have to be equal size");
         }
@@ -278,6 +286,7 @@ public:
             control_bounds_v.push_back(bounds_t(control_bounds(i, 0), control_bounds(i, 1)));
         }
 
+        distance_t* distance_computer = distance_computer_py.cast<distance_t*>();
         std::function<double(const double*, const double*, unsigned int)>  distance_f =
             [distance_computer] (const double* p0, const double* p1, unsigned int dims) {
                 return distance_computer->distance(p0, p1, dims);
@@ -291,6 +300,8 @@ public:
                         random_seed)
         );
     }
+private:
+    py::object  _distance_computer_py;
 };
 
 
@@ -414,7 +425,7 @@ PYBIND11_MODULE(_sst_module, m) {
    py::class_<RRTWrapper>(m, "RRTWrapper", planner)
         .def(py::init<const py::safe_array<double>&,
                       const py::safe_array<double>&,
-                      distance_t*,
+                      py::object,
                       const py::safe_array<double>&,
                       const py::safe_array<double>&,
                       double,
@@ -432,7 +443,7 @@ PYBIND11_MODULE(_sst_module, m) {
    py::class_<SSTWrapper>(m, "SSTWrapper", planner)
         .def(py::init<const py::safe_array<double>&,
                       const py::safe_array<double>&,
-                      distance_t*,
+                      py::object,
                       const py::safe_array<double>&,
                       const py::safe_array<double>&,
                       double,
