@@ -143,11 +143,47 @@ def test_py_system_rrt_custom_distance():
         im = planner.visualize_tree(system)
 
 
+def test_multiple_runs_same_result():
+    '''
+    Test that runs are deterministic
+    '''
+    system = standard_cpp_systems.Point()
+
+    planner = _sst_module.RRTWrapper(
+        state_bounds=system.get_state_bounds(),
+        control_bounds=system.get_control_bounds(),
+        distance=system.distance_computer(),
+        start_state=np.array([0., 0.]),
+        goal_state=np.array([9., 9.]),
+        goal_radius=0.5,
+        random_seed=0
+    )
+    for i in range(1000):
+        planner.step(system, 10, 50, 0.02)
+    original_number_of_nodes = planner.get_number_of_nodes()
+
+    for i in range(5):
+        planner = _sst_module.RRTWrapper(
+            state_bounds=system.get_state_bounds(),
+            control_bounds=system.get_control_bounds(),
+            distance=system.distance_computer(),
+            start_state=np.array([0., 0.]),
+            goal_state=np.array([9., 9.]),
+            goal_radius=0.5,
+            random_seed=0
+        )
+        for i in range(1000):
+            planner.step(system, 10, 50, 0.02)
+        assert original_number_of_nodes == planner.get_number_of_nodes()
+
+
 if __name__ == '__main__':
+
+    # test_create_multiple_times_rrt()
+    # test_py_system_rrt()
+    # test_py_system_rrt_custom_distance()
     st = time.time()
-    test_point_rrt()
+    # test_point_rrt()
     print("Current test time: %fs (baseline: %fs)" % (time.time() - st, 21.4076721668))
-    test_create_multiple_times_rrt()
-    test_py_system_rrt()
-    test_py_system_rrt_custom_distance()
+    test_multiple_runs_same_result()
     print('Passed all tests!')
