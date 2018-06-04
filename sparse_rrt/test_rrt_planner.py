@@ -8,22 +8,20 @@ from sparse_rrt.systems.acrobot import Acrobot, AcrobotDistance
 from sparse_rrt.systems.point import Point
 
 
-def test_point_sst():
+def test_point_rrt():
     system = standard_cpp_systems.Point()
 
-    planner = _sst_module.SSTWrapper(
+    planner = _sst_module.RRTWrapper(
         state_bounds=system.get_state_bounds(),
         control_bounds=system.get_control_bounds(),
         distance=system.distance_computer(),
         start_state=np.array([0., 0.]),
         goal_state=np.array([9., 9.]),
         goal_radius=0.5,
-        random_seed=0,
-        sst_delta_near=0.4,
-        sst_delta_drain=0.2
+        random_seed=0
     )
 
-    number_of_iterations = 410000
+    number_of_iterations = 31000
 
     min_time_steps = 20
     max_time_steps = 200
@@ -35,16 +33,15 @@ def test_point_sst():
 
     expected_results = {
         0: (1, None),
-        100000: (4900, 2.486),
-        200000: (5291, 2.072),
-        300000: (5436, 1.996),
-        400000: (5611, 1.988),
-        'final': (5629, 1.988)
+        10000: (7580, 7.82),
+        20000: (14967, 7.82),
+        30000: (22306, 7.14),
+        'final': (23037, 7.14)
     }
 
     for iteration in range(number_of_iterations):
         planner.step(system, min_time_steps, max_time_steps, integration_step)
-        if iteration % 100000 == 0:
+        if iteration % 10000 == 0:
             solution = planner.get_solution()
 
             expected_number_of_nodes, expected_solution_cost = expected_results[iteration]
@@ -71,67 +68,21 @@ def test_point_sst():
     assert(abs(solution_cost - expected_solution_cost) < 1e-9)
 
 
-def test_car_pose_sst():
-    system = standard_cpp_systems.CartPole()
-
-    planner = _sst_module.SSTWrapper(
-        state_bounds=system.get_state_bounds(),
-        control_bounds=system.get_control_bounds(),
-        distance=system.distance_computer(),
-        start_state=np.array([-20, 0, 3.14, 0]),
-        goal_state=np.array([20, 0, 3.14, 0]),
-        goal_radius=1.5,
-        random_seed=0,
-        sst_delta_near=2.,
-        sst_delta_drain=1.2
-    )
-
-    min_time_steps = 10
-    max_time_steps = 50
-    integration_step = 0.02
-
-    for iteration in range(10000):
-        planner.step(system, min_time_steps, max_time_steps, integration_step)
-
-
-def test_car_pose_rrt():
-    system = standard_cpp_systems.CartPole()
-
-    planner = _sst_module.RRTWrapper(
-        state_bounds=system.get_state_bounds(),
-        control_bounds=system.get_control_bounds(),
-        distance=system.distance_computer(),
-        start_state=np.array([-20, 0, 3.14, 0]),
-        goal_state=np.array([20, 0, 3.14, 0]),
-        goal_radius=1.5,
-        random_seed=0
-    )
-
-    min_time_steps = 10
-    max_time_steps = 50
-    integration_step = 0.02
-
-    for iteration in range(10000):
-        planner.step(system, min_time_steps, max_time_steps, integration_step)
-
-
-def test_create_multiple_times():
+def test_create_multiple_times_rrt():
     '''
     There used to be a crash during construction
     '''
     system = standard_cpp_systems.CartPole()
     planners = []
     for i in range(100):
-        planner = _sst_module.SSTWrapper(
+        planner = _sst_module.RRTWrapper(
             state_bounds=system.get_state_bounds(),
             control_bounds=system.get_control_bounds(),
             distance=system.distance_computer(),
             start_state=np.array([-20, 0, 3.14, 0]),
             goal_state=np.array([20, 0, 3.14, 0]),
             goal_radius=1.5,
-            random_seed=0,
-            sst_delta_near=2.,
-            sst_delta_drain=1.2
+            random_seed=0
         )
         min_time_steps = 10
         max_time_steps = 50
@@ -142,7 +93,7 @@ def test_create_multiple_times():
         planners.append(planner)
 
 
-def test_py_system_sst():
+def test_py_system_rrt():
 
     system = Point()
 
@@ -165,7 +116,7 @@ def test_py_system_sst():
         im = planner.visualize_tree(system)
 
 
-def test_py_system_sst_custom_distance():
+def test_py_system_rrt_custom_distance():
     '''
     Check that distance overriding in python works
     '''
@@ -194,12 +145,9 @@ def test_py_system_sst_custom_distance():
 
 if __name__ == '__main__':
     st = time.time()
-    test_point_sst()
-    # print(time.time() - st, 21.4076721668)
-
-    test_car_pose_sst()
-    test_car_pose_rrt()
-    test_create_multiple_times()
-    test_py_system_sst()
-    test_py_system_sst_custom_distance()
+    test_point_rrt()
+    print("Current test time: %fs (baseline: %fs)" % (time.time() - st, 21.4076721668))
+    test_create_multiple_times_rrt()
+    test_py_system_rrt()
+    test_py_system_rrt_custom_distance()
     print('Passed all tests!')
