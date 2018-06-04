@@ -4,4 +4,4 @@ script:
      # install the package and test
      - pip install -e .
      - py.test --pep8 -m pep8 -n0
-     - py.test
+     - py.test -n0
