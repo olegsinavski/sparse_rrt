@@ -4,6 +4,11 @@ from sparse_rrt.visualization import render_svg, svg_header, svg_footer
 
 
 def visualize_wrapper(parent_class):
+    '''
+    Class factory that wraps visualization function for planners
+    :param parent_class: a planner class (RRTWrapper or SSTWrapper)
+    :return: a class with visualization functions
+    '''
     class VisualizeWrapper(parent_class):
         def visualize_tree(self, system, image_width=500, image_height=500):
             body_string = parent_class.visualize_tree(

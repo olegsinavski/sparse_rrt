@@ -40,4 +40,5 @@ cmake-build-debug
 *.pyc
 
 .cache
-
+venv
+# *.egg-info

@@ -55,9 +55,9 @@ sst_t::sst_t(
     double delta_near, double delta_drain)
     : planner_t(in_start, in_goal, in_radius,
                 a_state_bounds, a_control_bounds, a_distance_function, random_seed)
+    , best_goal(nullptr)
     , sst_delta_near(delta_near)
     , sst_delta_drain(delta_drain)
-    , best_goal(nullptr)
 {
     //initialize the metrics
     unsigned int state_dimensions = this->get_state_dimension();

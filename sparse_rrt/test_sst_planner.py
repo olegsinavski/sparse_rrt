@@ -35,11 +35,11 @@ def test_point_sst():
 
     expected_results = {
         0: (1, None),
-        100000: (4900, 2.486),
-        200000: (5291, 2.072),
-        300000: (5436, 1.996),
-        400000: (5611, 1.988),
-        'final': (5629, 1.988)
+        100000: (4881, 2.486),
+        200000: (5234, 2.046),
+        300000: (5423, 2.0),
+        400000: (5560, 1.972),
+        'final': (5569, 1.972)
     }
 
     for iteration in range(number_of_iterations):
@@ -69,50 +69,6 @@ def test_point_sst():
     expected_number_of_nodes, expected_solution_cost = expected_results['final']
     assert(planner.get_number_of_nodes() == expected_number_of_nodes)
     assert(abs(solution_cost - expected_solution_cost) < 1e-9)
-
-
-def test_car_pose_sst():
-    system = standard_cpp_systems.CartPole()
-
-    planner = _sst_module.SSTWrapper(
-        state_bounds=system.get_state_bounds(),
-        control_bounds=system.get_control_bounds(),
-        distance=system.distance_computer(),
-        start_state=np.array([-20, 0, 3.14, 0]),
-        goal_state=np.array([20, 0, 3.14, 0]),
-        goal_radius=1.5,
-        random_seed=0,
-        sst_delta_near=2.,
-        sst_delta_drain=1.2
-    )
-
-    min_time_steps = 10
-    max_time_steps = 50
-    integration_step = 0.02
-
-    for iteration in range(10000):
-        planner.step(system, min_time_steps, max_time_steps, integration_step)
-
-
-def test_car_pose_rrt():
-    system = standard_cpp_systems.CartPole()
-
-    planner = _sst_module.RRTWrapper(
-        state_bounds=system.get_state_bounds(),
-        control_bounds=system.get_control_bounds(),
-        distance=system.distance_computer(),
-        start_state=np.array([-20, 0, 3.14, 0]),
-        goal_state=np.array([20, 0, 3.14, 0]),
-        goal_radius=1.5,
-        random_seed=0
-    )
-
-    min_time_steps = 10
-    max_time_steps = 50
-    integration_step = 0.02
-
-    for iteration in range(10000):
-        planner.step(system, min_time_steps, max_time_steps, integration_step)
 
 
 def test_create_multiple_times():
@@ -146,14 +102,16 @@ def test_py_system_sst():
 
     system = Point()
 
-    planner = _sst_module.RRTWrapper(
+    planner = _sst_module.SSTWrapper(
         state_bounds=system.get_state_bounds(),
         control_bounds=system.get_control_bounds(),
         distance=system.distance_computer(),
         start_state=np.array([0.2, 0.1]),
         goal_state=np.array([5., 5.]),
         goal_radius=1.5,
-        random_seed=0
+        random_seed=0,
+        sst_delta_near=0.6,
+        sst_delta_drain=0.4
     )
 
     min_time_steps = 10
@@ -172,7 +130,7 @@ def test_py_system_sst_custom_distance():
 
     system = Acrobot()
 
-    planner = _sst_module.RRTWrapper(
+    planner = _sst_module.SSTWrapper(
         state_bounds=system.get_state_bounds(),
         control_bounds=system.get_control_bounds(),
         # use custom distance computer
@@ -180,7 +138,9 @@ def test_py_system_sst_custom_distance():
         start_state=np.array([0., 0., 0., 0.]),
         goal_state=np.array([np.pi, 0., 0., 0.]),
         goal_radius=2.,
-        random_seed=0
+        random_seed=0,
+        sst_delta_near=0.6,
+        sst_delta_drain=0.4
     )
 
     min_time_steps = 10
@@ -192,14 +152,43 @@ def test_py_system_sst_custom_distance():
         im = planner.visualize_tree(system)
 
 
+def test_multiple_runs_same_result_sst():
+    '''
+    Test that runs are deterministic
+    '''
+    system = standard_cpp_systems.Point()
+
+    def _create_planner():
+        return _sst_module.SSTWrapper(
+            state_bounds=system.get_state_bounds(),
+            control_bounds=system.get_control_bounds(),
+            distance=system.distance_computer(),
+            start_state=np.array([0., 0.]),
+            goal_state=np.array([9., 9.]),
+            goal_radius=0.5,
+            random_seed=0,
+            sst_delta_near=0.6,
+            sst_delta_drain=0.4
+        )
+
+    planner = _create_planner()
+    for i in range(1000):
+        planner.step(system, 10, 50, 0.02)
+    original_number_of_nodes = planner.get_number_of_nodes()
+
+    for i in range(5):
+        planner = _create_planner()
+        for i in range(1000):
+            planner.step(system, 10, 50, 0.02)
+        assert original_number_of_nodes == planner.get_number_of_nodes()
+
+
 if __name__ == '__main__':
     st = time.time()
     test_point_sst()
-    # print(time.time() - st, 21.4076721668)
-
-    test_car_pose_sst()
-    test_car_pose_rrt()
+    print("Current test time: %fs (baseline: %fs)" % (time.time() - st, 21.4076721668))
     test_create_multiple_times()
     test_py_system_sst()
     test_py_system_sst_custom_distance()
+    test_multiple_runs_same_result_sst()
     print('Passed all tests!')

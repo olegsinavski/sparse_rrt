@@ -17,6 +17,8 @@
 #include <unordered_map>
 #include <functional>
 
+#include "utilities/random.hpp"
+
 class state_point_t;
 
 #define INIT_NODE_SIZE    1000
@@ -122,7 +124,7 @@ void sort( proximity_node_t** close_nodes, double* distances, int low, int high 
  * @param distances The distances that determine the ordering.
  * @param index The index to start from.
  */
-int resort( proximity_node_t** close_nodes, double* distances, int index );
+unsigned int resort( proximity_node_t** close_nodes, double* distances, unsigned int index );
 
 /**
  * A proximity structure based on graph literature. Each node maintains a list of neighbors.
@@ -157,7 +159,7 @@ class graph_nearest_neighbors_t
          * Prints the average degree of all vertices in the data structure.
          * @brief Prints the average degree of all vertices in the data structure.
          */
-        void average_valence();
+        double average_valence() const;
 
         /**
          * Returns the closest node in the data structure.
@@ -177,7 +179,7 @@ class graph_nearest_neighbors_t
          * @param k The number to return.
          * @return The number of nodes actually returned.
          */
-        int find_k_close( const double* state, proximity_node_t** close_nodes, double* distances, int k );
+        unsigned int find_k_close( const double* state, proximity_node_t** close_nodes, double* distances, unsigned int k );
         
         /**
          * Find all nodes within a radius and the closest node. 
@@ -199,7 +201,7 @@ class graph_nearest_neighbors_t
          * @param delta The radius to search within.
          * @return The number of nodes returned.
          */
-        int find_delta_close( const double* state, proximity_node_t** close_nodes, double* distances, double delta );
+        unsigned int find_delta_close( const double* state, proximity_node_t** close_nodes, double* distances, double delta );
 
 
         void set_distance(std::function<double(const double*, const double*)> new_distance)
@@ -224,7 +226,7 @@ class graph_nearest_neighbors_t
          * @brief Determine the number of nodes to sample for initial populations in queries.
          * @return The number of random nodes to initially select.
          */
-        int sampling_function() const;
+        unsigned int sampling_function() const;
         
         /**
          * Given the number of nodes, get the number of neighbors required for connectivity (in the limit).
@@ -249,6 +251,7 @@ class graph_nearest_neighbors_t
         std::vector<double> second_distances;
     private:
         double compute_distance(const proximity_node_t* node, const double* state) const;
+        mutable RandomGenerator random_generator;
 };
 
 #endif 

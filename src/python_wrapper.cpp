@@ -4,6 +4,7 @@
 #include <pybind11/functional.h>
 
 #include <iostream>
+#include <assert.h>
 
 #include "systems/point.hpp"
 #include "systems/car.hpp"
@@ -49,24 +50,11 @@ using namespace pybind11::literals;
 
 double global_dist(const double* point1, const double* point2, unsigned int state_dimensions){
     double result = 0;
-    for (int i=0; i<state_dimensions; ++i) {
+    for (unsigned int i=0; i<state_dimensions; ++i) {
         result += (point1[i]-point2[i]) * (point1[i]-point2[i]);
     }
     return std::sqrt(result);
 };
-
-
-
-//std::function<double(const double*, const double*, unsigned int)> global_dist = [] (const double* point1, const double* point2, unsigned int state_dimensions) -> double {
-//    double result = 0;
-//    for (int i=0; i<state_dimensions; ++i) {
-//        result += (point1[i]-point2[i]) * (point1[i]-point2[i]);
-//    }
-//    return std::sqrt(result);
-//};
-
-
-#include <assert.h>
 
 
 class py_distance_interface : public distance_t
@@ -186,8 +174,8 @@ public:
         py::safe_array<double> costs_array({costs.size()});
         auto controls_ref = controls_array.mutable_unchecked<2>();
         auto costs_ref = costs_array.mutable_unchecked<1>();
-        for (int i = 0; i < controls.size(); ++i) {
-            for (int j = 0; j < controls[0].size(); ++j) {
+        for (unsigned int i = 0; i < controls.size(); ++i) {
+            for (unsigned int j = 0; j < controls[0].size(); ++j) {
                 controls_ref(i, j) = controls[i][j];
             }
             costs_ref(i) = costs[i];
@@ -195,8 +183,8 @@ public:
 
         py::safe_array<double> state_array({solution_path.size(), solution_path[0].size()});
         auto state_ref = state_array.mutable_unchecked<2>();
-        for (int i = 0; i < solution_path.size(); ++i) {
-            for (int j = 0; j < solution_path[0].size(); ++j) {
+        for (unsigned int i = 0; i < solution_path.size(); ++i) {
+            for (unsigned int j = 0; j < solution_path[0].size(); ++j) {
                 state_ref(i, j) = solution_path[i][j];
             }
         }
@@ -204,8 +192,8 @@ public:
             (state_array, controls_array, costs_array));
     }
 
-    int get_number_of_nodes() {
-        return this->planner->number_of_nodes;
+    unsigned int get_number_of_nodes() {
+        return this->planner->get_number_of_nodes();
     }
 
 protected:
@@ -247,12 +235,12 @@ public:
         typedef std::pair<double, double> bounds_t;
         std::vector<bounds_t> state_bounds_v;
 
-        for (int i = 0; i < state_bounds_array.shape()[0]; i++) {
+        for (unsigned int i = 0; i < state_bounds_array.shape()[0]; i++) {
             state_bounds_v.push_back(bounds_t(state_bounds(i, 0), state_bounds(i, 1)));
         }
 
         std::vector<bounds_t> control_bounds_v;
-        for (int i = 0; i < control_bounds_array.shape()[0]; i++) {
+        for (unsigned int i = 0; i < control_bounds_array.shape()[0]; i++) {
             control_bounds_v.push_back(bounds_t(control_bounds(i, 0), control_bounds(i, 1)));
         }
 
@@ -302,12 +290,12 @@ public:
 
         typedef std::pair<double, double> bounds_t;
         std::vector<bounds_t> state_bounds_v;
-        for (int i = 0; i < state_bounds_array.shape()[0]; i++) {
+        for (unsigned int i = 0; i < state_bounds_array.shape()[0]; i++) {
             state_bounds_v.push_back(bounds_t(state_bounds(i, 0), state_bounds(i, 1)));
         }
 
         std::vector<bounds_t> control_bounds_v;
-        for (int i = 0; i < control_bounds_array.shape()[0]; i++) {
+        for (unsigned int i = 0; i < control_bounds_array.shape()[0]; i++) {
             control_bounds_v.push_back(bounds_t(control_bounds(i, 0), control_bounds(i, 1)));
         }
 

@@ -29,8 +29,6 @@ bool car_t::propagate(
 	bool validity = true;
 	for(int i=0;i<num_steps;i++)
 	{
-		double temp0 = temp_state[0];
-		double temp1 = temp_state[1];
 		double temp2 = temp_state[2];
 		temp_state[0] += integration_step*cos(temp2)*control[0];
 		temp_state[1] += integration_step*sin(temp2)*control[0];
