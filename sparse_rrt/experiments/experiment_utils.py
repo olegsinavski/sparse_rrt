@@ -75,14 +75,14 @@ def run_config(config):
 
 
 def run_planning_experiment(
-    planner,
-    system,
-    number_of_iterations,
-    min_time_steps,
-    max_time_steps,
-    integration_step,
-    debug_period,
-    display_type=None):
+        planner,
+        system,
+        number_of_iterations,
+        min_time_steps,
+        max_time_steps,
+        integration_step,
+        debug_period,
+        display_type=None):
     '''
     Simple standard runner of a single planning experiment
     :param planner: planner instance
@@ -112,7 +112,6 @@ def run_planning_experiment(
         if display_type is None:
             return
         show_image(im, display_type, wait=wait)
-
 
     print("Starting the planner.")
 
