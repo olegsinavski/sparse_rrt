@@ -142,11 +142,13 @@ def run_planning_experiment(
 
             _display_end(im, wait=False)
 
-    path, controls, costs = planner.get_solution()
-    solution_cost = np.sum(costs)
+    solution = planner.get_solution()
+    if solution is not None:
+        path, controls, costs = planner.get_solution()
+        solution_cost = np.sum(costs)
 
-    print("Time: %.2fs, Iterations: %d, Nodes: %d, Solution Quality: %f" %
-          (time.time() - start_time, number_of_iterations, planner.get_number_of_nodes(), solution_cost))
+        print("Time: %.2fs, Iterations: %d, Nodes: %d, Solution Quality: %s" %
+              (time.time() - start_time, number_of_iterations, planner.get_number_of_nodes(), solution_cost))
 
     im = _display_begin(planner, system)
     _display_end(im, wait=False)
