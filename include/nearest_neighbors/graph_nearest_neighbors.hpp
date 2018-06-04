@@ -17,6 +17,8 @@
 #include <unordered_map>
 #include <functional>
 
+#include "utilities/random.hpp"
+
 class state_point_t;
 
 #define INIT_NODE_SIZE    1000
@@ -157,7 +159,7 @@ class graph_nearest_neighbors_t
          * Prints the average degree of all vertices in the data structure.
          * @brief Prints the average degree of all vertices in the data structure.
          */
-        void average_valence();
+        double average_valence() const;
 
         /**
          * Returns the closest node in the data structure.
@@ -249,6 +251,7 @@ class graph_nearest_neighbors_t
         std::vector<double> second_distances;
     private:
         double compute_distance(const proximity_node_t* node, const double* state) const;
+        mutable RandomGenerator random_generator;
 };
 
 #endif 

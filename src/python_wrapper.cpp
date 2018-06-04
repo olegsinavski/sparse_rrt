@@ -192,7 +192,7 @@ public:
             (state_array, controls_array, costs_array));
     }
 
-    int get_number_of_nodes() {
+    unsigned int get_number_of_nodes() {
         return this->planner->get_number_of_nodes();
     }
 

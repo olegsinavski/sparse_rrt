@@ -35,11 +35,11 @@ def test_point_sst():
 
     expected_results = {
         0: (1, None),
-        100000: (4900, 2.486),
-        200000: (5291, 2.072),
-        300000: (5436, 1.996),
-        400000: (5611, 1.988),
-        'final': (5629, 1.988)
+        100000: (4881, 2.486),
+        200000: (5234, 2.046),
+        300000: (5423, 2.0),
+        400000: (5560, 1.972),
+        'final': (5569, 1.972)
     }
 
     for iteration in range(number_of_iterations):
@@ -158,23 +158,8 @@ def test_multiple_runs_same_result_sst():
     '''
     system = standard_cpp_systems.Point()
 
-    planner = _sst_module.SSTWrapper(
-        state_bounds=system.get_state_bounds(),
-        control_bounds=system.get_control_bounds(),
-        distance=system.distance_computer(),
-        start_state=np.array([0., 0.]),
-        goal_state=np.array([9., 9.]),
-        goal_radius=0.5,
-        random_seed=0,
-        sst_delta_near=0.6,
-        sst_delta_drain=0.4
-    )
-    for i in range(1000):
-        planner.step(system, 10, 50, 0.02)
-    original_number_of_nodes = planner.get_number_of_nodes()
-
-    for i in range(5):
-        planner = _sst_module.SSTWrapper(
+    def _create_planner():
+        return _sst_module.SSTWrapper(
             state_bounds=system.get_state_bounds(),
             control_bounds=system.get_control_bounds(),
             distance=system.distance_computer(),
@@ -185,9 +170,18 @@ def test_multiple_runs_same_result_sst():
             sst_delta_near=0.6,
             sst_delta_drain=0.4
         )
+
+    planner = _create_planner()
+    for i in range(1000):
+        planner.step(system, 10, 50, 0.02)
+    original_number_of_nodes = planner.get_number_of_nodes()
+
+    for i in range(5):
+        planner = _create_planner()
         for i in range(1000):
             planner.step(system, 10, 50, 0.02)
         assert original_number_of_nodes == planner.get_number_of_nodes()
+
 
 if __name__ == '__main__':
     st = time.time()

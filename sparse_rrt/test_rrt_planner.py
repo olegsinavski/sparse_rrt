@@ -33,10 +33,10 @@ def test_point_rrt():
 
     expected_results = {
         0: (1, None),
-        10000: (7580, 7.82),
-        20000: (14967, 7.82),
-        30000: (22306, 7.14),
-        'final': (23037, 7.14)
+        10000: (7563, 5.4),
+        20000: (14952, 4.43),
+        30000: (22293, 4.43),
+        'final': (23021, 4.43)
     }
 
     for iteration in range(number_of_iterations):
@@ -149,21 +149,8 @@ def test_multiple_runs_same_result():
     '''
     system = standard_cpp_systems.Point()
 
-    planner = _sst_module.RRTWrapper(
-        state_bounds=system.get_state_bounds(),
-        control_bounds=system.get_control_bounds(),
-        distance=system.distance_computer(),
-        start_state=np.array([0., 0.]),
-        goal_state=np.array([9., 9.]),
-        goal_radius=0.5,
-        random_seed=0
-    )
-    for i in range(1000):
-        planner.step(system, 10, 50, 0.02)
-    original_number_of_nodes = planner.get_number_of_nodes()
-
-    for i in range(5):
-        planner = _sst_module.RRTWrapper(
+    def _create_planner():
+        return _sst_module.RRTWrapper(
             state_bounds=system.get_state_bounds(),
             control_bounds=system.get_control_bounds(),
             distance=system.distance_computer(),
@@ -172,18 +159,25 @@ def test_multiple_runs_same_result():
             goal_radius=0.5,
             random_seed=0
         )
+
+    planner = _create_planner()
+    for i in range(1000):
+        planner.step(system, 10, 50, 0.02)
+    original_number_of_nodes = planner.get_number_of_nodes()
+
+    for i in range(5):
+        planner = _create_planner()
         for i in range(1000):
             planner.step(system, 10, 50, 0.02)
         assert original_number_of_nodes == planner.get_number_of_nodes()
 
 
 if __name__ == '__main__':
-
-    # test_create_multiple_times_rrt()
-    # test_py_system_rrt()
-    # test_py_system_rrt_custom_distance()
+    test_create_multiple_times_rrt()
+    test_py_system_rrt()
+    test_py_system_rrt_custom_distance()
     st = time.time()
-    # test_point_rrt()
+    test_point_rrt()
     print("Current test time: %fs (baseline: %fs)" % (time.time() - st, 21.4076721668))
     test_multiple_runs_same_result()
     print('Passed all tests!')
