@@ -124,3 +124,17 @@ def svg_rectangle((x, y), (width, height), (image_width, image_height), **extra)
     return drawing.rect(
         (x, image_height-y),
         size=(width, -height), **extra).tostring()
+
+def show_image(image, name, wait=False):
+    '''
+    Show image with opencv
+    :param image: np.array of shape (height, width, 3) containing image
+    :param name: name of the window
+    :param wait: whether to block for user input
+    '''
+    import cv2
+    cv2.imshow(name, image)
+    if wait:
+        cv2.waitKey(-1)
+    else:
+        cv2.waitKey(1)

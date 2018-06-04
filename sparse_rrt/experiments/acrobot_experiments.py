@@ -10,7 +10,8 @@ base_acrobot_config = dict(
     integration_step=0.02,
     min_time_steps=10,
     max_time_steps=50,
-    number_of_iterations=300000
+    number_of_iterations=300000,
+    display_type='nodes'
 )
 
 cpp_acrobot_config = dict(system='two_link_acrobot', **base_acrobot_config)

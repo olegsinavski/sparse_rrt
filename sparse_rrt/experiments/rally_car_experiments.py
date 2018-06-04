@@ -12,6 +12,7 @@ rally_car_config = dict(
     min_time_steps=20,
     max_time_steps=200,
     number_of_iterations=300000,
+    display_type='tree'
 )
 
 

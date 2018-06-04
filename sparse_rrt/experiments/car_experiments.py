@@ -11,7 +11,8 @@ base_car_config = dict(
     min_time_steps=20,
     max_time_steps=200,
     debug_period=1000,
-    number_of_iterations=300000
+    number_of_iterations=300000,
+    display_type='tree'
 )
 
 cpp_car_config = dict(system='car', **base_car_config)

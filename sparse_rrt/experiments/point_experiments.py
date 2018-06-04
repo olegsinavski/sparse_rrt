@@ -13,6 +13,7 @@ base_point_config = dict(
     min_time_steps=20,
     max_time_steps=200,
     number_of_iterations=300000,
+    display_type='tree'
 )
 
 
@@ -30,4 +31,4 @@ rrt_free_point_config = dict(planner='rrt', **free_point_config)
 sst_free_point_config = dict(planner='sst', **free_point_config)
 
 if __name__ == '__main__':
-    run_config(sst_free_point_config)
+    run_config(rrt_point_config)

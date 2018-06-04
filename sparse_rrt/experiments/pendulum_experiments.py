@@ -11,7 +11,8 @@ base_pendulum_config = dict(
     integration_step=0.002,
     min_time_steps=20,
     max_time_steps=200,
-    number_of_iterations=300000
+    number_of_iterations=300000,
+    display_type='tree'
 )
 
 cpp_pendulum_config = dict(system='pendulum', **base_pendulum_config)
