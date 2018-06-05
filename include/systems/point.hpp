@@ -1,12 +1,14 @@
 /**
  * @file point.hpp
- * 
+ *
  * @copyright Software License Agreement (BSD License)
- * Copyright (c) 2014, Rutgers the State University of New Jersey, New Brunswick  
+ * Original work Copyright (c) 2014, Rutgers the State University of New Jersey, New Brunswick
+ * Modified work Copyright 2017 Oleg Y. Sinyavskiy
  * All Rights Reserved.
  * For a full description see the file named LICENSE.
- * 
- * Authors: Zakary Littlefield, Kostas Bekris 
+ *
+ * Original authors: Zakary Littlefield, Kostas Bekris
+ * Modifications by: Oleg Y. Sinyavskiy
  * 
  */
 
@@ -110,9 +112,20 @@ public:
 	 */
     std::string visualize_obstacles(int image_width, int image_height) const override;
 
-	std::vector<std::pair<double, double>> get_state_bounds() const override;
-	std::vector<std::pair<double, double>> get_control_bounds() const override;
-	std::vector<bool> is_circular_topology() const override;
+	/**
+	 * @copydoc system_t::get_state_bounds()
+	 */
+    std::vector<std::pair<double, double>> get_state_bounds() const override;
+
+    /**
+	 * @copydoc system_t::get_control_bounds()
+	 */
+    std::vector<std::pair<double, double>> get_control_bounds() const override;
+
+    /**
+	 * @copydoc system_t::is_circular_topology()
+	 */
+    std::vector<bool> is_circular_topology() const override;
 
 protected:
 

@@ -1,7 +1,7 @@
 from sparse_rrt.experiments.experiment_utils import run_config
 
+# experiments with single-joint Pendulum
 base_pendulum_config = dict(
-    system='pendulum',
     start_state=[0., 0.],
     goal_state=[1.57, 0.],
     goal_radius=0.1,
@@ -15,10 +15,12 @@ base_pendulum_config = dict(
     display_type='tree'
 )
 
+# different configs for cpp and py implementations of the system
 cpp_pendulum_config = dict(system='pendulum', **base_pendulum_config)
 py_pendulum_config = dict(system='py_pendulum', **base_pendulum_config)
 
 
+# different configs with different planners
 rrt_pendulum_config = dict(planner='rrt', **cpp_pendulum_config)
 sst_pendulum_config = dict(planner='sst', **cpp_pendulum_config)
 rrt_py_pendulum_config = dict(planner='rrt', **py_pendulum_config)

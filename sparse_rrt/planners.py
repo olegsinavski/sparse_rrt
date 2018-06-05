@@ -34,8 +34,14 @@ def visualize_wrapper(parent_class):
 
 
 class SST(visualize_wrapper(_sst_module.SSTWrapper)):
+    '''
+    Sparse stable trees planner
+    '''
     pass
 
 
 class RRT(visualize_wrapper(_sst_module.RRTWrapper)):
+    '''
+    RRT planner (baseline)
+    '''
     pass

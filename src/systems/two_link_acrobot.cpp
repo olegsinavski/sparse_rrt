@@ -1,12 +1,14 @@
 /**
  * @file two_link_acrobot.cpp
- * 
+ *
  * @copyright Software License Agreement (BSD License)
- * Copyright (c) 2014, Rutgers the State University of New Jersey, New Brunswick  
+ * Original work Copyright (c) 2014, Rutgers the State University of New Jersey, New Brunswick
+ * Modified work Copyright 2017 Oleg Y. Sinyavskiy
  * All Rights Reserved.
  * For a full description see the file named LICENSE.
- * 
- * Authors: Zakary Littlefield, Kostas Bekris 
+ *
+ * Original authors: Zakary Littlefield, Kostas Bekris
+ * Modifications by: Oleg Y. Sinyavskiy
  * 
  */
 

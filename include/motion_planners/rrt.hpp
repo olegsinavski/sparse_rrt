@@ -1,12 +1,14 @@
 /**
  * @file rrt.hpp
- * 
+ *
  * @copyright Software License Agreement (BSD License)
- * Copyright (c) 2014, Rutgers the State University of New Jersey, New Brunswick  
+ * Original work Copyright (c) 2014, Rutgers the State University of New Jersey, New Brunswick
+ * Modified work Copyright 2017 Oleg Y. Sinyavskiy
  * All Rights Reserved.
  * For a full description see the file named LICENSE.
- * 
- * Authors: Zakary Littlefield, Kostas Bekris 
+ *
+ * Original authors: Zakary Littlefield, Kostas Bekris
+ * Modifications by: Oleg Y. Sinyavskiy
  * 
  */
 
@@ -17,13 +19,33 @@
 #include "motion_planners/planner.hpp"
 
 
+/**
+ * @brief A special storage node for RRT.
+ * @details A special storage node for RRT.
+ */
 class rrt_node_t : public tree_node_t
 {
 public:
+	/**
+	 * @brief RRT node constructor
+	 * @details RRT node constructor
+	 *
+	 * @param point State space point
+	 * @param state_dimension Dimensionality of the state space
+	 * @param a_parent Parent node in the planning graph
+	 * @param a_parent_edge An edge between the parent and this node
+	 * @param a_cost Cost of the edge
+	 */
 	rrt_node_t(double* point, unsigned int state_dimension, rrt_node_t* a_parent, tree_edge_t&& a_parent_edge, double a_cost);
 
 	~rrt_node_t();
 
+    /**
+	 * @brief Return the parent node
+	 * @details Return the parent node
+	 *
+	 * @return parent node pointer
+	 */
     rrt_node_t* get_parent() const {
         return this->parent;
     }

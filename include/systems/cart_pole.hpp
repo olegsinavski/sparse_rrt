@@ -1,12 +1,14 @@
 /**
  * @file cart_pole.hpp
- * 
+ *
  * @copyright Software License Agreement (BSD License)
- * Copyright (c) 2014, Rutgers the State University of New Jersey, New Brunswick  
+ * Original work Copyright (c) 2014, Rutgers the State University of New Jersey, New Brunswick
+ * Modified work Copyright 2017 Oleg Y. Sinyavskiy
  * All Rights Reserved.
  * For a full description see the file named LICENSE.
- * 
- * Authors: Zakary Littlefield, Kostas Bekris 
+ *
+ * Original authors: Zakary Littlefield, Kostas Bekris
+ * Modifications by: Oleg Y. Sinyavskiy
  * 
  */
 
@@ -26,7 +28,10 @@ public:
 		temp_state = new double[state_dimension];
 		deriv = new double[state_dimension];
 	}
-	virtual ~cart_pole_t(){}
+	virtual ~cart_pole_t(){
+	    delete temp_state;
+	    delete deriv;
+	}
 
 	/**
 	 * @copydoc system_t::propagate(const double*, const double*, int, int, double*, double& )
@@ -51,8 +56,19 @@ public:
 	 */
 	std::tuple<double, double> visualize_point(const double* state, unsigned int state_dimension) const override;
 
+	/**
+	 * @copydoc system_t::get_state_bounds()
+	 */
     std::vector<std::pair<double, double>> get_state_bounds() const override;
+
+    /**
+	 * @copydoc system_t::get_control_bounds()
+	 */
     std::vector<std::pair<double, double>> get_control_bounds() const override;
+
+    /**
+	 * @copydoc system_t::is_circular_topology()
+	 */
     std::vector<bool> is_circular_topology() const override;
 
 protected:

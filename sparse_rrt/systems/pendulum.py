@@ -6,7 +6,7 @@ from sparse_rrt.systems.system_interface import BaseSystem
 
 class Pendulum(BaseSystem):
     '''
-    Single joint pendulum
+    Single joint pendulum.
     '''
     MIN_ANGLE, MAX_ANGLE = -np.pi, np.pi
     MIN_W, MAX_W = -7., 7

@@ -1,12 +1,14 @@
 /**
  * @file system.hpp
- * 
+ *
  * @copyright Software License Agreement (BSD License)
- * Copyright (c) 2014, Rutgers the State University of New Jersey, New Brunswick  
+ * Original work Copyright (c) 2014, Rutgers the State University of New Jersey, New Brunswick
+ * Modified work Copyright 2017 Oleg Y. Sinyavskiy
  * All Rights Reserved.
  * For a full description see the file named LICENSE.
- * 
- * Authors: Zakary Littlefield, Kostas Bekris 
+ *
+ * Original authors: Zakary Littlefield, Kostas Bekris
+ * Modifications by: Oleg Y. Sinyavskiy
  * 
  */
 
@@ -18,6 +20,11 @@
 #include "systems/distance_functions.h"
 
 
+/**
+ * A minimal interface for a controllable system.
+ * TODO: This currently includes visualization abilities, but it should be moved out
+ *
+ */
 struct system_interface {
     /**
 	 * @brief Performs a local propagation using simple numerical integration.
@@ -57,17 +64,6 @@ struct system_interface {
     {
     	return "";
     }
-
-     /**
-     * @brief Compute a distance between two points in the state space
-     * @details Compute a distance between two points in the state space
-     *
-     * @param state0 the first state point
-     * @param state1 the second state point
-     *
-     * @return A distance value
-     */
-    //virtual double distance(const double* state0, const double* state1, unsigned int state_dimension) const = 0;
 };
 
 
@@ -84,16 +80,40 @@ public:
 	system_t(){}
 	virtual ~system_t(){}
 
+    /**
+	 * @brief The dimensionality of the state space.
+	 * @details The dimensionality of the state space.
+	 *
+	 * @return The dimensionality of the state space.
+	 */
 	unsigned get_state_dimension()
 	{
 		return state_dimension;
 	}
+
+	/**
+	 * @brief The dimensionality of the control space.
+	 * @details The dimensionality of the control space.
+	 *
+	 * @return The dimensionality of the control space.
+	 */
 	unsigned get_control_dimension()
 	{
 		return control_dimension;
 	}
 
+    /**
+     * @brief Array of tuples (min, max) indicating the bounds of the state space
+     * @details Array of tuples (min, max) indicating the bounds of the state space
+     *
+     */
     virtual std::vector<std::pair<double, double>> get_state_bounds() const = 0;
+
+      /**
+     * @brief Array of tuples (min, max) indicating the bounds of the control space
+     * @details Array of tuples (min, max) indicating the bounds of the control space
+     *
+     */
     virtual std::vector<std::pair<double, double>> get_control_bounds() const = 0;
 
     /**
@@ -102,10 +122,6 @@ public:
      *
      */
 	virtual std::vector<bool> is_circular_topology() const = 0;
-
-//	double distance(const double* state0, const double* state1, unsigned int state_dimension) const override {
-//	    return euclidian_distance(std::move(this->is_circular_topology()))(state0, state1);
-//	}
 
 protected:
 
@@ -123,12 +139,12 @@ protected:
 	virtual bool valid_state() = 0;
 
 	/**
-	 * @brief The size of the state space.
+	 * @brief The dimensionality of the state space.
 	 */
 	unsigned state_dimension;
 
 	/**
-	 * @brief The size of the control space.
+	 * @brief The dimensionality of the control space.
 	 */
 	unsigned control_dimension;
 

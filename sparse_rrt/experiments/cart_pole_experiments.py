@@ -1,5 +1,6 @@
 from sparse_rrt.experiments.experiment_utils import run_config
 
+# config for experiments with CartPole
 cart_pole_config = dict(
     system='cart_pole',
     start_state=[-20, 0, 3.14, 0],
@@ -16,6 +17,7 @@ cart_pole_config = dict(
 )
 
 
+# different configs with different planners
 rrt_cart_pole_config = dict(planner='rrt', **cart_pole_config)
 sst_cart_pole_config = dict(planner='sst', **cart_pole_config)
 

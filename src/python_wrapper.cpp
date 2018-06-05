@@ -1,3 +1,15 @@
+/**
+ * @file python_wrapper.cpp
+ *
+ * @copyright Software License Agreement (BSD License)
+ * Original work Copyright 2017 Oleg Y. Sinyavskiy
+ * All Rights Reserved.
+ * For a full description see the file named LICENSE.
+ *
+ * Original authors: Oleg Y. Sinyavskiy
+ *
+ */
+
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
 #include <pybind11/stl.h>
@@ -20,25 +32,6 @@
 #include "systems/distance_functions.h"
 
 
-//namespace pybind11 {
-//    template<typename T, uint8_t n_dim>
-//    class safe_array: public array_t<T, pybind11::array::c_style> {
-//    private:
-//        typedef array_t<T, pybind11::array::c_style> ParentT;
-//    public:
-//        template <typename... Args>
-//        safe_array(Args&&... args)
-//            : ParentT(std::forward<Args>(args)...)
-//        {
-//            // Check if array is not empty and then check dimensions
-//            if (ParentT::size() > 0 && ParentT::ndim() != n_dim) {
-//                throw std::domain_error("Required array with " + std::to_string(n_dim) + " dimensions. Got " + std::to_string(ParentT::ndim()));
-//            }
-//        }
-//    };
-//};
-
-
 namespace pybind11 {
     template <typename T>
     using safe_array = typename pybind11::array_t<T, pybind11::array::c_style>;
@@ -48,27 +41,28 @@ namespace py = pybind11;
 using namespace pybind11::literals;
 
 
-double global_dist(const double* point1, const double* point2, unsigned int state_dimensions){
-    double result = 0;
-    for (unsigned int i=0; i<state_dimensions; ++i) {
-        result += (point1[i]-point2[i]) * (point1[i]-point2[i]);
-    }
-    return std::sqrt(result);
-};
-
-
+/**
+ * @brief Python trampoline for abstract distance_t
+ * @details Python trampoline for abstract distance_t to enable python classes override distance_t functions
+ *
+ */
 class py_distance_interface : public distance_t
 {
 public:
 
+	/**
+	 * @copydoc distance_t::distance()
+	 */
     double distance(const double* point1, const double* point2, unsigned int state_dimension) const override
     {
+        // Copy cpp points to numpy arrays
         py::safe_array<double> point1_array{{state_dimension}};
         std::copy(point1, point1 + state_dimension, point1_array.mutable_data(0));
 
         py::safe_array<double> point2_array{{state_dimension}};
         std::copy(point2, point2 + state_dimension, point2_array.mutable_data(0));
 
+        // Call python function
         py::gil_scoped_acquire gil;
         py::function overload = py::get_overload(static_cast<const distance_t *>(this), "distance");
         if (!overload) {
@@ -77,10 +71,20 @@ public:
         }
 
         auto result = overload(point1_array, point2_array);
+        // Extract double result
         return py::detail::cast_safe<double>(std::move(result));;
     }
 };
 
+
+/**
+ * @brief Create cpp implementation of euclidean_distance
+ * @details Create cpp implementation of euclidean_distance to use it from python
+ *
+ * @param is_circular_topology_array numpy array that indicates whether state coordinates have circular topology
+ *
+ * @return euclidean_distance object
+ */
 euclidean_distance create_euclidean_distance(
     const py::safe_array<bool> &is_circular_topology_array)
 {
@@ -92,28 +96,36 @@ euclidean_distance create_euclidean_distance(
     return euclidean_distance(is_circular_topology_v);
 }
 
-py::safe_array<double> get_data(py::safe_array<double>& in_data) {
-    //if (in_data.ndim() != 2) throw std::domain_error("error: ndim != 2");
-    //in_data.mutable_data(0, 1);
-//    double *p = in_data.mutable_data(0);
-//    for (ssize_t i = 0; i < in_data.shape(0); i++) {
-//        *p += 1;
-//        ++p;
-//    }
 
-    throw std::domain_error("a");
-    return in_data;
-}
-
-
+/**
+ * @brief Python wrapper for planner_t class
+ * @details Python wrapper for planner_t class that handles numpy arguments and passes them to cpp functions
+ *
+ */
 class PlannerWrapper
 {
 public:
 
+    /**
+	 * @copydoc planner_t::step()
+	 */
     void step(system_interface& system, int min_time_steps, int max_time_steps, double integration_step) {
         planner->step(&system, min_time_steps, max_time_steps, integration_step);
     }
 
+    /**
+     * @brief Generate SVG visualization of the planning tree
+     * @details Generate SVG visualization of the planning tree
+     *
+     * @param system an instance of the system to plan for
+     * @param image_width Width of the drawing.
+     * @param image_height Height of the drawing.
+     * @param solution_node_diameter Diameter of a node.
+     * @param solution_line_width Width of a planning solution path.
+     * @param tree_line_width Width of the edges in the planning tree.
+     *
+     * @return string with SVG xml description
+     */
     std::string visualize_tree_wrapper(
         system_interface& system,
         int image_width,
@@ -137,6 +149,18 @@ public:
         return std::move(document_body);
     }
 
+    /**
+     * @brief Generate SVG visualization of the nodes in the planning tree
+     * @details Generate SVG visualization of the nodes in the planning tree
+     *
+     * @param system an instance of the system to plan for
+     * @param image_width Width of the drawing.
+     * @param image_height Height of the drawing.
+     * @param node_diameter Diameter of nodes
+     * @param solution_node_diameter Diameter of nodes that belong to the planning solution
+     *
+     * @return string with SVG xml description
+     */
     std::string visualize_nodes_wrapper(
         system_interface& system,
         int image_width,
@@ -160,6 +184,9 @@ public:
         return std::move(document_body);
     }
 
+    /**
+	 * @copydoc planner_t::get_solution()
+	 */
     py::object get_solution() {
         std::vector<std::vector<double>> solution_path;
         std::vector<std::vector<double>> controls;
@@ -192,18 +219,44 @@ public:
             (state_array, controls_array, costs_array));
     }
 
+    /**
+	 * @copydoc planner_t::get_number_of_nodes()
+	 */
     unsigned int get_number_of_nodes() {
         return this->planner->get_number_of_nodes();
     }
 
 protected:
+	/**
+	 * @brief Created planner object
+	 */
     std::unique_ptr<planner_t> planner;
 };
 
 
 
+/**
+ * @brief Python wrapper for SST planner
+ * @details Python wrapper for SST planner that handles numpy arguments and passes them to cpp functions
+ *
+ */
 class __attribute__ ((visibility ("hidden"))) SSTWrapper : public PlannerWrapper{
 public:
+
+	/**
+	 * @brief Python wrapper of SST planner Constructor
+	 * @details Python wrapper of SST planner Constructor
+	 *
+	 * @param state_bounds_array numpy array (N x 2) with boundaries of the state space (min and max)
+	 * @param control_bounds_array numpy array (N x 2) with boundaries of the control space (min and max)
+	 * @param distance_computer_py Python wrapper of distance_t implementation
+	 * @param start_state_array The start state (numpy array)
+	 * @param goal_state_array The goal state  (numpy array)
+	 * @param goal_radius The radial size of the goal region centered at in_goal.
+	 * @param random_seed The seed for the random generator
+	 * @param sst_delta_near Near distance threshold for SST
+	 * @param sst_delta_drain Drain distance threshold for SST
+	 */
     SSTWrapper(
             const py::safe_array<double> &state_bounds_array,
             const py::safe_array<double> &control_bounds_array,
@@ -259,12 +312,29 @@ public:
         );
     }
 private:
+
+	/**
+	 * @brief Captured distance computer python object to prevent its premature death
+	 */
     py::object  _distance_computer_py;
 };
 
 
 class __attribute__ ((visibility ("hidden"))) RRTWrapper : public PlannerWrapper{
 public:
+
+	/**
+	 * @brief Python wrapper of RRT planner constructor
+	 * @details Python wrapper of RRT planner constructor
+	 *
+	 * @param state_bounds_array numpy array (N x 2) with boundaries of the state space (min and max)
+	 * @param control_bounds_array numpy array (N x 2) with boundaries of the control space (min and max)
+	 * @param distance_computer_py Python wrapper of distance_t implementation
+	 * @param start_state_array The start state (numpy array)
+	 * @param goal_state_array The goal state  (numpy array)
+	 * @param goal_radius The radial size of the goal region centered at in_goal.
+	 * @param random_seed The seed for the random generator
+	 */
     RRTWrapper(
             const py::safe_array<double> &state_bounds_array,
             const py::safe_array<double> &control_bounds_array,
@@ -314,14 +384,27 @@ public:
         );
     }
 private:
+
+	/**
+	 * @brief Captured distance computer python object to prevent its premature death
+	 */
     py::object  _distance_computer_py;
 };
 
 
+/**
+ * @brief Python trampoline for system_interface distance_t
+ * @details Python trampoline for system_interface distance_t to enable python classes override system_interface functions
+ * and be able to create python systems
+ *
+ */
 class py_system_interface : public system_interface
 {
 public:
 
+	/**
+	 * @copydoc system_interface::propagate()
+	 */
     bool propagate(
         const double* start_state, unsigned int state_dimension,
         const double* control, unsigned int control_dimension,
@@ -351,6 +434,9 @@ public:
         }
     }
 
+	/**
+	 * @copydoc system_interface::visualize_point()
+	 */
     std::tuple<double, double> visualize_point(const double* state, unsigned int state_dimension) const override {
         py::safe_array<double> state_array{{state_dimension}};
         std::copy(state, state + state_dimension, state_array.mutable_data(0));
@@ -365,31 +451,38 @@ public:
         return py::detail::cast_safe<std::tuple<double, double>>(std::move(result));
     }
 
+	/**
+	 * @copydoc system_interface::visualize_obstacles()
+	 */
     std::string visualize_obstacles(int image_width, int image_height) const override
     {
     	PYBIND11_OVERLOAD(
-            std::string, /* Return type */
-            system_interface,      /* Parent class */
-            visualize_obstacles,          /* Name of function in C++ (must match Python name) */
-            image_width, image_height     /* Argument(s) */
+            std::string,                /* Return type */
+            system_interface,           /* Parent class */
+            visualize_obstacles,        /* Name of function in C++ (must match Python name) */
+            image_width, image_height   /* Argument(s) */
         );
     }
 };
 
 
+/**
+ * @brief pybind module
+ * @details pybind module for all planners, systems and interfaces
+ *
+ */
 PYBIND11_MODULE(_sst_module, m) {
    m.doc() = "Python wrapper for SST planners";
 
-   //m.def("get_data", &get_data, py::arg("in_data").noconvert());
-
+   // Classes and interfaces for distance computation
    py::class_<distance_t, py_distance_interface> distance_interface_var(m, "IDistance");
    distance_interface_var
         .def(py::init<>());
    py::class_<euclidean_distance, distance_t>(m, "EuclideanDistance");
    py::class_<two_link_acrobot_distance, distance_t>(m, "TwoLinkAcrobotDistance").def(py::init<>());
-
    m.def("euclidean_distance", &create_euclidean_distance, "is_circular_topology"_a.noconvert());
 
+   // Classes and interfaces for systems
    py::class_<system_interface, py_system_interface> system_interface_var(m, "ISystem");
    system_interface_var
         .def(py::init<>())
@@ -414,7 +507,7 @@ PYBIND11_MODULE(_sst_module, m) {
    py::class_<rally_car_t>(m, "RallyCar", system).def(py::init<>());
    py::class_<two_link_acrobot_t>(m, "TwoLinkAcrobot", system).def(py::init<>());
 
-
+   // Classes and interfaces for planners
    py::class_<PlannerWrapper> planner(m, "PlannerWrapper");
    planner
         .def("step", &PlannerWrapper::step)

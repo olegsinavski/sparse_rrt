@@ -3,7 +3,8 @@
  *  The "New BSD License" : http://www.opensource.org/licenses/bsd-license.php  *
  ********************************************************************************
  
- Copyright (c) 2010, Mark Turney
+ Original work Copyright (c) 2010, Mark Turney
+ Modified work Copyright (c) 2010, Oleg Y. Sinyavskiy
  All rights reserved.
  
  Redistribution and use in source and binary forms, with or without

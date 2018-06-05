@@ -1,5 +1,6 @@
 from sparse_rrt.experiments.experiment_utils import run_config
 
+# experiments with Acrobot
 base_acrobot_config = dict(
     start_state=[0., 0., 0., 0],
     goal_state=[3.14, 0., 0., 0.],
@@ -14,10 +15,12 @@ base_acrobot_config = dict(
     display_type='nodes'
 )
 
+# different configs for cpp and py implementations of the system
 cpp_acrobot_config = dict(system='two_link_acrobot', **base_acrobot_config)
-py_acrobot_config = dict(system='two_link_acrobot', **base_acrobot_config)
+py_acrobot_config = dict(system='py_acrobot', **base_acrobot_config)
 
 
+# different configs with different planners
 rrt_acrobot_config = dict(planner='rrt', **cpp_acrobot_config)
 sst_acrobot_config = dict(planner='sst', **cpp_acrobot_config)
 rrt_py_acrobot_config = dict(planner='rrt', **py_acrobot_config)
