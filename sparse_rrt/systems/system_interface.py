@@ -1,6 +1,5 @@
 
 import sparse_rrt._sst_module
-from abc import abstractmethod
 import numpy as np
 
 
@@ -59,7 +58,21 @@ class ISystem(sparse_rrt._sst_module.ISystem):
     def distance_computer(self):
         '''
         Return an object that implements cpp distance_t interface that can compute distance between points in the state space
-        :return: an object that inherits from _sst_wrapper.distance_t interface
+        :return: an object that inherits from IDistance interface
+        '''
+        raise NotImplementedError()
+
+
+class IDistance(sparse_rrt._sst_module.IDistance):
+    '''
+    An interface to compute distance between state space points for nearest-neighbour structure and a planner
+    '''
+    def distance(self, point1, point2):
+        '''
+        Compute distance between two points in the state space
+        :param point1: np.array of the first point in the state space
+        :param point2: np.array of the second point in the state space
+        :return: Float, distance between two points
         '''
         raise NotImplementedError()
 
@@ -112,4 +125,8 @@ class BaseSystem(ISystem):
         return len(self.get_control_dimensions())
 
     def distance_computer(self):
+        '''
+        Create euclidean distance object (implemented in cpp) based on the topology of the system
+        :return: IDistance euclidean_distance
+        '''
         return sparse_rrt._sst_module.euclidean_distance(np.array(self.is_circular_topology()))

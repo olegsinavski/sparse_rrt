@@ -4,6 +4,9 @@ from sparse_rrt.experiments.experiment_utils import run_config
 
 
 def test_experiments():
+    '''
+    Test that all experiments configs are working
+    '''
     for name, config in standard_experiments.iteritems():
         print("Running %s..." % name)
         config = config.copy()

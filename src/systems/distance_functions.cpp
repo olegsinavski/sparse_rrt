@@ -1,6 +1,16 @@
-//
-// Created by Oleg Sinyavskiy on 11/28/16.
-//
+/**
+ * @file distance_functions.cpp
+ *
+ * @copyright Software License Agreement (BSD License)
+ * Original work Copyright (c) 2014, Rutgers the State University of New Jersey, New Brunswick
+ * Modified work Copyright 2017 Oleg Y. Sinyavskiy
+ * All Rights Reserved.
+ * For a full description see the file named LICENSE.
+ *
+ * Original authors: Zakary Littlefield, Kostas Bekris
+ * Modifications by: Oleg Y. Sinyavskiy
+ *
+ */
 
 #include <assert.h>
 #include "systems/distance_functions.h"

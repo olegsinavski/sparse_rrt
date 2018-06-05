@@ -20,7 +20,7 @@ class AcrobotDistance(_sst_module.IDistance):
 
 class Acrobot(BaseSystem):
     '''
-    Single joint pendulum
+    Two joints pendulum that is activated in the second joint (Acrobot)
     '''
     STATE_THETA_1, STATE_THETA_2, STATE_V_1, STATE_V_2 = 0, 1, 2, 3
     MIN_V_1, MAX_V_1 = -6., 6.
@@ -68,7 +68,7 @@ class Acrobot(BaseSystem):
 
     def _compute_derivatives(self, state, control):
         '''
-        Port of the cpp implementation
+        Port of the cpp implementation for computing state space derivatives
         '''
         theta2 = state[self.STATE_THETA_2]
         theta1 = state[self.STATE_THETA_1] - np.pi/2

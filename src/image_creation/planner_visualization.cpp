@@ -1,3 +1,16 @@
+/**
+ * @file planner_visualization.cpp
+ *
+ * @copyright Software License Agreement (BSD License)
+ * Original work Copyright (c) 2014, Rutgers the State University of New Jersey, New Brunswick
+ * Modified work Copyright 2017 Oleg Y. Sinyavskiy
+ * All Rights Reserved.
+ * For a full description see the file named LICENSE.
+ *
+ * Original authors: Zakary Littlefield, Kostas Bekris
+ * Modifications by: Oleg Y. Sinyavskiy
+ *
+ */
 
 #include "image_creation/svg_image.hpp"
 #include "image_creation/planner_visualization.hpp"
@@ -5,6 +18,16 @@
 
 
 
+/**
+ * @brief A helper for visualizing state space point
+ * @details A helper for visualizing state space point
+ *
+ * @param projector Function to project state space point to 2d coordinates
+ * @param state State space point
+ * @param dims The size of the image.
+ *
+ * @return svg::Point object
+ */
 svg::Point visualize_point(projection_function projector, const double* state, svg::Dimensions dims) {
     double x, y;
     std::tie(x, y) = projector(state);
@@ -16,8 +39,10 @@ svg::Point visualize_point(projection_function projector, const double* state, s
  * @details Creates a single edge geometry with a node's parent.
  *
  * @param node The target node of the edge.
+ * @param projector Function to project state space point to 2d coordinates
  * @param doc The image storage.
  * @param dim The size of the image.
+ * @param tree_line_width The width of the planning graph lines
  */
 void visualize_edge(tree_node_t* node, projection_function projector, svg::DocumentBody& doc, svg::Dimensions& dim, double tree_line_width)
 {
@@ -37,8 +62,11 @@ void visualize_edge(tree_node_t* node, projection_function projector, svg::Docum
  * @brief Create geometries for visualizing the solution path.
  * @details Create geometries for visualizing the solution path.
  *
+ * @param last_solution_path solution path in the state space
+ * @param projector Function to project state space point to 2d coordinates
  * @param doc The image storage.
  * @param dim The size of the image.
+ * @param solution_line_width The width of the planning solution
  */
 void visualize_solution_path(
     const std::vector<std::vector<double>>& last_solution_path,
@@ -63,6 +91,8 @@ void visualize_solution_path(
  * @details A recursive function for finding the highest cost in the tree.
  *
  * @param node The current node being examined.
+ * @param max_cost returned max cost of the node
+ * @param nodes returns investigated nodes
  */
 void get_max_cost(tree_node_t* node, double& max_cost, std::vector<tree_node_t*>& nodes)
 {
@@ -77,6 +107,12 @@ void get_max_cost(tree_node_t* node, double& max_cost, std::vector<tree_node_t*>
 }
 
 
+/**
+ * @brief Sorts nodes in the vector
+ * @details Sorts nodes in the vector
+ *
+ * @param nodes nodes (TODO: use vector sort)
+ */
 void sort(std::vector<tree_node_t*>& nodes)
 {
 	for(unsigned i=0;i<nodes.size();i++)
@@ -98,8 +134,11 @@ void sort(std::vector<tree_node_t*>& nodes)
  * @details Creates a single node geometry.
  *
  * @param node The node to visualize.
+ * @param projector Function to project state space point to 2d coordinates
  * @param doc The image storage.
  * @param dim The size of the image.
+ * @param node_diameter diameter of the node element
+ * @param max_cost max cost of the nodes
  */
 void visualize_node(
     const tree_node_t* node,
@@ -118,8 +157,11 @@ void visualize_node(
  * @brief Create geometries for visualizing the nodes along the solution path.
  * @details Create geometries for visualizing the nodes along the solution path.
  *
+ * @param last_solution_path solution path in the state space
+ * @param projector Function to project state space point to 2d coordinates
  * @param doc The image storage.
  * @param dim The size of the image.
+ * @param solution_node_diameter diameter of solution nodes
  */
 
 void visualize_solution_nodes(
@@ -139,6 +181,9 @@ void visualize_solution_nodes(
 }
 
 
+/**
+ * @copydoc visualize_tree()
+ */
 std::string visualize_tree(
     tree_node_t* root,
     const std::vector<std::vector<double>>& last_solution_path,
@@ -162,6 +207,9 @@ std::string visualize_tree(
     return doc.toString();
 }
 
+/**
+ * @copydoc visualize_nodes()
+ */
 std::string visualize_nodes(
     tree_node_t* root,
     const std::vector<std::vector<double>>& last_solution_path,

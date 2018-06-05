@@ -1,12 +1,14 @@
 /**
  * @file sst.hpp
- * 
+ *
  * @copyright Software License Agreement (BSD License)
- * Copyright (c) 2014, Rutgers the State University of New Jersey, New Brunswick  
+ * Original work Copyright (c) 2014, Rutgers the State University of New Jersey, New Brunswick
+ * Modified work Copyright 2017 Oleg Y. Sinyavskiy
  * All Rights Reserved.
  * For a full description see the file named LICENSE.
- * 
- * Authors: Zakary Littlefield, Kostas Bekris 
+ *
+ * Original authors: Zakary Littlefield, Kostas Bekris
+ * Modifications by: Oleg Y. Sinyavskiy
  * 
  */
 
@@ -25,25 +27,64 @@ class sample_node_t;
 class sst_node_t : public tree_node_t
 {
 public:
+	/**
+	 * @brief SST node constructor
+	 * @details SST node constructor
+	 *
+	 * @param point State space point
+	 * @param state_dimension Dimensionality of the state space
+	 * @param a_parent Parent node in the planning graph
+	 * @param a_parent_edge An edge between the parent and this node
+	 * @param a_cost Cost of the edge
+	 */
 	sst_node_t(const double* point, unsigned int state_dimension, sst_node_t* a_parent, tree_edge_t&& a_parent_edge, double a_cost);
 	~sst_node_t();
 
+    /**
+	 * @brief Return whether the node is active
+	 * @details Return whether the node is active
+	 *
+	 * @return witness node pointer
+	 */
 	bool is_active() const {
 	    return active;
 	}
 
+    /**
+	 * @brief Inactivate the node
+	 * @details Inactivate the node
+	 *
+	 */
 	void make_inactive() {
 	    this->active = false;
 	}
 
+    /**
+	 * @brief Set a witness node for this point
+	 * @details Set a witness node for this point
+	 *
+	 * @param a_witness Witness node pointer
+	 */
 	void set_witness(sample_node_t* a_witness) {
 	    this->witness = a_witness;
 	}
 
+    /**
+	 * @brief Return the witness node
+	 * @details Return the witness node
+	 *
+	 * @return witness node pointer
+	 */
     sample_node_t* get_witness() const {
 	    return this->witness;
 	}
 
+    /**
+	 * @brief Return the parent node
+	 * @details Return the parent node
+	 *
+	 * @return parent node pointer
+	 */
     sst_node_t* get_parent() const {
         return this->parent;
     }
@@ -69,14 +110,34 @@ private:
 class sample_node_t : public state_point_t
 {
 public:
+	/**
+	 * @brief Witness node constructor
+	 * @details Witness node constructor
+	 *
+	 * @param representative SST pointer node
+	 * @param a_point A point in the state space
+	 * @param state_dimension Dimensionality of the state space
+	 */
 	sample_node_t(sst_node_t* const representative,
 	              const double* a_point, unsigned int state_dimension);
 	~sample_node_t();
 
+    /**
+	 * @brief Set a representative node for this point
+	 * @details Set a representative node for this point
+	 *
+	 * @param a_witness Witness node pointer
+	 */
     void set_representative(sst_node_t* const representative) {
         this->rep = representative;
     }
 
+    /**
+	 * @brief Return the node this witness represents
+	 * @details Return the node this witness represents
+	 *
+	 * @return node this witness represents
+	 */
     sst_node_t* get_representative() const {
         return this->rep;
     }
@@ -96,7 +157,18 @@ class sst_t : public planner_t
 {
 public:
 	/**
-	 * @copydoc planner_t::planner_t()
+	 * @brief SST planner Constructor
+	 * @details SST planner Constructor
+	 *
+	 * @param in_start The start state.
+	 * @param in_goal The goal state
+	 * @param in_radius The radial size of the goal region centered at in_goal.
+	 * @param a_state_bounds A vector with boundaries of the state space (min and max)
+	 * @param a_control_bounds A vector with boundaries of the control space (min and max)
+	 * @param distance_function Function that returns distance between two state space points
+	 * @param random_seed The seed for the random generator
+	 * @param delta_near Near distance threshold for SST
+	 * @param delta_drain Drain distance threshold for SST
 	 */
 	sst_t(const double* in_start, const double* in_goal,
 	      double in_radius,
@@ -174,6 +246,12 @@ protected:
 	 */
 	void remove_leaf(sst_node_t* node);
 
+	/**
+	 * @brief Branch out and prune planning tree
+	 * @details Branch out and prune planning tree
+	 *
+	 * @param node The node from which to branch
+	 */
 	void branch_and_bound(sst_node_t* node);
 
 	/**
@@ -181,9 +259,19 @@ protected:
 	 */
 	graph_nearest_neighbors_t samples;
 
+	/**
+	 * @brief Near distance threshold for SST
+	 */
 	double sst_delta_near;
+
+	/**
+	 * @brief Drain distance threshold for SST
+	 */
 	double sst_delta_drain;
 
+	/**
+	 * @brief Container for witness nodes (to avoid memory leaks)
+	 */
     std::vector<sample_node_t*> witness_nodes;
 };
 

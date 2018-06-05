@@ -9,6 +9,10 @@ from sparse_rrt.systems.point import Point
 
 
 def test_point_sst():
+    '''
+    Sanity check SST test - makes sure that SST produces exactly(!) the same results during runs.
+    Idea is to be deterministic and reproducible and detect when SST algorithm is changed during refactoring.
+    '''
     system = standard_cpp_systems.Point()
 
     planner = _sst_module.SSTWrapper(

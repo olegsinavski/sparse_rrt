@@ -4,6 +4,12 @@ import numpy as np
 
 
 def svg_header(width, height):
+    '''
+    Return standard SVG xml header
+    :param width: Int, width of the drawing
+    :param height: Int, width of the drawing
+    :return: xml header string
+    '''
     return '''<?xml version="1.0" standalone="no" ?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
 <svg width="%dpx" height="%dpx" xmlns="http://www.w3.org/2000/svg" version="1.1" >
@@ -12,6 +18,10 @@ def svg_header(width, height):
 
 
 def svg_footer():
+    '''
+    Return standard SVG xml footer
+    :return: xml footer string
+    '''
     return '\n</svg>'
 
 
@@ -130,7 +140,7 @@ def svg_rectangle((x, y), (width, height), (image_width, image_height), **extra)
         size=(width, -height), **extra).tostring()
 
 
-def show_image(image, name, wait=False):
+def show_image_opencv(image, name, wait=False):
     '''
     Show image with opencv
     :param image: np.array of shape (height, width, 3) containing image
@@ -143,3 +153,60 @@ def show_image(image, name, wait=False):
         cv2.waitKey(-1)
     else:
         cv2.waitKey(1)
+
+
+# few global variables to make pyside image show work
+_pyside_app = None
+_pyside_label = None
+
+
+def show_image_pyside(image, name, wait=False):
+    '''
+    Show image with pyside
+    :param image: np.array of shape (height, width, 3) containing image
+    :param name: name of the window
+    :param wait: whether to block for user input
+    '''
+    from PySide import QtGui
+    import time
+    global _pyside_app, _pyside_label
+
+    if _pyside_app is None:
+        _pyside_app = QtGui.QApplication([name])
+        _pyside_label = QtGui.QLabel()
+
+    imgQT = QtGui.QImage(image, image.shape[1], image.shape[0], QtGui.QImage.Format_ARGB32)
+    pixMap = QtGui.QPixmap.fromImage(imgQT)
+
+    _pyside_label.setPixmap(pixMap)
+    _pyside_label.show()
+
+    if wait:
+        while True:
+            _pyside_app.processEvents()
+            time.sleep(0.1)
+    else:
+        _pyside_app.processEvents()
+
+
+def show_image(image, name, wait=False):
+    '''
+    Show image using any available tool
+    :param image: np.array of shape (height, width, 3) containing image
+    :param name: name of the window
+    :param wait: whether to block for user input
+    '''
+    show_functions = (
+        show_image_opencv,
+        show_image_pyside,
+    )
+    exceptions = []
+    for c in show_functions:
+        try:
+            c(image, name, wait)
+            return
+        except:
+            import traceback
+            exceptions.append(traceback.format_exc())
+
+    raise Exception("Failed to show image. Here is the list of exceptions from showing functions:\n%s" % ('/n'.join(exceptions),))

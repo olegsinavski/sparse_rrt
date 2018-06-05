@@ -1,5 +1,7 @@
 from sparse_rrt.experiments.experiment_utils import run_config
 
+
+# experiments with a 6 dimensional rally car
 rally_car_config = dict(
     system='rally_car',
     start_state=[18., -30, 0, 16, 1.57, 0, 0, 0],
@@ -15,7 +17,7 @@ rally_car_config = dict(
     display_type='tree'
 )
 
-
+# different configs with different planners
 rrt_rally_car_config = dict(planner='rrt', **rally_car_config)
 sst_rally_car_config = dict(planner='sst', **rally_car_config)
 

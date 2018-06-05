@@ -1,12 +1,14 @@
 /**
  * @file graph_nearest_neighbors.hpp
- * 
+ *
  * @copyright Software License Agreement (BSD License)
- * Copyright (c) 2014, Rutgers the State University of New Jersey, New Brunswick  
+ * Original work Copyright (c) 2014, Rutgers the State University of New Jersey, New Brunswick
+ * Modified work Copyright 2017 Oleg Y. Sinyavskiy
  * All Rights Reserved.
  * For a full description see the file named LICENSE.
- * 
- * Authors: Zakary Littlefield, Kostas Bekris 
+ *
+ * Original authors: Zakary Littlefield, Kostas Bekris
+ * Modifications by: Oleg Y. Sinyavskiy
  * 
  */
 
@@ -203,7 +205,11 @@ class graph_nearest_neighbors_t
          */
         unsigned int find_delta_close( const double* state, proximity_node_t** close_nodes, double* distances, double delta );
 
-
+        /**
+         * Set distance function for NN structure
+         * @brief Set distance function for NN structure
+         * @param new_distance distance function that returns distance between state point
+         */
         void set_distance(std::function<double(const double*, const double*)> new_distance)
         {
             this->distance_function = new_distance;
@@ -211,6 +217,9 @@ class graph_nearest_neighbors_t
 
     protected:
 
+        /**
+         * @brief Distance function between state space points
+         */
         std::function<double(const double*, const double*)> distance_function;
 
         /**
@@ -229,9 +238,7 @@ class graph_nearest_neighbors_t
         unsigned int sampling_function() const;
         
         /**
-         * Given the number of nodes, get the number of neighbors required for connectivity (in the limit).
          * @brief Given the number of nodes, get the number of neighbors required for connectivity (in the limit).
-         * @return 
          */
         int percolation_threshold();
         
@@ -250,7 +257,18 @@ class graph_nearest_neighbors_t
          */
         std::vector<double> second_distances;
     private:
+        /**
+         * Helper function to compute distance between NN node and state space point
+         * @brief Helper function to compute distance between NN node and state space point
+         * @node node NN node
+         * @state state State space point
+         * @return distance between state space point, represented by node and state
+         */
         double compute_distance(const proximity_node_t* node, const double* state) const;
+
+        /**
+         * @brief Random number generator
+         */
         mutable RandomGenerator random_generator;
 };
 
