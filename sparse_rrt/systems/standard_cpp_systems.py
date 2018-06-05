@@ -10,19 +10,24 @@ class WithEuclideanDistanceComputer(object):
         return _sst_module.euclidean_distance(np.array(self.is_circular_topology()))
 
 
-class Car(_sst_module.Car, WithEuclideanDistanceComputer): pass
+class Car(_sst_module.Car, WithEuclideanDistanceComputer):
+    pass
 
 
-class CartPole(_sst_module.CartPole, WithEuclideanDistanceComputer): pass
+class CartPole(_sst_module.CartPole, WithEuclideanDistanceComputer):
+    pass
 
 
-class Pendulum(_sst_module.Pendulum, WithEuclideanDistanceComputer): pass
+class Pendulum(_sst_module.Pendulum, WithEuclideanDistanceComputer):
+    pass
 
 
-class Point(_sst_module.Point, WithEuclideanDistanceComputer): pass
+class Point(_sst_module.Point, WithEuclideanDistanceComputer):
+    pass
 
 
-class RallyCar(_sst_module.RallyCar, WithEuclideanDistanceComputer): pass
+class RallyCar(_sst_module.RallyCar, WithEuclideanDistanceComputer):
+    pass
 
 
 class TwoLinkAcrobot(_sst_module.TwoLinkAcrobot):
