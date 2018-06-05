@@ -1,10 +1,10 @@
 # Python bindings for Sparse-RRT planner
 
-This package is based on Sparse-RRT Package https://bitbucket.org/pracsys/sparse_rrt/.
+This package is based on Sparse-RRT project https://bitbucket.org/pracsys/sparse_rrt/.
 The main purpose of this work is to allow running Sparse-RRT planner in python environment. 
 Here are the main contributions:
  - C++ experiments from original package are executable from Python while preserving speed, SVG visualizations and statistics
- - Controllable systems for the planners can be completely written in Python, while planners are executed in C++. This is not so slow as it sounds - the average slowdown is only 2-3x for system's dynamic integration.
+ - Controllable systems for the planners can be completely written in Python, while planners are executed in C++. This is not so slow as it sounds - the average slowdown is only 2-3x for system propagation.
  - C++ code of planners, utilities and systems underwent a lot of refactoring using moder C++11 features. Python bindings are done using pybind11
  - C++ implementation of planners, utilities and systems used to contain many memory leaks that prevent running planning multiple times. This was fixed in the current implementation.
 
@@ -24,15 +24,10 @@ from sparse_rrt.experiments import run_standard_experiment
 run_standard_experiment('sst_car', visualization=False)
 ```
 
-This will run SST planner with non-holonomic car system, implemented in C++ and print out statistics.
+This will run SST planner for non-holonomic car system, implemented in C++ and print out statistics.
 Right now, the reported statistics are the number of iterations 
 executed, the number of nodes stored, and the solution length in 
 seconds.
-
-Right now, the reported statistics are the number of iterations executed, the 
-number of nodes stored, and the solution length in seconds. These are printed
-to the terminal at an interval set by the user with the stats_type and stats_check
-parameters.
 
 There are many more pre-packaged experiments. Run the following to get a list of them:
 ```python
@@ -45,14 +40,14 @@ for exp in available_standard_experiments():
 
 When running experiments, in addition to the terminal output,
 visualization images can be displayed in the standalone window. This project inherits SVG-based visualization from original C++ codebase. There are few convenience functions
-to display SVG images, to convert them to RGB numpy array or to display them in a opencv window.
-Visualization dependencies are not included into the package dependencies to ease installation. 
+to display SVG images, to convert them to RGB numpy arrays or to display them in a window.
+Visualization dependencies are not included in the package dependencies to ease installation. 
 Here are the packages that you may need to install to run visualization:
  - `PySide` or `cairosvg` - to render SVG in python. `PySide` is considerably faster (to install run `pip install pyside` or `pip install cairosvg`)
- - `PySide` or `python-opencv` - to open windows and display numpy images (`show_image` function). To install, follow you can follow <href>https://github.com/braincorp/shining_software/pull/2496
- - `svgwrite` - to write SVG files from python. This is needed only if you use visualization with Systems written in python (to install run `pip install svgwrite`)
+ - `PySide` or `python-opencv` - to open windows and display numpy images (`show_image` function). To install opencv, you can follow <href>https://www.learnopencv.com/install-opencv3-on-ubuntu/
+ - `svgwrite` - to write SVG files from python. This is needed only if you use visualization of Systems written in python (to install run `pip install svgwrite`)
 
-The simplest would to just install `PySide`. Here is the "Hello world" with visualization.
+The simplest option is to just install `PySide`. Here is how you can run standard experiment with visualization.
 ```python
 from sparse_rrt.experiments import run_standard_experiment
 run_standard_experiment('sst_car', visualization=True)
@@ -81,14 +76,14 @@ run_config(point_config)
 ```
 
 Experiment configs have a parameter `display_type` that can be either
- - `None`: no diplay
- - `'tree'`: image shows the resulting tree of the motion
+ - `None`: no display
+ - `'tree'`: image window shows the resulting tree of the motion
 planner along with the solution path.
- - `'nodes'`: image shows the cost at each node in the tree. Darker nodes represent lower cost (better)
+ - `'nodes'`: image windo shows the cost at each node in the tree. Darker nodes represent lower cost (better)
 while lighter nodes denote higher cost.
 
-# CUSTOM SYSTEMS
-One of the main goals of this project is the ability to plan for custom systems written in python.
+## CUSTOM SYSTEMS
+One of the main goals of this project is ability to plan for custom systems written in python.
 In order to implement a custom system, you need to implement `sparse_rrt.systems.system_interface.ISystem` interface.
 The main function to implement is `propagate` that is responsible for system dynamics and collision detection.
 See docstrings for detailed documentation. A helper base class `sparse_rrt.systems.system_interface.BaseSystem` is provided for easy

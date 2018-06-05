@@ -11,9 +11,11 @@ os.environ['OPT'] = " ".join(
     flag for flag in opt.split() if flag != '-Wstrict-prototypes'
 )
 
+exec(open('sparse_rrt/_version.py').read())
+
 setup(
     name='sparse_rrt',
-    version='0.0.5',
+    version=__version__,
     description='Sparse stable trees planner',
     long_description=long_description,
     author='Oleg Sinyavskiy',

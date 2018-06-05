@@ -43,7 +43,7 @@ def run_standard_experiment(experiment_name, visualization=True):
     :param visualization: whether to run visualization
     '''
     try:
-        config = standard_experiments[experiment_name]
+        config = standard_experiments[experiment_name].copy()
     except KeyError:
         raise KeyError("There is no %s experiment. Available keys: %s" % (experiment_name, standard_experiments.keys()))
     if not visualization:

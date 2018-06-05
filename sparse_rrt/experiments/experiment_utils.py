@@ -23,6 +23,7 @@ def run_config(config):
         goal_state: The goal state for the system
         goal_radius: The goal tolerance. (This is needed because in general, a dynamic system cannot reach a target state exactly.)
     '''
+    config = config.copy()
     if isinstance(config['system'], str):
         system = create_standard_system(config['system'])
     else:
