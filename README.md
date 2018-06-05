@@ -24,7 +24,7 @@ from sparse_rrt.experiments import run_standard_experiment
 run_standard_experiment('sst_car', visualization=False)
 ```
 
-This will run SST planner with non-holonomic car system, implemented in C++ and print out statistics.
+This will run SST planner with nosn-holonomic car system, implemented in C++ and print out statistics.
 Right now, the reported statistics are the number of iterations 
 executed, the number of nodes stored, and the solution length in 
 seconds.
