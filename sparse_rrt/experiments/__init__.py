@@ -1,1 +1,1 @@
-from standard_experiments import standard_experiments, run_standard_experiment
+from standard_experiments import standard_experiments, run_standard_experiment, available_standard_experiments
