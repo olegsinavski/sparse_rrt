@@ -36,9 +36,23 @@ standard_experiments = {
 }
 
 
-def run_standard_experiment(experiment_name):
+def run_standard_experiment(experiment_name, visualization=True):
     '''
     A helper to run an experiment from standard_experiments dict
     :param experiment_name: a key into standard_experiments
+    :param visualization: whether to run visualization
     '''
-    run_config(standard_experiments[experiment_name])
+    try:
+        config = standard_experiments[experiment_name]
+    except KeyError:
+        raise KeyError("There is no %s experiment. Available keys: %s" % (experiment_name, standard_experiments.keys()))
+    if not visualization:
+        config['display_type'] = None
+    run_config(config)
+
+
+def available_standard_experiments():
+    '''
+    Return a list of all available experiments
+    '''
+    return standard_experiments.keys()
