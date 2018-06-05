@@ -87,7 +87,7 @@ planner along with the solution path.
  - `'nodes'`: image shows the cost at each node in the tree. Darker nodes represent lower cost (better)
 while lighter nodes denote higher cost.
 
-# CUSTOM SYSTEMS
+## CUSTOM SYSTEMS
 One of the main goals of this project is the ability to plan for custom systems written in python.
 In order to implement a custom system, you need to implement `sparse_rrt.systems.system_interface.ISystem` interface.
 The main function to implement is `propagate` that is responsible for system dynamics and collision detection.
